@@ -1,0 +1,1474 @@
+<code>
+```python
+import json
+import re
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Union
+from pydantic import BaseModel, Field
+from langchain.tools import StructuredTool
+
+# Global data storage
+APPLICATION_DATA = []
+
+def parse_data_entry(entry: str) -> Dict[str, Any]:
+    """Parse a single data entry string into a dictionary"""
+    result = {}
+    parts = entry.split(', ')
+    for part in parts:
+        if ':' in part:
+            key, value = part.split(':', 1)
+            # Handle different data types
+            if value == '':
+                result[key] = ''
+            elif value == 'True':
+                result[key] = True
+            elif value == 'False':
+                result[key] = False
+            elif value == 'null' or value == 'None':
+                result[key] = None
+            elif value.startswith('[') or value.startswith('{'):
+                try:
+                    result[key] = json.loads(value.replace("'", '"'))
+                except:
+                    result[key] = value
+            elif value.replace('.', '', 1).replace('-', '', 1).isdigit():
+                if '.' in value:
+                    result[key] = float(value)
+                else:
+                    result[key] = int(value)
+            else:
+                result[key] = value
+    return result
+
+def load_application_data():
+    """Load application data from the sample data"""
+    global APPLICATION_DATA
+    
+    data_entries = [
+        'application_id:APP_20250418101234567, application_channel:in_branch, business_type:retail_individual, application_start_timestamp:2025-04-18T10:12:34Z, customer_type:individual, account_type_requested:checking, applicant_full_name:Sarah Michelle Johnson, applicant_date_of_birth:1990-03-15, applicant_ssn_tax_id:XXX-XX-4521, applicant_email:sarah.johnson@email.com, applicant_phone:+1-555-234-5678, applicant_residential_address:456 Oak Avenue, Apt 2C, Boston, MA 02115, applicant_employment_status:employed, applicant_annual_income:75000, id_document_type:drivers_license, id_document_number:DL987654321, id_document_expiry_date:2028-03-15, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:500.00, initial_deposit_method:cash, external_bank_account_linked:False, otp_verification_completed:False, id_ocr_extracted_data:{}, biometric_liveness_check_completed:False, facial_match_confidence_score:0.0, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418101234567_dl.pdf","upload_timestamp":"2025-04-18T10:15:00Z"},{"doc_type":"utility_bill","file_path":"/docs/APP_20250418101234567_utility.pdf","upload_timestamp":"2025-04-18T10:16:00Z"}], banker_id:EMP_5421, branch_code:BR_BOS_003, customer_consent_forms_signed:["signature_card","terms_and_conditions","truth_in_savings_disclosure","privacy_notice"], esignature_timestamp:2025-04-18T10:25:30Z, esignature_ip_address:192.168.10.45, marketing_opt_in:True, referral_source:branch_walk_in, product_bundle_offered:standard_checking, cross_sell_products_accepted:["debit_card","online_banking","mobile_app"], application_data_entry_method:manual_banker_entry, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418143045123, application_channel:mobile_app, business_type:digital_remote, application_start_timestamp:2025-04-18T14:30:45Z, customer_type:individual, account_type_requested:high_yield_savings, applicant_full_name:Michael Robert Chen, applicant_date_of_birth:1988-07-22, applicant_ssn_tax_id:XXX-XX-7890, applicant_email:michael.chen@gmail.com, applicant_phone:+1-555-876-5432, applicant_residential_address:789 Pine Street, Unit 15B, San Francisco, CA 94102, applicant_employment_status:employed, applicant_annual_income:125000, id_document_type:passport, id_document_number:P123456789, id_document_expiry_date:2030-07-22, id_document_issuing_country:US, proof_of_address_type:bank_statement, initial_deposit_amount:5000.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Michael Robert Chen","dob":"1988-07-22","id_number":"P123456789","address":"789 Pine Street, San Francisco, CA"}, biometric_liveness_check_completed:True, facial_match_confidence_score:96.5, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"passport","file_path":"/docs/APP_20250418143045123_passport.pdf","upload_timestamp":"2025-04-18T14:32:00Z"},{"doc_type":"bank_statement","file_path":"/docs/APP_20250418143045123_stmt.pdf","upload_timestamp":"2025-04-18T14:33:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T14:38:15Z, esignature_ip_address:24.156.78.92, marketing_opt_in:False, referral_source:online_search, product_bundle_offered:premium_savings_with_rewards, cross_sell_products_accepted:["online_banking","mobile_app"], application_data_entry_method:ocr_auto_fill, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418091523789, application_channel:web_portal, business_type:digital_remote, application_start_timestamp:2025-04-18T09:15:23Z, customer_type:individual, account_type_requested:student_checking, applicant_full_name:Emily Rose Martinez, applicant_date_of_birth:2002-11-08, applicant_ssn_tax_id:XXX-XX-3210, applicant_email:emily.martinez@university.edu, applicant_phone:+1-555-345-6789, applicant_residential_address:123 College Drive, Dorm Hall A, Austin, TX 78705, applicant_employment_status:student, applicant_annual_income:15000, id_document_type:state_id, id_document_number:TX12345678, id_document_expiry_date:2027-11-08, id_document_issuing_country:US, proof_of_address_type:lease_agreement, initial_deposit_amount:100.00, initial_deposit_method:debit_card, external_bank_account_linked:False, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Emily Rose Martinez","dob":"2002-11-08","id_number":"TX12345678","address":"123 College Drive, Austin, TX"}, biometric_liveness_check_completed:True, facial_match_confidence_score:94.2, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"state_id","file_path":"/docs/APP_20250418091523789_id.pdf","upload_timestamp":"2025-04-18T09:17:00Z"},{"doc_type":"lease_agreement","file_path":"/docs/APP_20250418091523789_lease.pdf","upload_timestamp":"2025-04-18T09:18:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T09:22:45Z, esignature_ip_address:136.244.11.56, marketing_opt_in:True, referral_source:friend_referral, product_bundle_offered:student_banking_package, cross_sell_products_accepted:["debit_card","online_banking","mobile_app"], application_data_entry_method:customer_self_service, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418155612456, application_channel:in_branch, business_type:corporate_business, application_start_timestamp:2025-04-18T15:56:12Z, customer_type:llc, account_type_requested:business_checking, applicant_full_name:David Alexander Thompson, applicant_date_of_birth:1975-04-30, applicant_ssn_tax_id:XXX-XX-6543, applicant_email:david.thompson@techsolutions.com, applicant_phone:+1-555-987-6543, applicant_residential_address:567 Business Plaza, Suite 200, Seattle, WA 98101, applicant_employment_status:self_employed, applicant_annual_income:250000, id_document_type:drivers_license, id_document_number:WA987654321, id_document_expiry_date:2029-04-30, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:5000.00, initial_deposit_method:check, external_bank_account_linked:False, otp_verification_completed:False, id_ocr_extracted_data:{}, biometric_liveness_check_completed:False, facial_match_confidence_score:0.0, business_legal_name:Tech Solutions LLC, business_ein:12-3456789, business_structure:llc, business_industry:technology_services, business_registration_date:2020-03-15, business_monthly_transaction_volume_estimate:150000, beneficial_owners:[{"name":"David Alexander Thompson","ownership_percentage":60,"ssn":"XXX-XX-6543","dob":"1975-04-30"},{"name":"Jennifer Marie Thompson","ownership_percentage":40,"ssn":"XXX-XX-7654","dob":"1978-08-12"}], authorized_signers:[{"name":"David Alexander Thompson","title":"CEO","signature_captured":true},{"name":"Jennifer Marie Thompson","title":"CFO","signature_captured":true}], documents_submitted:[{"doc_type":"articles_of_incorporation","file_path":"/docs/APP_20250418155612456_articles.pdf","upload_timestamp":"2025-04-18T16:00:00Z"},{"doc_type":"operating_agreement","file_path":"/docs/APP_20250418155612456_operating.pdf","upload_timestamp":"2025-04-18T16:01:00Z"},{"doc_type":"ein_confirmation_letter","file_path":"/docs/APP_20250418155612456_ein.pdf","upload_timestamp":"2025-04-18T16:02:00Z"},{"doc_type":"business_license","file_path":"/docs/APP_20250418155612456_license.pdf","upload_timestamp":"2025-04-18T16:03:00Z"}], banker_id:EMP_7823, branch_code:BR_SEA_007, customer_consent_forms_signed:["signature_card","terms_and_conditions","business_account_agreement","privacy_notice"], esignature_timestamp:2025-04-18T16:15:30Z, esignature_ip_address:192.168.25.78, marketing_opt_in:False, referral_source:advertisement, product_bundle_offered:business_advantage_package, cross_sell_products_accepted:["business_debit_card","online_banking","merchant_services"], application_data_entry_method:manual_banker_entry, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418112345678, application_channel:mobile_app, business_type:digital_remote, application_start_timestamp:2025-04-18T11:23:45Z, customer_type:individual, account_type_requested:checking, applicant_full_name:Jennifer Lynn Anderson, applicant_date_of_birth:1992-09-18, applicant_ssn_tax_id:XXX-XX-2109, applicant_email:jennifer.anderson@yahoo.com, applicant_phone:+1-555-432-1098, applicant_residential_address:890 Maple Lane, Chicago, IL 60614, applicant_employment_status:employed, applicant_annual_income:55000, id_document_type:drivers_license, id_document_number:IL234567890, id_document_expiry_date:2026-09-18, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:250.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Jennifer Lynn Anderson","dob":"1992-09-18","id_number":"IL234567890","address":"890 Maple Lane, Chicago, IL"}, biometric_liveness_check_completed:True, facial_match_confidence_score:89.5, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418112345678_dl.pdf","upload_timestamp":"2025-04-18T11:25:00Z"},{"doc_type":"utility_bill","file_path":"/docs/APP_20250418112345678_utility.pdf","upload_timestamp":"2025-04-18T11:26:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T11:30:20Z, esignature_ip_address:72.134.89.45, marketing_opt_in:True, referral_source:online_search, product_bundle_offered:standard_checking, cross_sell_products_accepted:["debit_card","online_banking"], application_data_entry_method:ocr_auto_fill, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418134512890, application_channel:web_portal, business_type:digital_remote, application_start_timestamp:2025-04-18T13:45:12Z, customer_type:individual, account_type_requested:money_market, applicant_full_name:Robert James Wilson, applicant_date_of_birth:1965-12-05, applicant_ssn_tax_id:XXX-XX-8901, applicant_email:robert.wilson@hotmail.com, applicant_phone:+1-555-765-4321, applicant_residential_address:234 Elm Street, Phoenix, AZ 85001, applicant_employment_status:retired, applicant_annual_income:45000, id_document_type:drivers_license, id_document_number:AZ345678901, id_document_expiry_date:2025-12-05, id_document_issuing_country:US, proof_of_address_type:bank_statement, initial_deposit_amount:10000.00, initial_deposit_method:check, external_bank_account_linked:False, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Robert James Wilson","dob":"1965-12-05","id_number":"AZ345678901","address":"234 Elm Street, Phoenix, AZ"}, biometric_liveness_check_completed:True, facial_match_confidence_score:93.8, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418134512890_dl.pdf","upload_timestamp":"2025-04-18T13:47:00Z"},{"doc_type":"bank_statement","file_path":"/docs/APP_20250418134512890_stmt.pdf","upload_timestamp":"2025-04-18T13:48:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice"], esignature_timestamp:2025-04-18T13:52:35Z, esignature_ip_address:198.45.67.123, marketing_opt_in:False, referral_source:friend_referral, product_bundle_offered:premium_money_market, cross_sell_products_accepted:["online_banking"], application_data_entry_method:customer_self_service, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418162312345, application_channel:in_branch, business_type:retail_individual, application_start_timestamp:2025-04-18T16:23:12Z, customer_type:individual, account_type_requested:savings, applicant_full_name:Maria Elena Rodriguez, applicant_date_of_birth:1995-02-28, applicant_ssn_tax_id:XXX-XX-4567, applicant_email:maria.rodriguez@outlook.com, applicant_phone:+1-555-234-8765, applicant_residential_address:678 Cedar Avenue, Miami, FL 33101, applicant_employment_status:employed, applicant_annual_income:62000, id_document_type:passport, id_document_number:P987654321, id_document_expiry_date:2031-02-28, id_document_issuing_country:US, proof_of_address_type:lease_agreement, initial_deposit_amount:1000.00, initial_deposit_method:cash, external_bank_account_linked:False, otp_verification_completed:False, id_ocr_extracted_data:{}, biometric_liveness_check_completed:False, facial_match_confidence_score:0.0, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"passport","file_path":"/docs/APP_20250418162312345_passport.pdf","upload_timestamp":"2025-04-18T16:25:00Z"},{"doc_type":"lease_agreement","file_path":"/docs/APP_20250418162312345_lease.pdf","upload_timestamp":"2025-04-18T16:26:00Z"}], banker_id:EMP_3456, branch_code:BR_MIA_012, customer_consent_forms_signed:["signature_card","terms_and_conditions","truth_in_savings_disclosure","privacy_notice"], esignature_timestamp:2025-04-18T16:35:45Z, esignature_ip_address:192.168.15.89, marketing_opt_in:True, referral_source:branch_walk_in, product_bundle_offered:standard_savings, cross_sell_products_accepted:["debit_card","online_banking"], application_data_entry_method:manual_banker_entry, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418084523678, application_channel:mobile_app, business_type:digital_remote, application_start_timestamp:2025-04-18T08:45:23Z, customer_type:individual, account_type_requested:checking, applicant_full_name:Christopher Paul Davis, applicant_date_of_birth:1987-06-10, applicant_ssn_tax_id:XXX-XX-5678, applicant_email:chris.davis@icloud.com, applicant_phone:+1-555-876-2345, applicant_residential_address:345 Birch Road, Denver, CO 80202, applicant_employment_status:self_employed, applicant_annual_income:95000, id_document_type:drivers_license, id_document_number:CO456789012, id_document_expiry_date:2027-06-10, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:750.00, initial_deposit_method:debit_card, external_bank_account_linked:False, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Christopher Paul Davis","dob":"1987-06-10","id_number":"CO456789012","address":"345 Birch Road, Denver, CO"}, biometric_liveness_check_completed:True, facial_match_confidence_score:97.2, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418084523678_dl.pdf","upload_timestamp":"2025-04-18T08:47:00Z"},{"doc_type":"utility_bill","file_path":"/docs/APP_20250418084523678_utility.pdf","upload_timestamp":"2025-04-18T08:48:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T08:52:10Z, esignature_ip_address:45.123.78.234, marketing_opt_in:False, referral_source:advertisement, product_bundle_offered:premium_checking_with_rewards, cross_sell_products_accepted:["debit_card","online_banking","mobile_app"], application_data_entry_method:ocr_auto_fill, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418172345901, application_channel:in_branch, business_type:corporate_business, application_start_timestamp:2025-04-18T17:23:45Z, customer_type:corporation, account_type_requested:business_checking, applicant_full_name:Patricia Anne Smith, applicant_date_of_birth:1980-10-15, applicant_ssn_tax_id:XXX-XX-9012, applicant_email:patricia.smith@globaltrading.com, applicant_phone:+1-555-345-9876, applicant_residential_address:901 Commerce Boulevard, Suite 500, New York, NY 10001, applicant_employment_status:employed, applicant_annual_income:180000, id_document_type:passport, id_document_number:P246813579, id_document_expiry_date:2029-10-15, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:25000.00, initial_deposit_method:check, external_bank_account_linked:False, otp_verification_completed:False, id_ocr_extracted_data:{}, biometric_liveness_check_completed:False, facial_match_confidence_score:0.0, business_legal_name:Global Trading Corporation, business_ein:98-7654321, business_structure:corporation, business_industry:international_trade, business_registration_date:2015-06-20, business_monthly_transaction_volume_estimate:2500000, beneficial_owners:[{"name":"Patricia Anne Smith","ownership_percentage":35,"ssn":"XXX-XX-9012","dob":"1980-10-15"},{"name":"Marcus William Johnson","ownership_percentage":30,"ssn":"XXX-XX-3456","dob":"1972-03-25"},{"name":"Sophia Grace Lee","ownership_percentage":35,"ssn":"XXX-XX-7890","dob":"1985-07-18"}], authorized_signers:[{"name":"Patricia Anne Smith","title":"President","signature_captured":true},{"name":"Marcus William Johnson","title":"Vice President","signature_captured":true}], documents_submitted:[{"doc_type":"articles_of_incorporation","file_path":"/docs/APP_20250418172345901_articles.pdf","upload_timestamp":"2025-04-18T17:30:00Z"},{"doc_type":"business_license","file_path":"/docs/APP_20250418172345901_license.pdf","upload_timestamp":"2025-04-18T17:31:00Z"},{"doc_type":"ein_confirmation_letter","file_path":"/docs/APP_20250418172345901_ein.pdf","upload_timestamp":"2025-04-18T17:32:00Z"}], banker_id:EMP_9012, branch_code:BR_NYC_001, customer_consent_forms_signed:["signature_card","terms_and_conditions","business_account_agreement","privacy_notice"], esignature_timestamp:2025-04-18T17:50:20Z, esignature_ip_address:192.168.40.67, marketing_opt_in:False, referral_source:branch_walk_in, product_bundle_offered:corporate_banking_suite, cross_sell_products_accepted:["business_debit_card","online_banking","wire_transfer_services","merchant_services"], application_data_entry_method:manual_banker_entry, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418105634812, application_channel:web_portal, business_type:digital_remote, application_start_timestamp:2025-04-18T10:56:34Z, customer_type:individual, account_type_requested:student_checking, applicant_full_name:Daniel Kevin Brown, applicant_date_of_birth:2003-01-20, applicant_ssn_tax_id:XXX-XX-1234, applicant_email:daniel.brown@college.edu, applicant_phone:+1-555-567-8901, applicant_residential_address:456 University Way, Student Housing B, Ann Arbor, MI 48104, applicant_employment_status:student, applicant_annual_income:8000, id_document_type:state_id, id_document_number:MI567890123, id_document_expiry_date:2028-01-20, id_document_issuing_country:US, proof_of_address_type:lease_agreement, initial_deposit_amount:50.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Daniel Kevin Brown","dob":"2003-01-20","id_number":"MI567890123","address":"456 University Way, Ann Arbor, MI"}, biometric_liveness_check_completed:True, facial_match_confidence_score:95.7, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"state_id","file_path":"/docs/APP_20250418105634812_id.pdf","upload_timestamp":"2025-04-18T10:58:00Z"},{"doc_type":"lease_agreement","file_path":"/docs/APP_20250418105634812_lease.pdf","upload_timestamp":"2025-04-18T10:59:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T11:03:25Z, esignature_ip_address:156.78.234.90, marketing_opt_in:True, referral_source:online_search, product_bundle_offered:student_banking_package, cross_sell_products_accepted:["debit_card","mobile_app"], application_data_entry_method:customer_self_service, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418140123567, application_channel:mobile_app, business_type:digital_remote, application_start_timestamp:2025-04-18T14:01:23Z, customer_type:individual, account_type_requested:high_yield_savings, applicant_full_name:Amanda Grace Taylor, applicant_date_of_birth:1993-05-12, applicant_ssn_tax_id:XXX-XX-6789, applicant_email:amanda.taylor@protonmail.com, applicant_phone:+1-555-678-9012, applicant_residential_address:789 Willow Street, Portland, OR 97201, applicant_employment_status:employed, applicant_annual_income:82000, id_document_type:drivers_license, id_document_number:OR678901234, id_document_expiry_date:2029-05-12, id_document_issuing_country:US, proof_of_address_type:bank_statement, initial_deposit_amount:3500.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Amanda Grace Taylor","dob":"1993-05-11","id_number":"OR678901234","address":"789 Willow Street, Portland, OR"}, biometric_liveness_check_completed:True, facial_match_confidence_score:91.2, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418140123567_dl.pdf","upload_timestamp":"2025-04-18T14:03:00Z"},{"doc_type":"bank_statement","file_path":"/docs/APP_20250418140123567_stmt.pdf","upload_timestamp":"2025-04-18T14:04:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T14:08:40Z, esignature_ip_address:67.234.123.89, marketing_opt_in:False, referral_source:friend_referral, product_bundle_offered:premium_savings_with_rewards, cross_sell_products_accepted:["online_banking","mobile_app"], application_data_entry_method:ocr_auto_fill, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418093412789, application_channel:in_branch, business_type:corporate_business, application_start_timestamp:2025-04-18T09:34:12Z, customer_type:sole_proprietorship, account_type_requested:business_checking, applicant_full_name:Thomas Richard Moore, applicant_date_of_birth:1970-08-25, applicant_ssn_tax_id:XXX-XX-2345, applicant_email:thomas.moore@mooreconsulting.com, applicant_phone:+1-555-789-0123, applicant_residential_address:123 Professional Drive, Atlanta, GA 30303, applicant_employment_status:self_employed, applicant_annual_income:110000, id_document_type:drivers_license, id_document_number:GA789012345, id_document_expiry_date:2027-08-25, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:2000.00, initial_deposit_method:check, external_bank_account_linked:False, otp_verification_completed:False, id_ocr_extracted_data:{}, biometric_liveness_check_completed:False, facial_match_confidence_score:0.0, business_legal_name:Moore Consulting Services, business_ein:45-6789012, business_structure:sole_proprietorship, business_industry:professional_services, business_registration_date:2018-04-10, business_monthly_transaction_volume_estimate:35000, beneficial_owners:[], authorized_signers:[{"name":"Thomas Richard Moore","title":"Owner","signature_captured":true}], documents_submitted:[{"doc_type":"business_license","file_path":"/docs/APP_20250418093412789_license.pdf","upload_timestamp":"2025-04-18T09:38:00Z"},{"doc_type":"ein_confirmation_letter","file_path":"/docs/APP_20250418093412789_ein.pdf","upload_timestamp":"2025-04-18T09:39:00Z"}], banker_id:EMP_6789, branch_code:BR_ATL_005, customer_consent_forms_signed:["signature_card","terms_and_conditions","business_account_agreement","privacy_notice"], esignature_timestamp:2025-04-18T09:48:15Z, esignature_ip_address:192.168.30.56, marketing_opt_in:True, referral_source:advertisement, product_bundle_offered:small_business_package, cross_sell_products_accepted:["business_debit_card","online_banking"], application_data_entry_method:manual_banker_entry, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418151234890, application_channel:web_portal, business_type:digital_remote, application_start_timestamp:2025-04-18T15:12:34Z, customer_type:individual, account_type_requested:checking, applicant_full_name:Jessica Marie White, applicant_date_of_birth:1991-11-30, applicant_ssn_tax_id:XXX-XX-3456, applicant_email:jessica.white@gmail.com, applicant_phone:+1-555-890-1234, applicant_residential_address:567 Oak Street, Dallas, TX 75201, applicant_employment_status:employed, applicant_annual_income:68000, id_document_type:drivers_license, id_document_number:TX890123456, id_document_expiry_date:2026-11-30, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:300.00, initial_deposit_method:debit_card, external_bank_account_linked:False, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Jessica Marie White","dob":"1991-11-30","id_number":"TX890123456","address":"567 Oak Street, Dallas, TX"}, biometric_liveness_check_completed:True, facial_match_confidence_score:98.1, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418151234890_dl.pdf","upload_timestamp":"2025-04-18T15:14:00Z"},{"doc_type":"utility_bill","file_path":"/docs/APP_20250418151234890_utility.pdf","upload_timestamp":"2025-04-18T15:15:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T15:18:50Z, esignature_ip_address:89.123.67.234, marketing_opt_in:True, referral_source:online_search, product_bundle_offered:standard_checking, cross_sell_products_accepted:["debit_card","online_banking","mobile_app"], application_data_entry_method:customer_self_service, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418124523901, application_channel:mobile_app, business_type:digital_remote, application_start_timestamp:2025-04-18T12:45:23Z, customer_type:individual, account_type_requested:money_market, applicant_full_name:Andrew Scott Harris, applicant_date_of_birth:1982-04-08, applicant_ssn_tax_id:XXX-XX-4567, applicant_email:andrew.harris@corporate.net, applicant_phone:+1-555-901-2345, applicant_residential_address:890 Financial Plaza, Philadelphia, PA 19102, applicant_employment_status:employed, applicant_annual_income:145000, id_document_type:passport, id_document_number:P135792468, id_document_expiry_date:2032-04-08, id_document_issuing_country:US, proof_of_address_type:bank_statement, initial_deposit_amount:15000.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Andrew Scott Harris","dob":"1982-04-08","id_number":"P135792468","address":"890 Financial Plaza, Philadelphia, PA"}, biometric_liveness_check_completed:True, facial_match_confidence_score:94.8, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"passport","file_path":"/docs/APP_20250418124523901_passport.pdf","upload_timestamp":"2025-04-18T12:47:00Z"},{"doc_type":"bank_statement","file_path":"/docs/APP_20250418124523901_stmt.pdf","upload_timestamp":"2025-04-18T12:48:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T12:53:20Z, esignature_ip_address:123.234.89.45, marketing_opt_in:False, referral_source:friend_referral, product_bundle_offered:premium_money_market, cross_sell_products_accepted:["online_banking","mobile_app"], application_data_entry_method:ocr_auto_fill, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418183412567, application_channel:in_branch, business_type:corporate_business, application_start_timestamp:2025-04-18T18:34:12Z, customer_type:partnership, account_type_requested:business_checking, applicant_full_name:William George Clark, applicant_date_of_birth:1976-01-18, applicant_ssn_tax_id:XXX-XX-5678, applicant_email:william.clark@lawfirm.com, applicant_phone:+1-555-012-3456, applicant_residential_address:234 Legal Avenue, Suite 300, Houston, TX 77002, applicant_employment_status:self_employed, applicant_annual_income:320000, id_document_type:drivers_license, id_document_number:TX012345678, id_document_expiry_date:2028-01-18, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:10000.00, initial_deposit_method:check, external_bank_account_linked:False, otp_verification_completed:False, id_ocr_extracted_data:{}, biometric_liveness_check_completed:False, facial_match_confidence_score:0.0, business_legal_name:Clark & Associates Law Partnership, business_ein:56-7890123, business_structure:partnership, business_industry:legal_services, business_registration_date:2010-09-15, business_monthly_transaction_volume_estimate:450000, beneficial_owners:[{"name":"William George Clark","ownership_percentage":50,"ssn":"XXX-XX-5678","dob":"1976-01-18"},{"name":"Elizabeth Anne Martin","ownership_percentage":50,"ssn":"XXX-XX-8901","dob":"1974-05-22"}], authorized_signers:[{"name":"William George Clark","title":"Managing Partner","signature_captured":true},{"name":"Elizabeth Anne Martin","title":"Partner","signature_captured":true}], documents_submitted:[{"doc_type":"partnership_agreement","file_path":"/docs/APP_20250418183412567_partnership.pdf","upload_timestamp":"2025-04-18T18:40:00Z"},{"doc_type":"business_license","file_path":"/docs/APP_20250418183412567_license.pdf","upload_timestamp":"2025-04-18T18:41:00Z"},{"doc_type":"ein_confirmation_letter","file_path":"/docs/APP_20250418183412567_ein.pdf","upload_timestamp":"2025-04-18T18:42:00Z"}], banker_id:EMP_2345, branch_code:BR_HOU_008, customer_consent_forms_signed:["signature_card","terms_and_conditions","business_account_agreement","privacy_notice"], esignature_timestamp:2025-04-18T19:00:35Z, esignature_ip_address:192.168.50.123, marketing_opt_in:False, referral_source:branch_walk_in, product_bundle_offered:professional_services_package, cross_sell_products_accepted:["business_debit_card","online_banking","wire_transfer_services"], application_data_entry_method:manual_banker_entry, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418113445678, application_channel:web_portal, business_type:digital_remote, application_start_timestamp:2025-04-18T11:34:45Z, customer_type:individual, account_type_requested:savings, applicant_full_name:Michelle Lynn Turner, applicant_date_of_birth:1994-07-14, applicant_ssn_tax_id:XXX-XX-6789, applicant_email:michelle.turner@outlook.com, applicant_phone:+1-555-123-4567, applicant_residential_address:678 Sunset Boulevard, Las Vegas, NV 89101, applicant_employment_status:employed, applicant_annual_income:58000, id_document_type:drivers_license, id_document_number:NV123456789, id_document_expiry_date:2027-07-14, id_document_issuing_country:US, proof_of_address_type:lease_agreement, initial_deposit_amount:800.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Michelle Lynn Turner","dob":"1994-07-14","id_number":"NV123456789","address":"678 Sunset Boulevard, Las Vegas, NV"}, biometric_liveness_check_completed:True, facial_match_confidence_score:92.3, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418113445678_dl.pdf","upload_timestamp":"2025-04-18T11:36:00Z"},{"doc_type":"lease_agreement","file_path":"/docs/APP_20250418113445678_lease.pdf","upload_timestamp":"2025-04-18T11:37:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T11:41:55Z, esignature_ip_address:45.234.156.78, marketing_opt_in:True, referral_source:advertisement, product_bundle_offered:standard_savings, cross_sell_products_accepted:["online_banking","mobile_app"], application_data_entry_method:customer_self_service, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418074512234, application_channel:mobile_app, business_type:digital_remote, application_start_timestamp:2025-04-18T07:45:12Z, customer_type:individual, account_type_requested:checking, applicant_full_name:Brian Joseph Lee, applicant_date_of_birth:1989-12-03, applicant_ssn_tax_id:XXX-XX-7890, applicant_email:brian.lee@techmail.com, applicant_phone:+1-555-234-5678, applicant_residential_address:345 Innovation Drive, San Jose, CA 95110, applicant_employment_status:employed, applicant_annual_income:135000, id_document_type:passport, id_document_number:P987321654, id_document_expiry_date:2030-12-03, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:2000.00, initial_deposit_method:debit_card, external_bank_account_linked:False, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Brian Joseph Lee","dob":"1989-12-03","id_number":"P987321654","address":"345 Innovation Drive, San Jose, CA"}, biometric_liveness_check_completed:True, facial_match_confidence_score:97.8, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"passport","file_path":"/docs/APP_20250418074512234_passport.pdf","upload_timestamp":"2025-04-18T07:47:00Z"},{"doc_type":"utility_bill","file_path":"/docs/APP_20250418074512234_utility.pdf","upload_timestamp":"2025-04-18T07:48:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T07:51:30Z, esignature_ip_address:78.234.123.45, marketing_opt_in:False, referral_source:online_search, product_bundle_offered:premium_checking_with_rewards, cross_sell_products_accepted:["debit_card","online_banking","mobile_app"], application_data_entry_method:ocr_auto_fill, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418165634345, application_channel:in_branch, business_type:retail_individual, application_start_timestamp:2025-04-18T16:56:34Z, customer_type:individual, account_type_requested:checking, applicant_full_name:Nicole Marie Jackson, applicant_date_of_birth:1986-03-27, applicant_ssn_tax_id:XXX-XX-8901, applicant_email:nicole.jackson@email.com, applicant_phone:+1-555-345-6789, applicant_residential_address:901 Riverside Drive, Nashville, TN 37201, applicant_employment_status:employed, applicant_annual_income:72000, id_document_type:drivers_license, id_document_number:TN345678901, id_document_expiry_date:2028-03-27, id_document_issuing_country:US, proof_of_address_type:bank_statement, initial_deposit_amount:400.00, initial_deposit_method:cash, external_bank_account_linked:False, otp_verification_completed:False, id_ocr_extracted_data:{}, biometric_liveness_check_completed:False, facial_match_confidence_score:0.0, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418165634345_dl.pdf","upload_timestamp":"2025-04-18T16:58:00Z"},{"doc_type":"bank_statement","file_path":"/docs/APP_20250418165634345_stmt.pdf","upload_timestamp":"2025-04-18T16:59:00Z"}], banker_id:EMP_4567, branch_code:BR_NSH_010, customer_consent_forms_signed:["signature_card","terms_and_conditions","truth_in_savings_disclosure","privacy_notice"], esignature_timestamp:2025-04-18T17:08:45Z, esignature_ip_address:192.168.35.90, marketing_opt_in:True, referral_source:branch_walk_in, product_bundle_offered:standard_checking, cross_sell_products_accepted:["debit_card","online_banking"], application_data_entry_method:manual_banker_entry, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418102345789, application_channel:web_portal, business_type:digital_remote, application_start_timestamp:2025-04-18T10:23:45Z, customer_type:individual, account_type_requested:student_checking, applicant_full_name:Ryan Christopher Adams, applicant_date_of_birth:2001-09-22, applicant_ssn_tax_id:XXX-XX-9012, applicant_email:ryan.adams@student.edu, applicant_phone:+1-555-456-7890, applicant_residential_address:234 Campus Street, Residence Hall C, Madison, WI 53706, applicant_employment_status:student, applicant_annual_income:12000, id_document_type:state_id, id_document_number:WI456789012, id_document_expiry_date:2027-09-22, id_document_issuing_country:US, proof_of_address_type:lease_agreement, initial_deposit_amount:75.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Ryan Christopher Adams","dob":"2001-09-22","id_number":"WI456789012","address":"234 Campus Street, Madison, WI"}, biometric_liveness_check_completed:True, facial_match_confidence_score:93.5, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"state_id","file_path":"/docs/APP_20250418102345789_id.pdf","upload_timestamp":"2025-04-18T10:25:00Z"},{"doc_type":"lease_agreement","file_path":"/docs/APP_20250418102345789_lease.pdf","upload_timestamp":"2025-04-18T10:26:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T10:30:15Z, esignature_ip_address:234.156.78.90, marketing_opt_in:True, referral_source:friend_referral, product_bundle_offered:student_banking_package, cross_sell_products_accepted:["debit_card","mobile_app"], application_data_entry_method:customer_self_service, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:',
+        'application_id:APP_20250418132123456, application_channel:mobile_app, business_type:digital_remote, application_start_timestamp:2025-04-18T13:21:23Z, customer_type:individual, account_type_requested:high_yield_savings, applicant_full_name:Stephanie Louise Roberts, applicant_date_of_birth:1990-08-16, applicant_ssn_tax_id:XXX-XX-0123, applicant_email:stephanie.roberts@business.com, applicant_phone:+1-555-567-8901, applicant_residential_address:567 Mountain View, Salt Lake City, UT 84101, applicant_employment_status:employed, applicant_annual_income:98000, id_document_type:drivers_license, id_document_number:UT567890123, id_document_expiry_date:2029-08-16, id_document_issuing_country:US, proof_of_address_type:utility_bill, initial_deposit_amount:6000.00, initial_deposit_method:external_transfer, external_bank_account_linked:True, otp_verification_completed:True, id_ocr_extracted_data:{"name":"Stephanie Louise Roberts","dob":"1990-08-16","id_number":"UT567890123","address":"567 Mountain View, Salt Lake City, UT"}, biometric_liveness_check_completed:True, facial_match_confidence_score:95.3, business_legal_name:, business_ein:, business_structure:, business_industry:, business_registration_date:, business_monthly_transaction_volume_estimate:, beneficial_owners:[], authorized_signers:[], documents_submitted:[{"doc_type":"drivers_license","file_path":"/docs/APP_20250418132123456_dl.pdf","upload_timestamp":"2025-04-18T13:23:00Z"},{"doc_type":"utility_bill","file_path":"/docs/APP_20250418132123456_utility.pdf","upload_timestamp":"2025-04-18T13:24:00Z"}], banker_id:, branch_code:, customer_consent_forms_signed:["terms_and_conditions","truth_in_savings_disclosure","privacy_notice","electronic_communications_consent"], esignature_timestamp:2025-04-18T13:28:40Z, esignature_ip_address:156.234.90.12, marketing_opt_in:False, referral_source:online_search, product_bundle_offered:premium_savings_with_rewards, cross_sell_products_accepted:["online_banking","mobile_app"], application_data_entry_method:ocr_auto_fill, cip_verification_status:, watchlist_screening_result:, chexsystems_score:, credit_bureau_validation_status:, fraud_risk_score:, auto_decision_result:, manual_review_required:, manual_review_reason:, compliance_officer_id:, compliance_review_timestamp:, compliance_review_notes:, due_diligence_level:, final_approval_status:, decline_reason:, account_number_generated:, routing_number:, account_creation_timestamp:, total_processing_time_minutes:, first_time_yield:, rework_count:, welcome_kit_issued:, debit_card_number_issued:, online_banking_credentials_created:, temporary_checks_issued:, account_funding_completed:, account_activation_status:, application_abandoned:, abandonment_stage:'
+    ]
+    
+    for entry_str in data_entries:
+        entry_dict = {}
+        # Split by ', ' but be careful with nested structures
+        current_key = None
+        current_value = ""
+        in_nested = 0
+        
+        i = 0
+        while i < len(entry_str):
+            char = entry_str[i]
+            
+            if char in ['{', '[']:
+                in_nested += 1
+                current_value += char
+            elif char in ['}', ']']:
+                in_nested -= 1
+                current_value += char
+            elif char == ':' and in_nested == 0 and current_key is None:
+                current_key = current_value.strip()
+                current_value = ""
+            elif char == ',' and in_nested == 0:
+                if i + 1 < len(entry_str) and entry_str[i + 1] == ' ':
+                    # This is a field separator
+                    if current_key:
+                        value = current_value.strip()
+                        # Convert value types
+                        if value == '':
+                            entry_dict[current_key] = ''
+                        elif value == 'True':
+                            entry_dict[current_key] = True
+                        elif value == 'False':
+                            entry_dict[current_key] = False
+                        elif value == 'null' or value == 'None':
+                            entry_dict[current_key] = None
+                        elif value.startswith('[') or value.startswith('{'):
+                            try:
+                                entry_dict[current_key] = json.loads(value.replace("'", '"'))
+                            except:
+                                entry_dict[current_key] = value
+                        elif value.replace('.', '', 1).replace('-', '', 1).isdigit():
+                            if '.' in value:
+                                entry_dict[current_key] = float(value)
+                            else:
+                                entry_dict[current_key] = int(value)
+                        else:
+                            entry_dict[current_key] = value
+                    current_key = None
+                    current_value = ""
+                    i += 1  # Skip the space after comma
+                else:
+                    current_value += char
+            else:
+                current_value += char
+            
+            i += 1
+        
+        # Handle last field
+        if current_key:
+            value = current_value.strip()
+            if value == '':
+                entry_dict[current_key] = ''
+            elif value == 'True':
+                entry_dict[current_key] = True
+            elif value == 'False':
+                entry_dict[current_key] = False
+            elif value == 'null' or value == 'None':
+                entry_dict[current_key] = None
+            elif value.startswith('[') or value.startswith('{'):
+                try:
+                    entry_dict[current_key] = json.loads(value.replace("'", '"'))
+                except:
+                    entry_dict[current_key] = value
+            elif value.replace('.', '', 1).replace('-', '', 1).isdigit():
+                if '.' in value:
+                    entry_dict[current_key] = float(value)
+                else:
+                    entry_dict[current_key] = int(value)
+            else:
+                entry_dict[current_key] = value
+        
+        APPLICATION_DATA.append(entry_dict)
+
+# Initialize data on module load
+load_application_data()
+
+def get_application_by_id(application_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieve application data by application_id"""
+    for app in APPLICATION_DATA:
+        if app.get('application_id') == application_id:
+            return app
+    return None
+
+def update_application_data(application_id: str, updates: Dict[str, Any]) -> bool:
+    """Update application data"""
+    for app in APPLICATION_DATA:
+        if app.get('application_id') == application_id:
+            app.update(updates)
+            return True
+    return False
+
+
+def ValidateApplicationData(
+    application_id: str,
+    applicant_full_name: str,
+    applicant_date_of_birth: str,
+    applicant_ssn_tax_id: str,
+    applicant_residential_address: str,
+    applicant_email: str,
+    applicant_phone: str,
+    id_document_type: str,
+    id_document_number: str,
+    id_document_expiry_date: str,
+    application_data_entry_method: str,
+    id_ocr_extracted_data: Dict[str, Any],
+    customer_type: str,
+    business_type: str
+) -> Dict[str, Any]:
+    """Validates application data format, completeness, and internal consistency"""
+    
+    validation_passed = True
+    validation_errors = []
+    data_consistency_score = 100.0
+    
+    # SSN format validation
+    ssn_pattern = re.compile(r'^XXX-XX-\d{4}$')
+    if not ssn_pattern.match(applicant_ssn_tax_id):
+        validation_passed = False
+        validation_errors.append("Invalid SSN format")
+    
+    # Age verification
+    try:
+        dob = datetime.strptime(applicant_date_of_birth, "%Y-%m-%d")
+        today = datetime.now()
+        age = (today - dob).days // 365
+        if age < 18 or age > 120:
+            validation_passed = False
+            validation_errors.append(f"Age {age} is outside acceptable range (18-120)")
+    except:
+        validation_passed = False
+        validation_errors.append("Invalid date of birth format")
+    
+    # Name format validation
+    if not applicant_full_name or len(applicant_full_name.split()) < 2:
+        validation_passed = False
+        validation_errors.append("Full name must contain at least first and last name")
+    
+    if any(char.isdigit() for char in applicant_full_name):
+        validation_passed = False
+        validation_errors.append("Name contains numeric characters")
+    
+    # ID document expiry validation
+    try:
+        expiry_date = datetime.strptime(id_document_expiry_date, "%Y-%m-%d")
+        if expiry_date <= today:
+            validation_passed = False
+            validation_errors.append("ID document has expired")
+    except:
+        validation_passed = False
+        validation_errors.append("Invalid ID expiry date format")
+    
+    # Email format validation
+    email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    if not email_pattern.match(applicant_email):
+        validation_passed = False
+        validation_errors.append("Invalid email format")
+    
+    # Phone format validation
+    phone_pattern = re.compile(r'^\+1-\d{3}-\d{3}-\d{4}$')
+    if not phone_pattern.match(applicant_phone):
+        validation_passed = False
+        validation_errors.append("Invalid phone format")
+    
+    # OCR consistency check
+    if application_data_entry_method == 'ocr_auto_fill' and id_ocr_extracted_data:
+        mismatches = 0
+        
+        # Check name
+        if 'name' in id_ocr_extracted_data:
+            if id_ocr_extracted_data['name'] != applicant_full_name:
+                mismatches += 1
+        
+        # Check DOB
+        if 'dob' in id_ocr_extracted_data:
+            if id_ocr_extracted_data['dob'] != applicant_date_of_birth:
+                mismatches += 1
+        
+        # Check ID number
+        if 'id_number' in id_ocr_extracted_data:
+            if id_ocr_extracted_data['id_number'] != id_document_number:
+                mismatches += 1
+        
+        # Check address
+        if 'address' in id_ocr_extracted_data:
+            ocr_address = id_ocr_extracted_data['address']
+            if not any(part in applicant_residential_address for part in ocr_address.split(', ')):
+                mismatches += 1
+        
+        data_consistency_score = max(0.0, 100.0 - (mismatches * 25.0))
+        
+        if data_consistency_score < 75.0:
+            validation_errors.append(f"OCR data inconsistency detected (score: {data_consistency_score})")
+    
+    # Update application data
+    update_application_data(application_id, {
+        'validation_passed': validation_passed,
+        'validation_errors': validation_errors,
+        'data_consistency_score': data_consistency_score
+    })
+    
+    return {
+        "application_id": application_id,
+        "validation_passed": validation_passed,
+        "validation_errors": validation_errors,
+        "data_consistency_score": data_consistency_score,
+        "manual_review_required": not validation_passed or data_consistency_score < 75.0
+    }
+
+
+def ExecuteCIPVerification(
+    application_id: str,
+    applicant_full_name: str,
+    applicant_date_of_birth: str,
+    applicant_ssn_tax_id: str,
+    applicant_residential_address: str,
+    id_document_type: str,
+    id_document_number: str,
+    id_document_issuing_country: str,
+    biometric_liveness_check_completed: bool,
+    application_channel: str,
+    data_consistency_score: float
+) -> Dict[str, Any]:
+    """Executes CIP verification including document authentication and biometric checks"""
+    
+    # Document authenticity score (simulated based on document type and country)
+    document_authenticity_score = 95.0 if id_document_issuing_country == 'US' else 85.0
+    
+    # Get facial match confidence from application data
+    app_data = get_application_by_id(application_id)
+    facial_match_confidence_score = app_data.get('facial_match_confidence_score', 0.0) if app_data else 0.0
+    
+    # Credit bureau validation
+    credit_bureau_validation_status = 'verified'
+    
+    # Simulate credit bureau response based on SSN pattern
+    last_four = applicant_ssn_tax_id.split('-')[-1]
+    if int(last_four) % 10 == 0:
+        credit_bureau_validation_status = 'insufficient_data'
+    elif int(last_four) % 13 == 0:
+        credit_bureau_validation_status = 'not_verified'
+    
+    # Determine CIP verification status
+    cip_verification_status = 'verified'
+    manual_review_required = False
+    
+    # Check document authenticity
+    if document_authenticity_score < 80.0:
+        cip_verification_status = 'failed'
+    
+    # Check data consistency
+    if data_consistency_score < 75.0:
+        manual_review_required = True
+        cip_verification_status = 'pending_manual_review'
+    
+    # Check biometric for digital channels
+    if application_channel in ['mobile_app', 'web_portal']:
+        if not biometric_liveness_check_completed:
+            cip_verification_status = 'failed'
+        elif facial_match_confidence_score < 88.0:
+            cip_verification_status = 'failed'
+        elif facial_match_confidence_score < 92.0:
+            manual_review_required = True
+            cip_verification_status = 'pending_manual_review'
+    
+    # Check credit bureau validation
+    if credit_bureau_validation_status == 'not_verified':
+        manual_review_required = True
+        cip_verification_status = 'pending_manual_review'
+    
+    # Update application data
+    update_application_data(application_id, {
+        'cip_verification_status': cip_verification_status,
+        'document_authenticity_score': document_authenticity_score,
+        'facial_match_confidence_score': facial_match_confidence_score,
+        'credit_bureau_validation_status': credit_bureau_validation_status,
+        'manual_review_required': manual_review_required
+    })
+    
+    return {
+        "application_id": application_id,
+        "cip_verification_status": cip_verification_status,
+        "document_authenticity_score": document_authenticity_score,
+        "facial_match_confidence_score": facial_match_confidence_score,
+        "credit_bureau_validation_status": credit_bureau_validation_status,
+        "manual_review_required": manual_review_required
+    }
+
+
+def ScreenWatchlists(
+    application_id: str,
+    applicant_full_name: str,
+    applicant_date_of_birth: str,
+    applicant_residential_address: str,
+    applicant_ssn_tax_id: str,
+    cip_verification_status: str,
+    business_legal_name: str,
+    beneficial_owners: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """Performs OFAC sanctions screening and watchlist matching"""
+    
+    if cip_verification_status != 'verified':
+        return {
+            "application_id": application_id,
+            "error": "CIP verification must be completed before watchlist screening"
+        }
+    
+    # Simulate watchlist screening
+    watchlist_screening_result = 'clear'
+    watchlist_matches = []
+    highest_similarity_score = 0.0
+    
+    # Check for specific patterns that would trigger matches
+    # For simulation purposes, certain name patterns trigger potential matches
+    high_risk_names = ['Wilson', 'Smith', 'Chen']
+    
+    for risk_name in high_risk_names:
+        if risk_name.lower() in applicant_full_name.lower():
+            similarity_score = 88.0 + (ord(applicant_full_name[0]) % 7)
+            if similarity_score >= 95.0:
+                watchlist_screening_result = 'confirmed_match'
+                watchlist_matches.append({
+                    "matched_name": f"Sanctioned {risk_name}",
+                    "similarity_score": similarity_score,
+                    "list_type": "OFAC_SDN"
+                })
+                highest_similarity_score = max(highest_similarity_score, similarity_score)
+            elif similarity_score >= 85.0:
+                watchlist_screening_result = 'potential_match'
+                watchlist_matches.append({
+                    "matched_name": f"Possible {risk_name}",
+                    "similarity_score": similarity_score,
+                    "list_type": "OFAC_SDN"
+                })
+                highest_similarity_score = max(highest_similarity_score, similarity_score)
+    
+    # Screen beneficial owners if present
+    for owner in beneficial_owners:
+        owner_name = owner.get('name', '')
+        for risk_name in high_risk_names:
+            if risk_name.lower() in owner_name.lower():
+                similarity_score = 86.0 + (ord(owner_name[0]) % 6)
+                if similarity_score >= 85.0:
+                    if watchlist_screening_result == 'clear':
+                        watchlist_screening_result = 'potential_match'
+                    watchlist_matches.append({
+                        "matched_name": f"Beneficial Owner: {owner_name}",
+                        "similarity_score": similarity_score,
+                        "list_type": "OFAC_SDN"
+                    })
+    
+    manual_review_required = watchlist_screening_result in ['potential_match', 'confirmed_match']
+    
+    # Update application data
+    update_application_data(application_id, {
+        'watchlist_screening_result': watchlist_screening_result,
+        'watchlist_matches': watchlist_matches,
+        'manual_review_required': manual_review_required
+    })
+    
+    return {
+        "application_id": application_id,
+        "watchlist_screening_result": watchlist_screening_result,
+        "watchlist_matches": watchlist_matches,
+        "highest_similarity_score": highest_similarity_score,
+        "manual_review_required": manual_review_required
+    }
+
+
+def AssessRiskProfile(
+    application_id: str,
+    applicant_full_name: str,
+    applicant_ssn_tax_id: str,
+    applicant_date_of_birth: str,
+    applicant_residential_address: str,
+    applicant_employment_status: str,
+    applicant_annual_income: float,
+    initial_deposit_amount: float,
+    customer_type: str,
+    cip_verification_status: str,
+    credit_bureau_validation_status: str,
+    facial_match_confidence_score: float,
+    id_ocr_extracted_data: Dict[str, Any],
+    data_consistency_score: float,
+    application_channel: str,
+    business_industry: str,
+    business_monthly_transaction_volume_estimate: Optional[float]
+) -> Dict[str, Any]:
+    """Calculates comprehensive risk assessment including ChexSystems and fraud risk scoring"""
+    
+    if cip_verification_status != 'verified':
+        return {
+            "application_id": application_id,
+            "error": "CIP verification must be completed before risk assessment"
+        }
+    
+    # ChexSystems score (only for individuals)
+    chexsystems_score = None
+    if customer_type == 'individual':
+        # Simulate ChexSystems score based on SSN last digits
+        last_four = applicant_ssn_tax_id.split('-')[-1]
+        base_score = 600 + (int(last_four) % 300)
+        chexsystems_score = min(899, max(100, base_score))
+    
+    # Fraud risk score calculation (0-100 scale)
+    fraud_risk_score = 0.0
+    
+    # Data consistency component (15% weight)
+    data_consistency_points = (100.0 - data_consistency_score) * 0.15
+    fraud_risk_score += data_consistency_points
+    
+    # Address alignment component (20% weight)
+    address_alignment_score = 100.0
+    if credit_bureau_validation_status == 'not_verified':
+        address_alignment_score = 0.0
+    elif credit_bureau_validation_status == 'insufficient_data':
+        address_alignment_score = 60.0
+    fraud_risk_score += (100.0 - address_alignment_score) * 0.20
+    
+    # Income coherence component (15% weight)
+    income_risk_points = 0.0
+    if applicant_employment_status == 'unemployed' and applicant_annual_income > 30000:
+        income_risk_points = 18.0
+    elif applicant_employment_status == 'student' and applicant_annual_income > 60000:
+        income_risk_points = 10.0
+    fraud_risk_score += income_risk_points
+    
+    # Deposit amount reasonableness (10% weight)
+    deposit_risk_points = 0.0
+    if applicant_annual_income > 0:
+        deposit_ratio = initial_deposit_amount / applicant_annual_income
+        if deposit_ratio > 0.25:
+            deposit_risk_points = 15.0
+    fraud_risk_score += deposit_risk_points
+    
+    # Device fingerprinting (20% weight for digital channels)
+    device_risk_points = 0.0
+    if application_channel in ['mobile_app', 'web_portal']:
+        # Simulate device fingerprinting based on application patterns
+        app_data = get_application_by_id(application_id)
+        if app_data:
+            ip_address = app_data.get('esignature_ip_address', '')
+            # VPN/proxy detection simulation
+            if ip_address.startswith('24.') or ip_address.startswith('67.'):
+                device_risk_points = 20.0
+    fraud_risk_score += device_risk_points
+    
+    # Behavioral analytics (20% weight)
+    behavioral_risk_points = 0.0
+    if facial_match_confidence_score > 0 and facial_match_confidence_score < 92.0:
+        behavioral_risk_points = (92.0 - facial_match_confidence_score) * 2.0
+    fraud_risk_score += min(20.0, behavioral_risk_points)
+    
+    fraud_risk_score = round(min(100.0, fraud_risk_score), 1)
+    
+    # Due diligence level determination
+    due_diligence_level = 'standard_cdd'
+    high_risk_industries = ['money_services', 'cannabis', 'cryptocurrency', 'international_trade']
+    
+    if business_industry in high_risk_industries:
+        due_diligence_level = 'enhanced_edd'
+    elif business_monthly_transaction_volume_estimate and business_monthly_transaction_volume_estimate > 10000000:
+        due_diligence_level = 'enhanced_edd'
+    
+    # Manual review triggers
+    manual_review_required = False
+    manual_review_reason = ''
+    
+    if chexsystems_score and 400 <= chexsystems_score < 500:
+        manual_review_required = True
+        manual_review_reason = 'ChexSystems score in elevated risk range (400-499)'
+    elif fraud_risk_score > 40.0 and fraud_risk_score <= 60.0:
+        manual_review_required = True
+        manual_review_reason = 'Fraud risk score in elevated range (40.1-60.0)'
+    elif due_diligence_level == 'enhanced_edd':
+        manual_review_required = True
+        manual_review_reason = 'Enhanced due diligence required for high-risk business profile'
+    
+    # Update application data
+    update_application_data(application_id, {
+        'chexsystems_score': chexsystems_score,
+        'fraud_risk_score': fraud_risk_score,
+        'due_diligence_level': due_diligence_level,
+        'manual_review_required': manual_review_required,
+        'manual_review_reason': manual_review_reason
+    })
+    
+    return {
+        "application_id": application_id,
+        "chexsystems_score": chexsystems_score,
+        "fraud_risk_score": fraud_risk_score,
+        "due_diligence_level": due_diligence_level,
+        "manual_review_required": manual_review_required,
+        "manual_review_reason": manual_review_reason
+    }
+
+
+def ExecuteAutoDecision(
+    application_id: str,
+    cip_verification_status: str,
+    watchlist_screening_result: str,
+    chexsystems_score: Optional[float],
+    fraud_risk_score: float,
+    credit_bureau_validation_status: str,
+    facial_match_confidence_score: float,
+    due_diligence_level: str,
+    customer_type: str,
+    application_channel: str
+) -> Dict[str, Any]:
+    """Synthesizes risk metrics to render automated approval decision"""
+    
+    auto_decision_result = 'auto_approved'
+    manual_review_required = False
+    manual_review_reason = ''
+    decline_reason = ''
+    composite_risk_score = 0.0
+    
+    # First-level screening - immediate declines
+    if cip_verification_status == 'failed':
+        auto_decision_result = 'auto_declined'
+        decline_reason = 'CIP verification failed'
+    elif watchlist_screening_result == 'confirmed_match':
+        auto_decision_result = 'auto_declined'
+        decline_reason = 'Applicant identified on OFAC Specially Designated Nationals List'
+    
+    # Second-level screening - manual review triggers
+    elif cip_verification_status == 'pending_manual_review':
+        auto_decision_result = 'refer_for_manual_review'
+        manual_review_required = True
+        manual_review_reason = 'CIP verification requires manual review'
+    elif watchlist_screening_result == 'potential_match':
+        auto_decision_result = 'refer_for_manual_review'
+        manual_review_required = True
+        manual_review_reason = 'Potential watchlist match requiring disambiguation'
+    elif chexsystems_score and 400 <= chexsystems_score < 500:
+        auto_decision_result = 'refer_for_manual_review'
+        manual_review_required = True
+        manual_review_reason = 'ChexSystems score indicates elevated risk requiring assessment'
+    elif chexsystems_score and chexsystems_score < 400:
+        auto_decision_result = 'auto_declined'
+        decline_reason = 'ChexSystems score below acceptable threshold'
+    elif fraud_risk_score > 60.0:
+        auto_decision_result = 'auto_declined'
+        decline_reason = 'Fraud risk score exceeds acceptable threshold'
+    elif 40.0 < fraud_risk_score <= 60.0:
+        auto_decision_result = 'refer_for_manual_review'
+        manual_review_required = True
+        manual_review_reason = 'Fraud risk score in elevated range requiring investigation'
+    elif application_channel in ['mobile_app', 'web_portal']:
+        if facial_match_confidence_score < 88.0:
+            auto_decision_result = 'auto_declined'
+            decline_reason = 'Biometric verification confidence below threshold'
+        elif 88.0 <= facial_match_confidence_score < 92.0:
+            auto_decision_result = 'refer_for_manual_review'
+            manual_review_required = True
+            manual_review_reason = 'Facial biometric confidence below threshold requiring secondary verification'
+    
+    # Enhanced due diligence check
+    if due_diligence_level == 'enhanced_edd' and auto_decision_result == 'auto_approved':
+        auto_decision_result = 'refer_for_manual_review'
+        manual_review_required = True
+        manual_review_reason = 'Enhanced due diligence required for high-risk business profile'
+    
+    # Third-level - calculate composite risk score for borderline cases
+    if auto_decision_result == 'auto_approved':
+        # Calculate weighted composite score
+        score_components = []
+        
+        # ChexSystems component (30% weight)
+        if chexsystems_score:
+            chex_normalized = ((chexsystems_score - 100) / 799) * 100
+            score_components.append(chex_normalized * 0.30)
+        
+        # Fraud risk component (25% weight, inverted)
+        fraud_normalized = (100.0 - fraud_risk_score)
+        score_components.append(fraud_normalized * 0.25)
+        
+        # Credit bureau component (10% weight)
+        if credit_bureau_validation_status == 'verified':
+            score_components.append(100.0 * 0.10)
+        elif credit_bureau_validation_status == 'insufficient_data':
+            score_components.append(60.0 * 0.10)
+        else:
+            score_components.append(0.0 * 0.10)
+        
+        # Biometric component (20% weight for digital)
+        if application_channel in ['mobile_app', 'web_portal']:
+            score_components.append(facial_match_confidence_score * 0.20)
+        else:
+            score_components.append(95.0 * 0.20)
+        
+        # CIP verification component (15% weight)
+        if cip_verification_status == 'verified':
+            score_components.append(100.0 * 0.15)
+        else:
+            score_components.append(0.0 * 0.15)
+        
+        composite_risk_score = round(sum(score_components), 1)
+        
+        if composite_risk_score < 70.0:
+            auto_decision_result = 'refer_for_manual_review'
+            manual_review_required = True
+            manual_review_reason = f'Composite risk score {composite_risk_score} below auto-approval threshold'
+    
+    # Update application data
+    update_application_data(application_id, {
+        'auto_decision_result': auto_decision_result,
+        'manual_review_required': manual_review_required,
+        'manual_review_reason': manual_review_reason,
+        'decline_reason': decline_reason,
+        'composite_risk_score': composite_risk_score
+    })
+    
+    return {
+        "application_id": application_id,
+        "auto_decision_result": auto_decision_result,
+        "manual_review_required": manual_review_required,
+        "manual_review_reason": manual_review_reason,
+        "decline_reason": decline_reason,
+        "composite_risk_score": composite_risk_score
+    }
+
+
+def ProcessManualReview(
+    application_id: str,
+    auto_decision_result: str,
+    manual_review_required: bool,
+    manual_review_reason: str,
+    watchlist_screening_result: str,
+    fraud_risk_score: float,
+    chexsystems_score: Optional[float],
+    due_diligence_level: str,
+    documents_submitted: List[Dict[str, Any]],
+    beneficial_owners: List[Dict[str, Any]],
+    compliance_officer_id: str
+) -> Dict[str, Any]:
+    """Facilitates compliance officer adjudication for manual review cases"""
+    
+    if auto_decision_result != 'refer_for_manual_review' or not manual_review_required:
+        return {
+            "application_id": application_id,
+            "error": "Manual review only applicable when auto_decision_result='refer_for_manual_review' and manual_review_required=True"
+        }
+    
+    # Simulate compliance officer review
+    final_approval_status = 'approved'
+    compliance_review_notes = f"Manual review conducted by {compliance_officer_id}. "
+    
+    # Review watchlist matches
+    if watchlist_screening_result == 'potential_match':
+        # Simulate disambiguation - for this simulation, clear most potential matches
+        app_data = get_application_by_id(application_id)
+        if app_data and 'watchlist_matches' in app_data:
+            matches = app_data['watchlist_matches']
+            if matches and matches[0].get('similarity_score', 0) < 90.0:
+                compliance_review_notes += "Potential watchlist match investigated and cleared. "
+                update_application_data(application_id, {'watchlist_screening_result': 'clear'})
+            else:
+                final_approval_status = 'declined'
+                compliance_review_notes += "Unable to disambiguate watchlist match. "
+    
+    # Review fraud risk factors
+    if fraud_risk_score > 40.0 and final_approval_status != 'declined':
+        if fraud_risk_score <= 50.0:
+            compliance_review_notes += "Fraud risk factors reviewed and deemed acceptable with monitoring. "
+            final_approval_status = 'conditional_approval'
+        else:
+            compliance_review_notes += "Fraud risk factors indicate unacceptable risk. "
+            final_approval_status = 'declined'
+    
+    # Review ChexSystems issues
+    if chexsystems_score and chexsystems_score < 500 and final_approval_status != 'declined':
+        if chexsystems_score >= 450:
+            compliance_review_notes += "ChexSystems history reviewed with mitigating circumstances identified. "
+            final_approval_status = 'conditional_approval'
+        else:
+            compliance_review_notes += "ChexSystems score too low despite review. "
+            final_approval_status = 'declined'
+    
+    # Review enhanced due diligence cases
+    if due_diligence_level == 'enhanced_edd' and final_approval_status != 'declined':
+        required_docs = ['articles_of_incorporation', 'business_license', 'ein_confirmation_letter']
+        submitted_doc_types = [doc['doc_type'] for doc in documents_submitted]
+        
+        if all(doc_type in submitted_doc_types for doc_type in required_docs):
+            compliance_review_notes += "Enhanced due diligence documentation complete and verified. "
+        else:
+            compliance_review_notes += "Enhanced due diligence documentation incomplete. "
+            final_approval_status = 'declined'
+        
+        # Verify beneficial ownership for corporate entities
+        if beneficial_owners:
+            total_ownership = sum(owner.get('ownership_percentage', 0) for owner in beneficial_owners)
+            if total_ownership >= 75:
+                compliance_review_notes += "Beneficial ownership structure verified. "
+            else:
+                compliance_review_notes += "Beneficial ownership structure incomplete. "
+                final_approval_status = 'declined'
+    
+    compliance_review_timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    decline_reason = ''
+    
+    if final_approval_status == 'declined':
+        decline_reason = compliance_review_notes
+    
+    # Update application data
+    update_application_data(application_id, {
+        'final_approval_status': final_approval_status,
+        'compliance_officer_id': compliance_officer_id,
+        'compliance_review_timestamp': compliance_review_timestamp,
+        'compliance_review_notes': compliance_review_notes,
+        'decline_reason': decline_reason
+    })
+    
+    return {
+        "application_id": application_id,
+        "final_approval_status": final_approval_status,
+        "compliance_officer_id": compliance_officer_id,
+        "compliance_review_timestamp": compliance_review_timestamp,
+        "compliance_review_notes": compliance_review_notes,
+        "decline_reason": decline_reason
+    }
+
+
+def CreateBankAccount(
+    application_id: str,
+    final_approval_status: str,
+    applicant_full_name: str,
+    applicant_date_of_birth: str,
+    applicant_ssn_tax_id: str,
+    applicant_residential_address: str,
+    applicant_email: str,
+    applicant_phone: str,
+    account_type_requested: str,
+    customer_type: str,
+    branch_code: str,
+    business_legal_name: str,
+    business_ein: str,
+    authorized_signers: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """Generates new account in Core Banking System"""
+    
+    if final_approval_status != 'approved':
+        return {
+            "application_id": application_id,
+            "error": "Account creation only proceeds when final_approval_status='approved'"
+        }
+    
+    # Generate account number
+    # Format: branch_code (3 digits) + product type (2 digits) + sequence (5 digits) + check digit (1)
+    branch_num = branch_code.split('_')[-1] if branch_code else '000'
+    
+    product_codes = {
+        'checking': '10',
+        'savings': '20',
+        'student_checking': '11',
+        'high_yield_savings': '21',
+        'money_market': '30',
+        'business_checking': '40'
+    }
+    product_code = product_codes.get(account_type_requested, '10')
+    
+    # Generate sequence number based on application_id
+    sequence = str(abs(hash(application_id)) % 100000).zfill(5)
+    
+    # Calculate check digit (simple mod 10)
+    account_base = branch_num + product_code + sequence
+    check_digit = str(sum(int(d) for d in account_base) % 10)
+    
+    account_number_generated = account_base + check_digit
+    
+    # Routing number (standard ABA routing number)
+    routing_number = '011401533'
+    
+    # Account creation timestamp
+    account_creation_timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    
+    # Initial account status
+    account_activation_status = 'pending_funding'
+    
+    # Update application data
+    update_application_data(application_id, {
+        'account_number_generated': account_number_generated,
+        'routing_number': routing_number,
+        'account_creation_timestamp': account_creation_timestamp,
+        'account_activation_status': account_activation_status
+    })
+    
+    return {
+        "application_id": application_id,
+        "account_number_generated": account_number_generated,
+        "routing_number": routing_number,
+        "account_creation_timestamp": account_creation_timestamp,
+        "account_activation_status": account_activation_status,
+        "account_balance": 0.0
+    }
+
+
+def ProcessAccountFunding(
+    application_id: str,
+    account_number_generated: str,
+    initial_deposit_amount: float,
+    initial_deposit_method: str,
+    external_bank_account_linked: bool,
+    account_activation_status: str
+) -> Dict[str, Any]:
+    """Executes initial deposit processing"""
+    
+    if not account_number_generated:
+        return {
+            "application_id": application_id,
+            "error": "Account must be created before funding can be processed"
+        }
+    
+    if account_activation_status != 'pending_funding':
+        return {
+            "application_id": application_id,
+            "error": "Account activation status must be 'pending_funding'"
+        }
+    
+    account_funding_completed = False
+    funding_transaction_id = ''
+    updated_activation_status = 'pending_funding'
+    
+    # Process based on funding method
+    if initial_deposit_method == 'cash':
+        # Cash deposits completed at branch
+        funding_transaction_id = f"CASH_{application_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        account_funding_completed = True
+        updated_activation_status = 'active'
+    
+    elif initial_deposit_method == 'check':
+        # Check deposits have pending status until cleared
+        funding_transaction_id = f"CHK_{application_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        account_funding_completed = True
+        updated_activation_status = 'active'
+    
+    elif initial_deposit_method == 'external_transfer':
+        if external_bank_account_linked:
+            # ACH transfer initiated
+            funding_transaction_id = f"ACH_{application_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            account_funding_completed = True
+            updated_activation_status = 'active'
+        else:
+            # Cannot process without linked account
+            updated_activation_status = 'pending_funding'
+    
+    elif initial_deposit_method == 'debit_card':
+        # Debit card funding processed immediately
+        funding_transaction_id = f"CARD_{application_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        account_funding_completed = True
+        updated_activation_status = 'active'
+    
+    # Update application data
+    update_application_data(application_id, {
+        'account_funding_completed': account_funding_completed,
+        'funding_transaction_id': funding_transaction_id,
+        'account_activation_status': updated_activation_status
+    })
+    
+    return {
+        "application_id": application_id,
+        "account_funding_completed": account_funding_completed,
+        "funding_transaction_id": funding_transaction_id,
+        "account_activation_status": updated_activation_status,
+        "initial_deposit_amount": initial_deposit_amount if account_funding_completed else 0.0
+    }
+
+
+def ProvisionAncillaryProducts(
+    application_id: str,
+    account_number_generated: str,
+    routing_number: str,
+    applicant_full_name: str,
+    applicant_residential_address: str,
+    applicant_email: str,
+    account_type_requested: str,
+    cross_sell_products_accepted: List[str],
+    customer_type: str
+) -> Dict[str, Any]:
+    """Coordinates issuance of ancillary banking products"""
+    
+    if not account_number_generated:
+        return {
+            "application_id": application_id,
+            "error": "Account must be created before ancillary products can be provisioned"
+        }
+    
+    debit_card_number_issued = ''
+    online_banking_credentials_created = False
+    temporary_checks_issued = 0
+    products_provisioned = []
+    
+    # Debit card provisioning
+    if 'debit_card' in cross_sell_products_accepted or 'business_debit_card' in cross_sell_products_accepted:
+        # Generate masked card number
+        card_prefix = '4532'  # Visa prefix
+        card_middle = '****-****'
+        card_suffix = str(abs(hash(application_id)) % 10000).zfill(4)
+        debit_card_number_issued = f"{card_prefix}-{card_middle}-{card_suffix}"
+        products_provisioned.append('debit_card')
+    
+    # Online banking credentials
+    if 'online_banking' in cross_sell_products_accepted:
+        online_banking_credentials_created = True
+        products_provisioned.append('online_banking')
+    
+    # Mobile app access
+    if 'mobile_app' in cross_sell_products_accepted:
+        products_provisioned.append('mobile_app')
+    
+    # Check stock
+    if account_type_requested in ['checking', 'student_checking', 'business_checking']:
+        if customer_type == 'individual':
+            temporary_checks_issued = 100
+        else:
+            temporary_checks_issued = 200
+        products_provisioned.append('check_stock')
+    
+    # Merchant services
+    if 'merchant_services' in cross_sell_products_accepted:
+        products_provisioned.append('merchant_services')
+    
+    # Wire transfer services
+    if 'wire_transfer_services' in cross_sell_products_accepted:
+        products_provisioned.append('wire_transfer_services')
+    
+    # Update application data
+    update_application_data(application_id, {
+        'debit_card_number_issued': debit_card_number_issued,
+        'online_banking_credentials_created': online_banking_credentials_created,
+        'temporary_checks_issued': temporary_checks_issued
+    })
+    
+    return {
+        "application_id": application_id,
+        "debit_card_number_issued": debit_card_number_issued,
+        "online_banking_credentials_created": online_banking_credentials_created,
+        "temporary_checks_issued": temporary_checks_issued,
+        "products_provisioned": products_provisioned
+    }
+
+
+def CalculateProcessMetrics(
+    application_id: str,
+    application_start_timestamp: str,
+    account_creation_timestamp: str,
+    account_funding_completed: bool,
+    final_approval_status: str,
+    auto_decision_result: str,
+    manual_review_required: bool,
+    customer_consent_forms_signed: List[str],
+    application_abandoned: bool,
+    abandonment_stage: str
+) -> Dict[str, Any]:
+    """Computes process performance metrics"""
+    
+    # Calculate processing time
+    total_processing_time_minutes = 0
+    if account_creation_timestamp:
+        try:
+            start_time = datetime.strptime(application_start_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+            end_time = datetime.strptime(account_creation_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+            time_diff = end_time - start_time
+            total_processing_time_minutes = abs(int(time_diff.total_seconds() / 60))
+        except:
+            # Use current time if timestamp missing
+            start_time = datetime.strptime(application_start_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+            end_time = datetime.now()
+            time_diff = end_time - start_time
+            total_processing_time_minutes = abs(int(time_diff.total_seconds() / 60))
+    
+    # Determine first time yield
+    first_time_yield = True
+    rework_count = 0
+    
+    if manual_review_required:
+        rework_count += 1
+        first_time_yield = False
+    
+    # Get validation errors from application data
+    app_data = get_application_by_id(application_id)
+    if app_data:
+        validation_errors = app_data.get('validation_errors', [])
+        if validation_errors:
+            rework_count += len(validation_errors)
+            first_time_yield = False
+    
+    # Welcome kit completion
+    welcome_kit_issued = False
+    required_consents = ['signature_card', 'terms_and_conditions', 'truth_in_savings_disclosure', 'privacy_notice']
+    
+    if final_approval_status == 'approved' and account_funding_completed:
+        # Check if all required consents are signed
+        if all(consent in customer_consent_forms_signed for consent in required_consents):
+            welcome_kit_issued = True
+    
+    # Update application data
+    update_application_data(application_id, {
+        'total_processing_time_minutes': total_processing_time_minutes,
+        'first_time_yield': first_time_yield,
+        'rework_count': rework_count,
+        'welcome_kit_issued': welcome_kit_issued,
+        'application_abandoned': application_abandoned,
+        'abandonment_stage': abandonment_stage
+    })
+    
+    return {
+        "application_id": application_id,
+        "total_processing_time_minutes": total_processing_time_minutes,
+        "first_time_yield": first_time_yield,
+        "rework_count": rework_count,
+        "welcome_kit_issued": welcome_kit_issued,
+        "application_abandoned": application_abandoned,
+        "abandonment_stage": abandonment_stage,
+        "auto_approval_achieved": auto_decision_result == 'auto_approved' and not manual_review_required
+    }
+
+
+# Helper function to process tool calls
+def process_tool_call(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
+    """Process tool calls by routing to appropriate function"""
+    
+    tool_functions = {
+        'ValidateApplicationData': ValidateApplicationData,
+        'ExecuteCIPVerification': ExecuteCIPVerification,
+        'ScreenWatchlists': ScreenWatchlists,
+        'AssessRiskProfile': AssessRiskProfile,
+        'ExecuteAutoDecision': ExecuteAutoDecision,
+        'ProcessManualReview': ProcessManualReview,
+        'CreateBankAccount': CreateBankAccount,
+        'ProcessAccountFunding': ProcessAccountFunding,
+        'ProvisionAncillaryProducts': ProvisionAncillaryProducts,
+        'CalculateProcessMetrics': CalculateProcessMetrics
+    }
+    
+    if tool_name in tool_functions:
+        return tool_functions[tool_name](**tool_input)
+    else:
+        return {"error": f"Unknown tool: {tool_name}"}
+
+
+# Test cases
+if __name__ == "__main__":
+    print("Testing Account Opening Workflow APIs...\n")
+    
+    # Test Case 1: In-branch individual checking account
+    print("=== Test Case 1: In-branch Individual Checking ===")
+    app_id_1 = "APP_20250418101234567"
+    
+    # Step 1: Validate Application Data
+    validate_result = ValidateApplicationData(
+        application_id=app_id_1,
+        applicant_full_name="Sarah Michelle Johnson",
+        applicant_date_of_birth="1990-03-15",
+        applicant_ssn_tax_id="XXX-XX-4521",
+        applicant_residential_address="456 Oak Avenue, Apt 2C, Boston, MA 02115",
+        applicant_email="sarah.johnson@email.com",
+        applicant_phone="+1-555-234-5678",
+        id_document_type="drivers_license",
+        id_document_number="DL987654321",
+        id_document_expiry_date="2028-03-15",
+        application_data_entry_method="manual_banker_entry",
+        id_ocr_extracted_data={},
+        customer_type="individual",
+        business_type="retail_individual"
+    )
+    print(f"Validation Result: {validate_result}\n")
+    
+    # Step 2: Execute CIP Verification
+    cip_result = ExecuteCIPVerification(
+        application_id=app_id_1,
+        applicant_full_name="Sarah Michelle Johnson",
+        applicant_date_of_birth="1990-03-15",
+        applicant_ssn_tax_id="XXX-XX-4521",
+        applicant_residential_address="456 Oak Avenue, Apt 2C, Boston, MA 02115",
+        id_document_type="drivers_license",
+        id_document_number="DL987654321",
+        id_document_issuing_country="US",
+        biometric_liveness_check_completed=False,
+        application_channel="in_branch",
+        data_consistency_score=validate_result['data_consistency_score']
+    )
+    print(f"CIP Verification: {cip_result}\n")
+    
+    # Step 3: Screen Watchlists
+    watchlist_result = ScreenWatchlists(
+        application_id=app_id_1,
+        applicant_full_name="Sarah Michelle Johnson",
+        applicant_date_of_birth="1990-03-15",
+        applicant_residential_address="456 Oak Avenue, Apt 2C, Boston, MA 02115",
+        applicant_ssn_tax_id="XXX-XX-4521",
+        cip_verification_status=cip_result['cip_verification_status'],
+        business_legal_name="",
+        beneficial_owners=[]
+    )
+    print(f"Watchlist Screening: {watchlist_result}\n")
+    
+    # Step 4: Assess Risk Profile
+    risk_result = AssessRiskProfile(
+        application_id=app_id_1,
+        applicant_full_name="Sarah Michelle Johnson",
+        applicant_ssn_tax_id="XXX-XX-4521",
+        applicant_date_of_birth="1990-03-15",
+        applicant_residential_address="456 Oak Avenue, Apt 2C, Boston, MA 02115",
+        applicant_employment_status="employed",
+        applicant_annual_income=75000,
+        initial_deposit_amount=500.00,
+        customer_type="individual",
+        cip_verification_status=cip_result['cip_verification_status'],
+        credit_bureau_validation_status=cip_result['credit_bureau_validation_status'],
+        facial_match_confidence_score=cip_result['facial_match_confidence_score'],
+        id_ocr_extracted_data={},
+        data_consistency_score=validate_result['data_consistency_score'],
+        application_channel="in_branch",
+        business_industry="",
+        business_monthly_transaction_volume_estimate=None
+    )
+    print(f"Risk Assessment: {risk_result}\n")
+    
+    # Step 5: Execute Auto Decision
+    decision_result = ExecuteAutoDecision(
+        application_id=app_id_1,
+        cip_verification_status=cip_result['cip_verification_status'],
+        watchlist_screening_result=watchlist_result['watchlist_screening_result'],
+        chexsystems_score=risk_result['chexsystems_score'],
+        fraud_risk_score=risk_result['fraud_risk_score'],
+        credit_bureau_validation_status=cip_result['credit_bureau_validation_status'],
+        facial_match_confidence_score=cip_result['facial_match_confidence_score'],
+        due_diligence_level=risk_result['due_diligence_level'],
+        customer_type="individual",
+        application_channel="in_branch"
+    )
+    print(f"Auto Decision: {decision_result}\n")
+    
+    # If approved, create account
+    if decision_result['auto_decision_result'] == 'auto_approved':
+        account_result = CreateBankAccount(
+            application_id=app_id_1,
+            final_approval_status='approved',
+            applicant_full_name="Sarah Michelle Johnson",
+            applicant_date_of_birth="1990-03-15",
+            applicant_ssn_tax_id="XXX-XX-4521",
+            applicant_residential_address="456 Oak Avenue, Apt 2C, Boston, MA 02115",
+            applicant_email="sarah.johnson@email.com",
+            applicant_phone="+1-555-234-5678",
+            account_type_requested="checking",
+            customer_type="individual",
+            branch_code="BR_BOS_003",
+            business_legal_name="",
+            business_ein="",
+            authorized_signers=[]
+        )
+        print(f"Account Creation: {account_result}\n")
+    
+    print("=== Test Case 2: Digital Remote High-Yield Savings ===")
+    app_id_2 = "APP_20250418143045123"
+    
+    # Validate with OCR data
+    validate_result_2 = ValidateApplicationData(
+        application_id=app_id_2,
+        applicant_full_name="Michael Robert Chen",
+        applicant_date_of_birth="1988-07-22",
+        applicant_ssn_tax_id="XXX-XX-7890",
+        applicant_residential_address="789 Pine Street, Unit 15B, San Francisco, CA 94102",
+        applicant_email="michael.chen@gmail.com",
+        applicant_phone="+1-555-876-5432",
+        id_document_type="passport",
+        id_document_number="P123456789",
+        id_document_expiry_date="2030-07-22",
+        application_data_entry_method="ocr_auto_fill",
+        id_ocr_extracted_data={
+            "name": "Michael Robert Chen",
+            "dob": "1988-07-22",
+            "id_number": "P123456789",
+            "address": "789 Pine Street, San Francisco, CA"
+        },
+        customer_type="individual",
+        business_type="digital_remote"
+    )
+    print(f"Validation with OCR: {validate_result_2}\n")
+    
+    print("All tests completed successfully!")
+```
+</code>
+
+<class>
+```python
+# Pydantic model definitions for all APIs
+
+class Tool_ValidateApplicationData(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_full_name: str = Field(..., description="Complete legal name")
+    applicant_date_of_birth: str = Field(..., description="Date of birth in ISO 8601 format")
+    applicant_ssn_tax_id: str = Field(..., description="SSN or Tax ID")
+    applicant_residential_address: str = Field(..., description="Complete residential address")
+    applicant_email: str = Field(..., description="Email address")
+    applicant_phone: str = Field(..., description="Phone number in E.164 format")
+    id_document_type: str = Field(..., description="Type of ID document")
+    id_document_number: str = Field(..., description="ID document number")
+    id_document_expiry_date: str = Field(..., description="ID expiry date")
+    application_data_entry_method: str = Field(..., description="Data entry method")
+    id_ocr_extracted_data: Dict[str, Any] = Field(..., description="OCR extracted data")
+    customer_type: str = Field(..., description="Customer type classification")
+    business_type: str = Field(..., description="Business type classification")
+
+
+class Tool_ExecuteCIPVerification(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_full_name: str = Field(..., description="Complete legal name")
+    applicant_date_of_birth: str = Field(..., description="Date of birth")
+    applicant_ssn_tax_id: str = Field(..., description="SSN or Tax ID")
+    applicant_residential_address: str = Field(..., description="Residential address")
+    id_document_type: str = Field(..., description="ID document type")
+    id_document_number: str = Field(..., description="ID document number")
+    id_document_issuing_country: str = Field(..., description="ID issuing country")
+    biometric_liveness_check_completed: bool = Field(..., description="Biometric check completed")
+    application_channel: str = Field(..., description="Application channel")
+    data_consistency_score: float = Field(..., description="Data consistency score")
+
+
+class Tool_ScreenWatchlists(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_full_name: str = Field(..., description="Applicant name")
+    applicant_date_of_birth: str = Field(..., description="Date of birth")
+    applicant_residential_address: str = Field(..., description="Residential address")
+    applicant_ssn_tax_id: str = Field(..., description="SSN or Tax ID")
+    cip_verification_status: str = Field(..., description="CIP verification status")
+    business_legal_name: str = Field(..., description="Business legal name")
+    beneficial_owners: List[Dict[str, Any]] = Field(..., description="Beneficial owners list")
+
+
+class Tool_AssessRiskProfile(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_full_name: str = Field(..., description="Applicant name")
+    applicant_ssn_tax_id: str = Field(..., description="SSN or Tax ID")
+    applicant_date_of_birth: str = Field(..., description="Date of birth")
+    applicant_residential_address: str = Field(..., description="Residential address")
+    applicant_employment_status: str = Field(..., description="Employment status")
+    applicant_annual_income: float = Field(..., description="Annual income")
+    initial_deposit_amount: float = Field(..., description="Initial deposit amount")
+    customer_type: str = Field(..., description="Customer type")
+    cip_verification_status: str = Field(..., description="CIP verification status")
+    credit_bureau_validation_status: str = Field(..., description="Credit bureau status")
+    facial_match_confidence_score: float = Field(..., description="Facial match confidence")
+    id_ocr_extracted_data: Dict[str, Any] = Field(..., description="OCR data")
+    data_consistency_score: float = Field(..., description="Data consistency score")
+    application_channel: str = Field(..., description="Application channel")
+    business_industry: str = Field(..., description="Business industry")
+    business_monthly_transaction_volume_estimate: Optional[float] = Field(None, description="Transaction volume estimate")
+
+
+class Tool_ExecuteAutoDecision(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    cip_verification_status: str = Field(..., description="CIP verification status")
+    watchlist_screening_result: str = Field(..., description="Watchlist screening result")
+    chexsystems_score: Optional[float] = Field(None, description="ChexSystems score")
+    fraud_risk_score: float = Field(..., description="Fraud risk score")
+    credit_bureau_validation_status: str = Field(..., description="Credit bureau status")
+    facial_match_confidence_score: float = Field(..., description="Facial match confidence")
+    due_diligence_level: str = Field(..., description="Due diligence level")
+    customer_type: str = Field(..., description="Customer type")
+    application_channel: str = Field(..., description="Application channel")
+
+
+class Tool_ProcessManualReview(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    auto_decision_result: str = Field(..., description="Auto decision result")
+    manual_review_required: bool = Field(..., description="Manual review required flag")
+    manual_review_reason: str = Field(..., description="Manual review reason")
+    watchlist_screening_result: str = Field(..., description="Watchlist screening result")
+    fraud_risk_score: float = Field(..., description="Fraud risk score")
+    chexsystems_score: Optional[float] = Field(None, description="ChexSystems score")
+    due_diligence_level: str = Field(..., description="Due diligence level")
+    documents_submitted: List[Dict[str, Any]] = Field(..., description="Documents submitted")
+    beneficial_owners: List[Dict[str, Any]] = Field(..., description="Beneficial owners")
+    compliance_officer_id: str = Field(..., description="Compliance officer ID")
+
+
+class Tool_CreateBankAccount(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    final_approval_status: str = Field(..., description="Final approval status")
+    applicant_full_name: str = Field(..., description="Applicant name")
+    applicant_date_of_birth: str = Field(..., description="Date of birth")
+    applicant_ssn_tax_id: str = Field(..., description="SSN or Tax ID")
+    applicant_residential_address: str = Field(..., description="Residential address")
+    applicant_email: str = Field(..., description="Email address")
+    applicant_phone: str = Field(..., description="Phone number")
+    account_type_requested: str = Field(..., description="Account type")
+    customer_type: str = Field(..., description="Customer type")
+    branch_code: str = Field(..., description="Branch code")
+    business_legal_name: str = Field(..., description="Business legal name")
+    business_ein: str = Field(..., description="Business EIN")
+    authorized_signers: List[Dict[str, Any]] = Field(..., description="Authorized signers")
+
+
+class Tool_ProcessAccountFunding(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    account_number_generated: str = Field(..., description="Generated account number")
+    initial_deposit_amount: float = Field(..., description="Initial deposit amount")
+    initial_deposit_method: str = Field(..., description="Deposit method")
+    external_bank_account_linked: bool = Field(..., description="External account linked")
+    account_activation_status: str = Field(..., description="Account activation status")
+
+
+class Tool_ProvisionAncillaryProducts(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    account_number_generated: str = Field(..., description="Generated account number")
+    routing_number: str = Field(..., description="Routing number")
+    applicant_full_name: str = Field(..., description="Applicant name")
+    applicant_residential_address: str = Field(..., description="Residential address")
+    applicant_email: str = Field(..., description="Email address")
+    account_type_requested: str = Field(..., description="Account type")
+    cross_sell_products_accepted: List[str] = Field(..., description="Cross-sell products")
+    customer_type: str = Field(..., description="Customer type")
+
+
+class Tool_CalculateProcessMetrics(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    application_start_timestamp: str = Field(..., description="Application start timestamp")
+    account_creation_timestamp: str = Field(..., description="Account creation timestamp")
+    account_funding_completed: bool = Field(..., description="Funding completed flag")
+    final_approval_status: str = Field(..., description="Final approval status")
+    auto_decision_result: str = Field(..., description="Auto decision result")
+    manual_review_required: bool = Field(..., description="Manual review required")
+    customer_consent_forms_signed: List[str] = Field(..., description="Consent forms signed")
+    application_abandoned: bool = Field(..., description="Application abandoned")
+    abandonment_stage: str = Field(..., description="Abandonment stage")
+```
+</class>
+
+<tools>
+```python
+tools = [
+    StructuredTool.from_function(
+        func=ValidateApplicationData,
+        name="ValidateApplicationData",
+        description="Validates application data format, completeness, and internal consistency including OCR cross-reference for digital applications to ensure data quality before initiating external verification processes",
+        args_schema=Tool_ValidateApplicationData
+    ),
+    StructuredTool.from_function(
+        func=ExecuteCIPVerification,
+        name="ExecuteCIPVerification",
+        description="Orchestrates comprehensive Customer Identification Program verification including document authentication, biometric liveness checks, facial matching, and credit bureau identity validation to satisfy regulatory CIP requirements",
+        args_schema=Tool_ExecuteCIPVerification
+    ),
+    StructuredTool.from_function(
+        func=ScreenWatchlists,
+        name="ScreenWatchlists",
+        description="Performs OFAC sanctions screening and watchlist matching against Specially Designated Nationals List, Consolidated Sanctions List, global sanctions databases, and politically exposed person databases",
+        args_schema=Tool_ScreenWatchlists
+    ),
+    StructuredTool.from_function(
+        func=AssessRiskProfile,
+        name="AssessRiskProfile",
+        description="Calculates comprehensive risk assessment including ChexSystems deposit account history score retrieval and multi-factor fraud risk scoring based on behavioral analytics and data integrity checks",
+        args_schema=Tool_AssessRiskProfile
+    ),
+    StructuredTool.from_function(
+        func=ExecuteAutoDecision,
+        name="ExecuteAutoDecision",
+        description="Synthesizes all risk assessment metrics through multi-factor decision matrix to render automated approval, decline, or manual review referral decision based on institutional risk appetite thresholds",
+        args_schema=Tool_ExecuteAutoDecision
+    ),
+    StructuredTool.from_function(
+        func=ProcessManualReview,
+        name="ProcessManualReview",
+        description="Facilitates compliance officer adjudication for applications referred for manual review where auto-decision requires human expert review of watchlist matches, fraud risk factors, and documentation",
+        args_schema=Tool_ProcessManualReview
+    ),
+    StructuredTool.from_function(
+        func=CreateBankAccount,
+        name="CreateBankAccount",
+        description="Generates new account in Core Banking System of record including account number assignment, routing number association, product configuration, and initial account balance establishment",
+        args_schema=Tool_CreateBankAccount
+    ),
+    StructuredTool.from_function(
+        func=ProcessAccountFunding,
+        name="ProcessAccountFunding",
+        description="Executes initial deposit processing based on funding method with distinct pathways for cash, check, external transfer, and debit card transactions",
+        args_schema=Tool_ProcessAccountFunding
+    ),
+    StructuredTool.from_function(
+        func=ProvisionAncillaryProducts,
+        name="ProvisionAncillaryProducts",
+        description="Coordinates issuance of ancillary banking products and services based on cross-sell selections including debit cards, online banking, check stock, and merchant services",
+        args_schema=Tool_ProvisionAncillaryProducts
+    ),
+    StructuredTool.from_function(
+        func=CalculateProcessMetrics,
+        name="CalculateProcessMetrics",
+        description="Computes process performance metrics for operational monitoring and continuous improvement including processing time, first-time yield, rework count, and completion status",
+        args_schema=Tool_CalculateProcessMetrics
+    )
+]
+```
+</tools>

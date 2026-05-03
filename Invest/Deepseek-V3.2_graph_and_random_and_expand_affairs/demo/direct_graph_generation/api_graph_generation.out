@@ -1,0 +1,892 @@
+<dependency_analysis>
+
+## 1. Business Process Deconstruction
+
+### Phase 1: Client Risk Profile Assessment and Establishment
+**Step 5.1.1 - Risk Profile Validation**
+- API-1: ValidateExistingRiskProfile
+  - Checks if client has valid, unexpired risk profile
+  - Input: client_id, transaction_timestamp
+  - Output: previous_risk_profile, previous_risk_profile_expiry_date, requires_new_assessment (boolean)
+
+**Step 5.1.2 - Questionnaire Administration**
+- API-2: AdministerRiskQuestionnaire
+  - Collects and scores risk questionnaire responses
+  - Input: client_id, client_age, client_annual_income, client_investment_experience_years, client_liquidity_needs
+  - Output: risk_questionnaire_responses, risk_questionnaire_total_score
+
+**Step 5.1.3 - Risk Profile Calculation**
+- API-3: CalculateRiskProfile
+  - Derives risk classification from total score
+  - Input: risk_questionnaire_total_score
+  - Output: calculated_risk_profile
+
+**Step 5.1.4 & 5.1.5 - Client Authorization and Profile Activation**
+- API-4: AuthorizeAndActivateRiskProfile
+  - Captures client consent and activates investment eligibility
+  - Input: client_id, calculated_risk_profile, client_authorization_method, transaction_timestamp
+  - Output: client_authorization_timestamp, risk_profile_expiry_date, investable_status
+
+### Phase 2: Investment Product Selection and Suitability Validation
+**Step 5.2.1 - Product Recommendation**
+- API-5: RecommendSuitableProducts
+  - Filters products based on client risk profile
+  - Input: client_id, calculated_risk_profile, investable_status
+  - Output: list of suitable products with product_code, product_name, product_risk_rating, product_category
+
+**Step 5.2.4 - Order Entry**
+- API-6: CreateInvestmentOrder
+  - Creates transaction record with all product and client details
+  - Input: client_id, relationship_manager_id, product_code, subscription_amount, settlement_account_number, transaction_timestamp, branch_code, channel, region
+  - Output: transaction_id, transaction_type, product details (populated from master), front_end_load_percentage, annual_management_fee_percentage, current_nav
+
+**Step 5.2.5 - Suitability Check**
+- API-7: ValidateProductSuitability
+  - Compares product risk against client risk profile
+  - Input: transaction_id, calculated_risk_profile, product_risk_rating
+  - Output: suitability_check_passed, suitability_mismatch_flag, mismatch_waiver_required, supervisor_approval_required
+
+### Phase 3: Pre-Trade Compliance and Financial Validation
+**Step 5.3.1 - AML Screening**
+- API-8: ExecuteAMLSanctionsScreening
+  - Performs real-time sanctions list checks
+  - Input: client_id, client_name, transaction_id
+  - Output: aml_sanctions_screening_status
+
+**Step 5.3.2 - Threshold and SOW Validation**
+- API-9: ValidateThresholdAndSOW
+  - Checks if transaction exceeds threshold and validates SOW documentation
+  - Input: subscription_amount, monitoring_threshold_amount, source_of_wealth_documented
+  - Output: transaction_threshold_exceeded, sow_validation_passed (derived)
+
+**Step 5.3.3 - Funds Availability Check**
+- API-10: VerifyFundsAvailability
+  - Confirms sufficient balance in settlement account
+  - Input: settlement_account_number, subscription_amount
+  - Output: available_balance, funds_availability_verified
+
+**Step 5.3.4 - Overall Compliance Validation**
+- API-11: AggregateComplianceChecks
+  - Consolidates all validation results
+  - Input: suitability_check_passed, aml_sanctions_screening_status, transaction_threshold_exceeded, source_of_wealth_documented, funds_availability_verified
+  - Output: pre_trade_compliance_passed
+
+**Step 5.3.5 - Financial Calculations**
+- API-12: CalculateTransactionFinancials
+  - Computes fees, net investment, and estimated units
+  - Input: subscription_amount, front_end_load_percentage, annual_management_fee_percentage, current_nav, product_category
+  - Output: front_end_load_amount, net_investment_amount, estimated_units, annual_management_fee_amount
+
+### Phase 4: Client Authorization and Transaction Execution
+**Step 5.4.3 - Cooling-off Period Management**
+- API-13: ManageCoolingOffPeriod
+  - Determines if cooling-off period applies and manages status
+  - Input: transaction_id, product_category, cooling_off_period_required, cooling_off_period_hours, client_authorization_timestamp
+  - Output: transaction_status (Pending_Cooling_Off or Ready_for_Execution)
+
+**Step 5.4.4 & 5.4.5 - Transaction Execution**
+- API-14: ExecuteInvestmentTransaction
+  - Routes order to fund house/Treasury and debits settlement account
+  - Input: transaction_id, product_category, product_code, net_investment_amount, settlement_account_number, client_id
+  - Output: trade_reference_number, contract_note_number, execution_timestamp, settlement_date, transaction_status (Executed)
+
+**Step 5.4.5 - STP Flag Calculation**
+- API-15: CalculateSTPFlag
+  - Determines if transaction was straight-through processed
+  - Input: transaction_id, all validation flags, manual intervention indicators
+  - Output: straight_through_processing_flag
+
+### Phase 5: Post-Execution Compliance Review
+**Step 5.5.2 & 5.5.3 - Compliance Review**
+- API-16: ExecutePostTradeComplianceReview
+  - Reviews transaction for compliance defects
+  - Input: transaction_id, audio_video_recording_id, suitability_mismatch_flag, transaction_threshold_exceeded, disclosure_documents_presented
+  - Output: compliance_defect_flag, compliance_review_notes
+
+**Step 5.5.5 - Processing Time Calculation**
+- API-17: CalculateProcessingMetrics
+  - Computes total processing time and finalizes transaction
+  - Input: transaction_timestamp, execution_timestamp
+  - Output: total_processing_time_minutes
+
+## 2. Data Flow Analysis
+
+### Primary Data Flow Path:
+1. **Client Input → Risk Assessment**
+   - Client demographic data (client_age, client_annual_income, client_net_worth, client_investment_experience_years, client_liquidity_needs) flows into API-2
+   - Risk questionnaire responses generate risk_questionnaire_total_score
+   - Score flows into API-3 to produce calculated_risk_profile
+
+2. **Risk Profile → Authorization**
+   - calculated_risk_profile flows into API-4 for client acknowledgment
+   - API-4 produces investable_status = "Active", enabling transactions
+
+3. **Product Selection → Order Creation**
+   - calculated_risk_profile flows into API-5 for product filtering
+   - Selected product_code flows into API-6 for order creation
+   - API-6 retrieves product master data (product_risk_rating, current_nav, fees)
+
+4. **Order → Suitability Validation**
+   - transaction_id, calculated_risk_profile, product_risk_rating flow into API-7
+   - API-7 produces suitability_check_passed flag
+
+5. **Parallel Compliance Checks**
+   - API-8 (AML): client_id → aml_sanctions_screening_status
+   - API-9 (Threshold): subscription_amount → transaction_threshold_exceeded
+   - API-10 (Funds): settlement_account_number → funds_availability_verified
+
+6. **Compliance Aggregation**
+   - All validation flags flow into API-11
+   - API-11 produces pre_trade_compliance_passed (gating condition)
+
+7. **Financial Calculations**
+   - subscription_amount, fees, current_nav flow into API-12
+   - API-12 produces front_end_load_amount, net_investment_amount, estimated_units
+
+8. **Execution Flow**
+   - API-13 manages cooling-off logic based on product_category
+   - API-14 executes trade, producing trade_reference_number
+   - API-15 calculates straight_through_processing_flag
+
+9. **Post-Execution**
+   - API-16 reviews for compliance defects
+   - API-17 calculates total_processing_time_minutes
+
+### Critical State Dependencies:
+- **investable_status = "Active"** is prerequisite for API-6 (order creation)
+- **pre_trade_compliance_passed = TRUE** is prerequisite for API-12 (financial calcs) and API-14 (execution)
+- **transaction_status state machine**: Pending → (optional: Pending_Cooling_Off) → Ready_for_Execution → Executed
+
+## 3. Dependency Relationship Deduction
+
+### Direct Data Dependencies:
+1. **API-3 depends on API-2**: Requires risk_questionnaire_total_score to calculate calculated_risk_profile
+2. **API-4 depends on API-3**: Requires calculated_risk_profile to authorize and set expiry
+3. **API-5 depends on API-4**: Requires calculated_risk_profile and investable_status to filter products
+4. **API-7 depends on API-6**: Requires transaction_id, product_risk_rating to perform suitability check
+5. **API-11 depends on API-7, API-8, API-9, API-10**: Aggregates all validation outputs
+6. **API-12 depends on API-11**: Requires pre_trade_compliance_passed = TRUE to proceed
+7. **API-13 depends on API-12**: Requires financial calculations complete before cooling-off logic
+8. **API-14 depends on API-13**: Requires transaction_status = "Ready_for_Execution"
+9. **API-15 depends on API-14**: Requires execution complete to assess STP status
+10. **API-16 depends on API-14**: Requires execution complete to review
+11. **API-17 depends on API-14**: Requires execution_timestamp to calculate duration
+
+### Parallel Dependencies:
+- **API-8, API-9, API-10** can execute in parallel after API-6, all feed into API-11
+- **API-7** executes in parallel with API-8, API-9, API-10
+
+### State Dependencies:
+- **API-6 requires investable_status = "Active"** (produced by API-4)
+- **API-12, API-13, API-14 require pre_trade_compliance_passed = TRUE** (produced by API-11)
+
+### Temporal Dependencies:
+- **API-13 manages time-based cooling-off** period before API-14 can execute
+- **API-1 checks temporal validity** of previous_risk_profile_expiry_date
+
+## 4. Complexity Assessment
+
+### High Complexity APIs:
+- **API-2 (AdministerRiskQuestionnaire)**: Complex scoring algorithm with multiple weighted inputs
+- **API-11 (AggregateComplianceChecks)**: Multiple conditional logic branches for different validation combinations
+- **API-14 (ExecuteInvestmentTransaction)**: Multiple external system integrations (fund house, Treasury, Core Banking)
+
+### Medium Complexity APIs:
+- **API-7 (ValidateProductSuitability)**: Hierarchical matrix matching logic
+- **API-12 (CalculateTransactionFinancials)**: Multiple mathematical operations with precision requirements
+- **API-13 (ManageCoolingOffPeriod)**: State machine logic with time calculations
+
+### Low Complexity APIs:
+- **API-1 (ValidateExistingRiskProfile)**: Simple date comparison
+- **API-3 (CalculateRiskProfile)**: Simple range-based classification
+- **API-8 (ExecuteAMLSanctionsScreening)**: External API call with simple status return
+- **API-10 (VerifyFundsAvailability)**: Simple balance comparison
+- **API-15 (CalculateSTPFlag)**: Boolean flag aggregation
+- **API-17 (CalculateProcessingMetrics)**: Simple timestamp difference calculation
+
+### Cyclic Dependency Risk: **NONE IDENTIFIED**
+- The process is linear with clear progression from risk profiling → product selection → validation → execution → review
+- No circular references in data flow
+
+### Longest Dependency Chain:
+API-1 → API-2 → API-3 → API-4 → API-5 → API-6 → API-7 → API-11 → API-12 → API-13 → API-14 → API-15/API-16/API-17
+**Length: 12-14 steps** (manageable with proper error handling)
+
+## 5. Verification and Optimization
+
+### Rationality Verification:
+✓ All dependencies follow logical business process flow
+✓ No unnecessary dependencies identified
+✓ Each API has clear single responsibility
+✓ Data dependencies match schema definitions exactly
+
+### Parallel Execution Opportunities:
+1. **After API-6 (CreateInvestmentOrder)**:
+   - API-7 (Suitability)
+   - API-8 (AML)
+   - API-9 (Threshold/SOW)
+   - API-10 (Funds)
+   → All four can execute simultaneously, feeding into API-11
+
+2. **After API-14 (ExecuteInvestmentTransaction)**:
+   - API-15 (STP Flag)
+   - API-16 (Compliance Review)
+   - API-17 (Processing Time)
+   → All three can execute simultaneously (independent post-execution operations)
+
+### Optimization Suggestions:
+1. **Caching Strategy**: API-1 results (existing risk profile) can be cached to avoid repeated CRM queries within same session
+2. **Batch Processing**: API-8 (AML screening) could batch multiple transactions for efficiency
+3. **Early Validation**: Move API-10 (funds check) earlier to fail fast on insufficient balance before expensive compliance checks
+4. **Async Processing**: API-16 (compliance review) could be fully asynchronous for non-blocking post-execution
+
+### Error Handling Considerations:
+- **API-11 as Gate**: Critical checkpoint - any FALSE from API-7, API-8, API-10 blocks progression
+- **API-14 Rollback**: Must handle partial execution failures (order sent but debit failed)
+- **API-13 Timeout**: Cooling-off period expiry must handle system downtime scenarios
+
+</dependency_analysis>
+
+<api_dependency_graph>
+```yaml
+apis:
+  - api_name: "ValidateExistingRiskProfile"
+    description: "Validates whether the client has an existing, unexpired risk profile assessment on file, determining if a new risk assessment questionnaire administration is required"
+    purpose: "Entry point validation to determine risk profiling pathway and avoid unnecessary re-assessment of clients with valid profiles"
+    input_parameters:
+      - name: "client_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "system_state"
+        required: true
+      - name: "previous_risk_profile"
+        data_type: "enum"
+        source: "system_state"
+        required: false
+      - name: "previous_risk_profile_expiry_date"
+        data_type: "datetime"
+        source: "system_state"
+        required: false
+    output_parameters:
+      - name: "previous_risk_profile"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "previous_risk_profile_expiry_date"
+        data_type: "datetime"
+        destination: "other_api"
+      - name: "requires_new_assessment"
+        data_type: "boolean"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "AdministerRiskQuestionnaire"
+    description: "Administers the regulatory-mandated Risk Tolerance Questionnaire to the client, collects structured responses across multiple dimensions (age, income, experience, liquidity, loss tolerance), applies weighted scoring algorithm, and generates total risk score"
+    purpose: "Quantitative assessment of client risk tolerance through standardized questionnaire methodology required for regulatory compliance"
+    input_parameters:
+      - name: "client_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "client_age"
+        data_type: "integer"
+        source: "system_state"
+        required: true
+      - name: "client_annual_income"
+        data_type: "float"
+        source: "system_state"
+        required: true
+      - name: "client_investment_experience_years"
+        data_type: "integer"
+        source: "system_state"
+        required: true
+      - name: "client_liquidity_needs"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "risk_questionnaire_responses"
+        data_type: "JSON"
+        destination: "storage"
+      - name: "risk_questionnaire_total_score"
+        data_type: "integer"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ValidateExistingRiskProfile"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only executes when ValidateExistingRiskProfile determines requires_new_assessment = TRUE, indicating no valid existing profile"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "CalculateRiskProfile"
+    description: "Applies deterministic mapping algorithm to convert numerical risk_questionnaire_total_score into categorical risk profile classification (Conservative: 0-35, Balanced: 36-65, Aggressive: 66-100)"
+    purpose: "Transforms quantitative risk score into qualitative risk category used for all subsequent suitability matching operations"
+    input_parameters:
+      - name: "risk_questionnaire_total_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "calculated_risk_profile"
+        data_type: "enum"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "AdministerRiskQuestionnaire"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires risk_questionnaire_total_score output from AdministerRiskQuestionnaire as direct input for classification algorithm"
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "AuthorizeAndActivateRiskProfile"
+    description: "Presents calculated risk profile to client for review and consent, captures client authorization via configured method (OTP/Biometric/Signature), sets risk profile expiry date (current timestamp + 730 days), and updates client investable_status to Active"
+    purpose: "Obtains legally binding client acknowledgment of risk classification and activates client eligibility for investment transactions"
+    input_parameters:
+      - name: "client_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "calculated_risk_profile"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "client_authorization_method"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "client_authorization_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "risk_profile_expiry_date"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "investable_status"
+        data_type: "enum"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "CalculateRiskProfile"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires calculated_risk_profile from CalculateRiskProfile to present to client for authorization and to update client master record"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "RecommendSuitableProducts"
+    description: "Queries product master database applying hierarchical suitability filters based on client calculated_risk_profile to return only products whose product_risk_rating does not exceed client risk tolerance according to regulatory suitability matrix"
+    purpose: "Filters investment product universe to present only suitable products aligned with client risk profile, preventing non-compliant recommendations"
+    input_parameters:
+      - name: "client_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "calculated_risk_profile"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "investable_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "suitable_products_list"
+        data_type: "array"
+        destination: "ui_display"
+    direct_dependencies:
+      - dependent_api: "AuthorizeAndActivateRiskProfile"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires investable_status = Active from AuthorizeAndActivateRiskProfile before product recommendations can be generated, ensuring only eligible clients receive product proposals"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "CreateInvestmentOrder"
+    description: "Creates new transaction record with system-generated transaction_id, captures all order parameters (client, RM, product, amount, settlement account), retrieves and populates product master data (risk rating, NAV, fees), assigns compliance officer, and records operational metadata"
+    purpose: "Initiates formal investment transaction workflow by creating comprehensive order record serving as central data structure for all downstream processing"
+    input_parameters:
+      - name: "client_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "relationship_manager_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "product_code"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "subscription_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "settlement_account_number"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "system_state"
+        required: true
+      - name: "branch_code"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "channel"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "region"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "transaction_id"
+        data_type: "string"
+        destination: "other_api"
+      - name: "transaction_type"
+        data_type: "enum"
+        destination: "storage"
+      - name: "product_name"
+        data_type: "string"
+        destination: "storage"
+      - name: "product_risk_rating"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "product_category"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "current_nav"
+        data_type: "float"
+        destination: "other_api"
+      - name: "front_end_load_percentage"
+        data_type: "float"
+        destination: "other_api"
+      - name: "annual_management_fee_percentage"
+        data_type: "float"
+        destination: "other_api"
+      - name: "compliance_officer_id"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "RecommendSuitableProducts"
+        dependency_type: "state_dependency"
+        dependency_reason: "Logically follows product selection from RecommendSuitableProducts, though not strict data dependency; requires client has investable_status = Active inherited from prior workflow"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ValidateProductSuitability"
+    description: "Executes automated suitability check by comparing product_risk_rating against client calculated_risk_profile using hierarchical matching matrix, determines if product exceeds client risk tolerance, sets suitability flags, and triggers mismatch waiver workflow if violation detected"
+    purpose: "Core regulatory control preventing miss-selling by enforcing suitability rules and blocking non-compliant transactions unless explicit override procedures are followed"
+    input_parameters:
+      - name: "transaction_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "calculated_risk_profile"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "product_risk_rating"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "suitability_check_passed"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "suitability_mismatch_flag"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "mismatch_waiver_required"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "supervisor_approval_required"
+        data_type: "boolean"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CreateInvestmentOrder"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires transaction_id and product_risk_rating from CreateInvestmentOrder to identify transaction and product for suitability comparison"
+      - dependent_api: "AuthorizeAndActivateRiskProfile"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires calculated_risk_profile from client master record established by AuthorizeAndActivateRiskProfile for comparison against product risk rating"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ExecuteAMLSanctionsScreening"
+    description: "Interfaces with enterprise AML platform to perform real-time sanctions list screening against OFAC SDN, EU sanctions, UN sanctions for client_id and client_name, returns screening status indicating Clear, Flagged, or Pending disposition"
+    purpose: "Mandatory regulatory control to prevent transactions with sanctioned entities, ensuring compliance with anti-money laundering and counter-terrorism financing obligations"
+    input_parameters:
+      - name: "client_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "client_name"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "transaction_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "aml_sanctions_screening_status"
+        data_type: "enum"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "CreateInvestmentOrder"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires transaction_id from CreateInvestmentOrder to associate screening results with specific transaction and retrieve client_id for screening"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ValidateThresholdAndSOW"
+    description: "Compares subscription_amount against monitoring_threshold_amount to determine if transaction exceeds regulatory large-transaction threshold, checks if source_of_wealth_documented flag is TRUE for threshold-exceeding transactions, validates SOW documentation adequacy"
+    purpose: "Enhanced due diligence control for high-value transactions requiring Source of Wealth documentation to mitigate money laundering risk"
+    input_parameters:
+      - name: "subscription_amount"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "monitoring_threshold_amount"
+        data_type: "float"
+        source: "system_state"
+        required: true
+      - name: "source_of_wealth_documented"
+        data_type: "boolean"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "transaction_threshold_exceeded"
+        data_type: "boolean"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "CreateInvestmentOrder"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires subscription_amount from CreateInvestmentOrder to compare against threshold and determine if enhanced due diligence is required"
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "VerifyFundsAvailability"
+    description: "Queries Core Banking System to retrieve real-time available_balance for settlement_account_number, compares available_balance against subscription_amount to confirm sufficient funds exist for transaction settlement without creating overdraft"
+    purpose: "Financial pre-validation to ensure transaction can be settled, preventing failed trades due to insufficient funds and optimizing operational efficiency"
+    input_parameters:
+      - name: "settlement_account_number"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "subscription_amount"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "available_balance"
+        data_type: "float"
+        destination: "storage"
+      - name: "funds_availability_verified"
+        data_type: "boolean"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "CreateInvestmentOrder"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires settlement_account_number and subscription_amount from CreateInvestmentOrder to query account balance and validate sufficiency"
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "AggregateComplianceChecks"
+    description: "Aggregates validation results from suitability check, AML screening, threshold/SOW validation, and funds verification, applies boolean AND logic to determine overall compliance status, produces consolidated pre_trade_compliance_passed flag serving as gate for execution"
+    purpose: "Critical control gate consolidating all pre-trade validations to produce single compliance decision determining if transaction can proceed to execution or must be blocked"
+    input_parameters:
+      - name: "suitability_check_passed"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "aml_sanctions_screening_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "transaction_threshold_exceeded"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "source_of_wealth_documented"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "funds_availability_verified"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "pre_trade_compliance_passed"
+        data_type: "boolean"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ValidateProductSuitability"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires suitability_check_passed output from ValidateProductSuitability as key input to compliance aggregation logic"
+      - dependent_api: "ExecuteAMLSanctionsScreening"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires aml_sanctions_screening_status from ExecuteAMLSanctionsScreening to verify no sanctions violations exist"
+      - dependent_api: "ValidateThresholdAndSOW"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires transaction_threshold_exceeded from ValidateThresholdAndSOW to apply conditional SOW validation logic"
+      - dependent_api: "VerifyFundsAvailability"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires funds_availability_verified from VerifyFundsAvailability to confirm transaction can be financially settled"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "CalculateTransactionFinancials"
+    description: "Computes all transaction financial metrics including front_end_load_amount (subscription_amount × front_end_load_percentage / 100), net_investment_amount (subscription_amount - front_end_load_amount), estimated_units (net_investment_amount / current_nav for mutual funds), and annual_management_fee_amount (net_investment_amount × annual_management_fee_percentage / 100) with precision to regulatory standards"
+    purpose: "Transparent fee disclosure calculation providing clients with complete understanding of all costs and actual invested capital before final authorization"
+    input_parameters:
+      - name: "subscription_amount"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "front_end_load_percentage"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "annual_management_fee_percentage"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "current_nav"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "product_category"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "pre_trade_compliance_passed"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "front_end_load_amount"
+        data_type: "float"
+        destination: "storage"
+      - name: "net_investment_amount"
+        data_type: "float"
+        destination: "other_api"
+      - name: "estimated_units"
+        data_type: "float"
+        destination: "storage"
+      - name: "annual_management_fee_amount"
+        data_type: "float"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CreateInvestmentOrder"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires subscription_amount, front_end_load_percentage, annual_management_fee_percentage, current_nav, and product_category from CreateInvestmentOrder for financial calculations"
+      - dependent_api: "AggregateComplianceChecks"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only executes when pre_trade_compliance_passed = TRUE from AggregateComplianceChecks, ensuring calculations performed only for compliant transactions proceeding to execution"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ManageCoolingOffPeriod"
+    description: "Evaluates product_category to determine if cooling_off_period_required applies (TRUE for structured products), calculates cooling-off expiry timestamp by adding cooling_off_period_hours to client_authorization_timestamp, sets transaction_status to Pending_Cooling_Off or Ready_for_Execution based on cooling-off applicability"
+    purpose: "Implements regulatory cooling-off period for complex products, giving clients unconditional cancellation rights within specified timeframe before final execution"
+    input_parameters:
+      - name: "transaction_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "product_category"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "cooling_off_period_required"
+        data_type: "boolean"
+        source: "system_state"
+        required: true
+      - name: "cooling_off_period_hours"
+        data_type: "integer"
+        source: "system_state"
+        required: true
+      - name: "client_authorization_timestamp"
+        data_type: "datetime"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "transaction_status"
+        data_type: "enum"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "CalculateTransactionFinancials"
+        dependency_type: "state_dependency"
+        dependency_reason: "Executes after CalculateTransactionFinancials completes financial calculations, using product_category to determine cooling-off applicability and manage transaction status transition"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ExecuteInvestmentTransaction"
+    description: "Routes order to appropriate execution channel (fund house gateway for mutual funds, Treasury desk for structured products) transmitting transaction details, receives preliminary confirmation generating trade_reference_number or contract_note_number, instructs Core Banking System to debit settlement_account_number for subscription_amount, sets transaction_status to Executed, records execution_timestamp, calculates settlement_date based on product settlement cycles"
+    purpose: "Final execution step consummating the investment transaction through external order routing and internal settlement account debit, creating binding trade commitment"
+    input_parameters:
+      - name: "transaction_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "product_category"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "product_code"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "net_investment_amount"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "settlement_account_number"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "client_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "transaction_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "subscription_amount"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "trade_reference_number"
+        data_type: "string"
+        destination: "storage"
+      - name: "contract_note_number"
+        data_type: "string"
+        destination: "storage"
+      - name: "execution_timestamp"
+        data_type: "datetime"
+        destination: "other_api"
+      - name: "settlement_date"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "transaction_status"
+        data_type: "enum"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ManageCoolingOffPeriod"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only executes when transaction_status = Ready_for_Execution from ManageCoolingOffPeriod, ensuring cooling-off period has elapsed or is not applicable before final execution"
+      - dependent_api: "CalculateTransactionFinancials"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires net_investment_amount from CalculateTransactionFinancials for order routing and subscription_amount for settlement account debit"
+      - dependent_api: "CreateInvestmentOrder"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires transaction_id, product_code, product_category, settlement_account_number, client_id from CreateInvestmentOrder for execution routing and settlement"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "CalculateSTPFlag"
+    description: "Evaluates entire transaction lifecycle to determine if straight-through processing was achieved by checking if any manual intervention, exception handling, workflow rerouting, supervisor override, or compliance escalation occurred, sets straight_through_processing_flag to TRUE only for zero-touch transactions"
+    purpose: "Operational efficiency metric calculation identifying fully automated transactions for STP rate KPI reporting and process optimization analysis"
+    input_parameters:
+      - name: "transaction_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "suitability_mismatch_flag"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "supervisor_approval_required"
+        data_type: "boolean"
+        source: "system_state"
+        required: true
+      - name: "aml_sanctions_screening_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "straight_through_processing_flag"
+        data_type: "boolean"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecuteInvestmentTransaction"
+        dependency_type: "state_dependency"
+        dependency_reason: "Executes after ExecuteInvestmentTransaction completes to evaluate entire transaction lifecycle and determine if any manual touchpoints occurred during processing"
+    complexity_level: "low"
+    business_criticality: "medium"
+
+  - api_name: "ExecutePostTradeComplianceReview"
+    description: "Reviews executed transaction against compliance checklist covering documentation completeness (disclosure_documents_presented), audio_video_recording_id content quality for complex products, suitability mismatch waiver documentation, and overall transaction coherence, documents findings in compliance_review_notes, sets compliance_defect_flag if violations identified"
+    purpose: "Post-execution quality assurance and regulatory compliance verification to identify miss-selling, documentation deficiencies, or process violations requiring corrective action"
+    input_parameters:
+      - name: "transaction_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "audio_video_recording_id"
+        data_type: "string"
+        source: "system_state"
+        required: false
+      - name: "suitability_mismatch_flag"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "transaction_threshold_exceeded"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "disclosure_documents_presented"
+        data_type: "array"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "compliance_defect_flag"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "compliance_review_notes"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecuteInvestmentTransaction"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only executes after ExecuteInvestmentTransaction completes with transaction_status = Executed, enabling post-trade review of completed transaction"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "CalculateProcessingMetrics"
+    description: "Computes total_processing_time_minutes by calculating elapsed time in minutes between transaction_timestamp (initiation) and execution_timestamp (completion), providing quantitative measure of end-to-end processing efficiency for cycle time analysis and operational performance reporting"
+    purpose: "Operational performance metric calculation enabling monitoring of processing efficiency, identification of bottlenecks, and trend analysis for continuous process improvement"
+    input_parameters:
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "system_state"
+        required: true
+      - name: "execution_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "total_processing_time_minutes"
+        data_type: "integer"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecuteInvestmentTransaction"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires execution_timestamp from ExecuteInvestmentTransaction to calculate elapsed time from transaction initiation to execution completion"
+    complexity_level: "low"
+    business_criticality: "low"
+```
+</api_dependency_graph>
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件

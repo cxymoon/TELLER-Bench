@@ -1,0 +1,63 @@
+
+prompts:
+   name: generate_dataset_csv
+   parameters: [sop_title, sop_file_contents, additional_context, sample_schema, n_samples, sop_data_generation_guidelines]
+   text: |
+      You are an expert AI assistant specializing in generating high-quality synthetic datasets based on detailed Standard Operating Procedures (SOPs). Your task is to extract operational logic and decision criteria from SOPs and synthesize structured data that reflects all possible scenarios, perfectly matching the field structure of the provided schema.
+      The following is the input information you will receive:
+
+      <sop_title>
+      {{sop_title}}
+      </sop_title>
+
+      <sop_contents>
+      {{sop_file_contents}}
+      </sop_contents>
+
+      <additional_context>
+      {{additional_context}}
+      </additional_context>
+
+      <schema>
+      {{sample_schema}}
+      </schema>
+
+      API Dependency Directed Graph:
+      <direct_graph>
+      {{direct_graph}}
+      </direct_graph>
+
+      Your task is to generate a synthetic dataset including the following:
+      ***Please note that the format of each data entry in the dataset you generate should be exactly the same. Each data entry should be wrapped in [], with each field value conforming to the structure in the schema, each wrapped in '', and separated by English commas. **The input and output fields in each data entry must not be those not present in the schema**; only synthesize the field values within the <Existing_fields></Existing_fields> tags in the schema. For fields wrapped in <Field_to_be_obtained></Field_to_be_obtained>, only write the key, and leave the value empty.***
+      1. **Understanding and Analysis**: Carefully analyze the SOP to identify all decision points, validation steps, escalation conditions, and classification rules. Based on these, determine the fields that must appear in the dataset and their possible values.
+      2. **Schema Compliance**: Ensure the dataset complies with (and expands upon) the fields given in the `<schema>` section. If no schema is provided, infer a reasonable and complete schema from the SOP content.
+      3. **Case Diversity**:
+         - Include both valid and invalid examples;
+         - Cover edge conditions, extreme values, and policy violations;
+         - Ensure that every step of logic in the SOP is reflected in some rows of the data.
+      4. **Data Format**:
+         - Output data **only** within `<data></data>` tags;
+         - Do **not** add extra commentary or instructions outside the `<data>` block.
+      5. **Validation Requirements**:
+         - All rows must be non-empty;
+         - All columns must be complete and values correctly formatted;
+         - No unclosed strings, no internal line breaks within strings;
+         - Consistency between field values (e.g., escalation field set to True only when conditions are met).
+      6. Generate at least `{{n_samples}}` rows of valid records, covering the full range of conditions defined by the SOP.
+      7. Generate the complete data in one go, without interruption, confirmation, or interaction.
+      8. Do not add explanatory text, placeholders, or prompts to continue generation. Output **only** the complete data within the `<data>` block.
+      9. Ensure there are no format errors, incomplete nodes, or broken strings.
+      10. No empty columns or rows are allowed. Ensure all strings are fully closed without line breaks.
+      11. For Boolean fields, use `True` or `False` to allow parsing with `ast`.
+      12. Ensure all square brackets are properly closed.
+
+      <additional_requirements>
+      {{sop_data_generation_guidelines}}
+      </additional_requirements>
+
+      You must output the data strictly in the following format, where 'field' is the field name (which must already exist in the schema), and 'value' is the field value you synthesize. For fields wrapped in <Field_to_be_obtained></Field_to_be_obtained>, only write the key and leave the value empty.
+      <data>
+      ['field_1:value_1_1', 'field_2:value_1_2', ..., 'field_N:value_1_N'],
+      ...
+      ['field_1:value_k_1', 'field_2:value_k_2', ..., 'field_N:value_k_N']
+      </data>

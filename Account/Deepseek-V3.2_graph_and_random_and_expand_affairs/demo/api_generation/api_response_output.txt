@@ -1,0 +1,847 @@
+<sop_breakdown>
+
+## 1. Independent Tasks/Operations in Main Procedure
+
+### Section 5.1: Customer Identification Program Verification
+- **Task 5.1.1**: Data Integrity Validation
+  - Validate applicant data format and completeness
+  - Cross-reference OCR-extracted data with manually entered fields
+  - Calculate data consistency score
+  
+- **Task 5.1.2**: Identity Verification Service Integration
+  - Execute document authentication procedures
+  - Perform facial biometric comparison (for digital applications)
+  - Return document authenticity and facial match scores
+
+- **Task 5.1.3**: Credit Bureau Validation
+  - Submit PII to credit bureaus for identity verification
+  - Receive validation response (verified/not_verified/insufficient_data)
+
+- **Task 5.1.4**: CIP Verification Decision Matrix
+  - Synthesize all verification outcomes
+  - Determine final CIP verification status
+
+### Section 5.2: Regulatory Watchlist Screening
+- **Task 5.2.1**: OFAC Watchlist Screening
+  - Execute fuzzy matching against sanctions lists
+  - Generate similarity scores and screening results
+
+- **Task 5.2.2**: Manual Watchlist Disambiguation
+  - Assign potential matches to compliance officers
+  - Document investigation and override results
+
+- **Task 5.2.3**: ChexSystems Score Retrieval
+  - Query ChexSystems for deposit account history
+  - Return consumer risk score
+
+- **Task 5.2.4**: Corporate Entity Verification
+  - Validate business legal name and EIN
+  - Assess business industry risk classification
+  - Determine due diligence level
+
+### Section 5.3: Fraud Risk Scoring and Auto-Decision
+- **Task 5.3.1**: Fraud Risk Score Calculation
+  - Analyze data consistency, address validation, income coherence
+  - Evaluate device fingerprinting and behavioral analytics
+  - Calculate weighted composite fraud risk score
+
+- **Task 5.3.2**: Fraud Risk Classification
+  - Apply threshold-based score interpretation
+  - Determine if manual review required
+
+- **Task 5.3.3**: Multi-Factor Auto-Decision Engine
+  - Synthesize all risk metrics through decision matrix
+  - Apply hierarchical evaluation logic
+  - Determine auto-approval, auto-decline, or manual review
+
+- **Task 5.3.4**: Manual Review Case Routing
+  - Assign cases to compliance officers
+  - Provide detailed risk factor documentation
+
+### Section 5.4: Account Establishment
+- **Task 5.4.1**: Core Banking Account Generation
+  - Create formal account in Core Banking System
+  - Assign account number and routing number
+  - Configure product parameters
+
+- **Task 5.4.2**: Account Confirmation and Metrics
+  - Record account creation timestamp
+  - Calculate total processing time
+  - Evaluate first-time yield
+
+- **Task 5.4.3**: Account Funding Processing
+  - Execute deposit based on funding method
+  - Update funding completion status
+  - Set account activation status
+
+- **Task 5.4.4**: Ancillary Product Provisioning
+  - Issue debit cards
+  - Create online banking credentials
+  - Order check stock
+  - Assemble welcome kit
+
+### Section 5.5: Process Completion
+- **Task 5.5.1**: Completion Documentation
+  - Verify welcome kit delivery
+  - Confirm consent form signatures
+
+- **Task 5.5.2**: Performance Metrics Calculation
+  - Calculate processing time, FTY, rework count
+  - Generate service level compliance reports
+
+- **Task 5.5.3**: Digital Abandonment Analysis
+  - Identify abandonment stages
+  - Calculate abandonment rates
+
+- **Task 5.5.4**: Regulatory Compliance Metrics
+  - Track CIP verification success rates
+  - Monitor watchlist screening distributions
+  - Validate beneficial ownership completeness
+
+## 2. External Dependencies by Task
+
+### Data Integrity Validation
+- **Dependencies**: Application database with populated input fields, OCR extraction service results
+- **External Systems**: None directly, uses system_state data
+
+### Identity Verification Service
+- **Dependencies**: ID document images, facial images, TLS 1.3 encrypted API endpoints
+- **External Systems**: Identity Verification Service (Jumio, Onfido, etc.)
+
+### Credit Bureau Validation
+- **Dependencies**: Valid SSN, name, DOB, address
+- **External Systems**: Major consumer reporting agencies (Experian, Equifax, TransUnion)
+
+### OFAC Watchlist Screening
+- **Dependencies**: Complete applicant PII
+- **External Systems**: OFAC SDN List, Watchlist Screening Tool (LexisNexis, World-Check)
+
+### ChexSystems Score Retrieval
+- **Dependencies**: Valid SSN, name, DOB, address, individual customer type
+- **External Systems**: ChexSystems reporting agency
+
+### Fraud Risk Calculation
+- **Dependencies**: All verification outputs, behavioral analytics, device fingerprinting
+- **External Systems**: Fraud detection service, device intelligence platform
+
+### Core Banking Account Creation
+- **Dependencies**: Final approval status, validated customer data
+- **External Systems**: Core Banking System (Fiserv, Jack Henry)
+
+### Account Funding
+- **Dependencies**: Account number, funding method details
+- **External Systems**: ACH network, card processing network, Plaid API
+
+### Ancillary Product Provisioning
+- **Dependencies**: Account number, routing number, customer preferences
+- **External Systems**: Card processor, check printing vendor, email service
+
+## 3. Edge Cases by Task
+
+### Data Integrity Validation
+- OCR extraction returns empty JSON for in-branch applications
+- Name contains special characters (apostrophes, hyphens)
+- Minor applicant (age < 18) requires custodial account
+- SSN format invalid or sequential numbers detected
+
+### Identity Verification Service
+- Document authenticity score between 70.0-85.0 (borderline)
+- Facial match confidence between 88.0-91.9 (requires secondary verification)
+- Identification document expired
+- Non-US issued identification document
+
+### Credit Bureau Validation
+- Credit-invisible applicant with no bureau file
+- Name/address mismatch between application and bureau records
+- Multiple credit files for same SSN (identity theft indicator)
+
+### OFAC Watchlist Screening
+- Similarity score exactly 85.0 or 95.0 (threshold boundary)
+- Multiple potential matches with varying similarity scores
+- Common name with hundreds of potential matches
+- Beneficial owner appears on watchlist but applicant does not
+
+### ChexSystems Score Retrieval
+- Score exactly 400, 500, or 600 (threshold boundary)
+- No ChexSystems record found (new to banking)
+- Corporate business application (not applicable to ChexSystems)
+
+### Fraud Risk Calculation
+- Device fingerprint indicates VPN but applicant is traveling
+- Large deposit amount from legitimate inheritance
+- Unemployed status with high income from investments
+- Student with part-time employment income variability
+
+### Auto-Decision Engine
+- Multiple risk factors at threshold boundaries
+- Conflicting signals (high ChexSystems score but elevated fraud risk)
+- Enhanced due diligence required but auto-approval risk metrics
+
+### Manual Review
+- Compliance officer queue at capacity
+- Weekend/holiday application requiring urgent review
+- Multiple potential watchlist matches requiring extensive investigation
+
+### Account Creation
+- Duplicate account number generated (collision)
+- Core Banking System timeout during creation
+- Business account with complex ownership structure
+
+### Account Funding
+- External ACH transfer fails after 3 days
+- Debit card authorization declined
+- Check deposit bounces after account creation
+
+### Ancillary Products
+- Card processor rejects embossing due to name length
+- Online banking username already taken
+- Check stock out of inventory
+
+## 4. Key API Parameters from SOP and Dependency Graph
+
+### ValidateApplicationData
+- **Inputs**: application_id, applicant_full_name, applicant_date_of_birth, applicant_ssn_tax_id, applicant_residential_address, applicant_email, applicant_phone, id_document_type, id_document_number, id_document_expiry_date, application_data_entry_method, id_ocr_extracted_data, customer_type, business_type
+- **Outputs**: data_validation_status, data_consistency_score, validation_error_details, manual_review_required, manual_review_reason
+
+### ExecuteCIPVerification
+- **Inputs**: application_id, applicant_full_name, applicant_date_of_birth, applicant_ssn_tax_id, applicant_residential_address, id_document_type, id_document_number, id_document_issuing_country, biometric_liveness_check_completed, application_channel, data_consistency_score
+- **Outputs**: cip_verification_status, facial_match_confidence_score, credit_bureau_validation_status, document_authenticity_score, manual_review_required, manual_review_reason
+
+### ScreenWatchlists
+- **Inputs**: application_id, applicant_full_name, applicant_date_of_birth, applicant_residential_address, applicant_ssn_tax_id, cip_verification_status, business_legal_name, beneficial_owners
+- **Outputs**: watchlist_screening_result, watchlist_match_details, similarity_scores, manual_review_required, manual_review_reason
+
+### AssessRiskProfile
+- **Inputs**: application_id, applicant_full_name, applicant_ssn_tax_id, applicant_date_of_birth, applicant_residential_address, applicant_employment_status, applicant_annual_income, initial_deposit_amount, customer_type, cip_verification_status, credit_bureau_validation_status, facial_match_confidence_score, id_ocr_extracted_data, data_consistency_score, application_channel, business_industry, business_monthly_transaction_volume_estimate
+- **Outputs**: chexsystems_score, fraud_risk_score, due_diligence_level, risk_factor_breakdown, manual_review_required, manual_review_reason
+
+### ExecuteAutoDecision
+- **Inputs**: application_id, cip_verification_status, watchlist_screening_result, chexsystems_score, fraud_risk_score, credit_bureau_validation_status, facial_match_confidence_score, due_diligence_level, customer_type, application_channel
+- **Outputs**: auto_decision_result, composite_risk_score, decision_rationale, manual_review_required, manual_review_reason, final_approval_status, decline_reason
+
+### ProcessManualReview
+- **Inputs**: application_id, auto_decision_result, manual_review_required, manual_review_reason, watchlist_screening_result, fraud_risk_score, chexsystems_score, due_diligence_level, documents_submitted, beneficial_owners, compliance_officer_id
+- **Outputs**: final_approval_status, decline_reason, compliance_review_timestamp, compliance_review_notes, compliance_officer_id
+
+### CreateBankAccount
+- **Inputs**: application_id, final_approval_status, applicant_full_name, applicant_date_of_birth, applicant_ssn_tax_id, applicant_residential_address, applicant_email, applicant_phone, account_type_requested, customer_type, branch_code, business_legal_name, business_ein, authorized_signers
+- **Outputs**: account_number_generated, routing_number, account_creation_timestamp, account_activation_status
+
+### ProcessAccountFunding
+- **Inputs**: application_id, account_number_generated, initial_deposit_amount, initial_deposit_method, external_bank_account_linked, account_activation_status
+- **Outputs**: account_funding_completed, account_activation_status, funding_transaction_id
+
+### ProvisionAncillaryProducts
+- **Inputs**: application_id, account_number_generated, routing_number, applicant_full_name, applicant_residential_address, applicant_email, account_type_requested, cross_sell_products_accepted, customer_type
+- **Outputs**: debit_card_number_issued, online_banking_credentials_created, temporary_checks_issued, welcome_kit_issued
+
+### CalculateProcessMetrics
+- **Inputs**: application_id, application_start_timestamp, account_creation_timestamp, account_funding_completed, final_approval_status, auto_decision_result, manual_review_required, customer_consent_forms_signed, application_abandoned, abandonment_stage
+- **Outputs**: total_processing_time_minutes, first_time_yield, rework_count, welcome_kit_issued, application_abandoned, abandonment_stage
+
+## 5. API Generation Approach
+
+**Approach**: Generate APIs strictly following the dependency graph structure, ensuring:
+1. Each API corresponds to a distinct node in the dependency graph
+2. APIs are sequenced based on dependency relationships
+3. Input parameters originate from sample_data or prior API outputs
+4. No additional parameters beyond those in sample_data
+5. Output parameters match those specified in the dependency graph
+6. Error handling covers all edge cases identified
+
+**Sequencing Strategy**:
+1. **Layer 1 (No Dependencies)**: ValidateApplicationData
+2. **Layer 2 (Depends on Layer 1)**: ExecuteCIPVerification
+3. **Layer 3 (Depends on Layer 2)**: ScreenWatchlists, AssessRiskProfile (parallel)
+4. **Layer 4 (Depends on Layer 3)**: ExecuteAutoDecision
+5. **Layer 5 (Conditional - Depends on Layer 4)**: ProcessManualReview (only if manual_review_required)
+6. **Layer 6 (Depends on Layer 4 or 5)**: CreateBankAccount
+7. **Layer 7 (Depends on Layer 6)**: ProcessAccountFunding, ProvisionAncillaryProducts (parallel)
+8. **Layer 8 (Depends on Layer 7)**: CalculateProcessMetrics
+
+## 6. Parameter Sources
+
+### ValidateApplicationData
+- All inputs: **sample_data** (application input fields)
+- Outputs: **Used by ExecuteCIPVerification, AssessRiskProfile**
+
+### ExecuteCIPVerification
+- Inputs from **sample_data**: application_id, biometric_liveness_check_completed, application_channel, id_document_issuing_country
+- Inputs from **ValidateApplicationData**: applicant_full_name, applicant_date_of_birth, applicant_ssn_tax_id, applicant_residential_address, id_document_type, id_document_number, data_consistency_score
+- Outputs: **Used by ScreenWatchlists, AssessRiskProfile, ExecuteAutoDecision**
+
+### ScreenWatchlists
+- Inputs from **sample_data**: application_id, business_legal_name, beneficial_owners
+- Inputs from **ValidateApplicationData**: applicant_full_name, applicant_date_of_birth, applicant_residential_address, applicant_ssn_tax_id
+- Inputs from **ExecuteCIPVerification**: cip_verification_status
+- Outputs: **Used by ExecuteAutoDecision, ProcessManualReview**
+
+### AssessRiskProfile
+- Inputs from **sample_data**: application_id, applicant_employment_status, applicant_annual_income, initial_deposit_amount, customer_type, application_channel, id_ocr_extracted_data, business_industry, business_monthly_transaction_volume_estimate
+- Inputs from **ValidateApplicationData**: applicant_full_name, applicant_ssn_tax_id, applicant_date_of_birth, applicant_residential_address, data_consistency_score
+- Inputs from **ExecuteCIPVerification**: cip_verification_status, credit_bureau_validation_status, facial_match_confidence_score
+- Outputs: **Used by ExecuteAutoDecision, ProcessManualReview**
+
+### ExecuteAutoDecision
+- Inputs from **sample_data**: application_id, customer_type, application_channel
+- Inputs from **ExecuteCIPVerification**: cip_verification_status, credit_bureau_validation_status, facial_match_confidence_score
+- Inputs from **ScreenWatchlists**: watchlist_screening_result
+- Inputs from **AssessRiskProfile**: chexsystems_score, fraud_risk_score, due_diligence_level
+- Outputs: **Used by ProcessManualReview, CreateBankAccount, CalculateProcessMetrics**
+
+### ProcessManualReview
+- Inputs from **sample_data**: application_id, documents_submitted, beneficial_owners, compliance_officer_id
+- Inputs from **ExecuteAutoDecision**: auto_decision_result, manual_review_required, manual_review_reason
+- Inputs from **ScreenWatchlists**: watchlist_screening_result
+- Inputs from **AssessRiskProfile**: fraud_risk_score, chexsystems_score, due_diligence_level
+- Outputs: **Used by CreateBankAccount**
+
+### CreateBankAccount
+- Inputs from **sample_data**: application_id, account_type_requested, customer_type, branch_code, business_legal_name, business_ein, authorized_signers
+- Inputs from **ValidateApplicationData**: applicant_full_name, applicant_date_of_birth, applicant_ssn_tax_id, applicant_residential_address, applicant_email, applicant_phone
+- Inputs from **ExecuteAutoDecision** or **ProcessManualReview**: final_approval_status
+- Outputs: **Used by ProcessAccountFunding, ProvisionAncillaryProducts, CalculateProcessMetrics**
+
+### ProcessAccountFunding
+- Inputs from **sample_data**: application_id, initial_deposit_amount, initial_deposit_method, external_bank_account_linked
+- Inputs from **CreateBankAccount**: account_number_generated, account_activation_status
+- Outputs: **Used by CalculateProcessMetrics**
+
+### ProvisionAncillaryProducts
+- Inputs from **sample_data**: application_id, account_type_requested, cross_sell_products_accepted, customer_type
+- Inputs from **ValidateApplicationData**: applicant_full_name, applicant_residential_address, applicant_email
+- Inputs from **CreateBankAccount**: account_number_generated, routing_number
+- Outputs: **Used by CalculateProcessMetrics**
+
+### CalculateProcessMetrics
+- Inputs from **sample_data**: application_id, application_start_timestamp, customer_consent_forms_signed, application_abandoned, abandonment_stage
+- Inputs from **CreateBankAccount**: account_creation_timestamp
+- Inputs from **ProcessAccountFunding**: account_funding_completed
+- Inputs from **ExecuteAutoDecision**: final_approval_status, auto_decision_result, manual_review_required
+- Outputs: **Stored for reporting/analytics**
+
+## 7. API Execution Sequence
+
+1. **ValidateApplicationData** - Entry point validation
+2. **ExecuteCIPVerification** - Identity verification (depends on #1)
+3. **ScreenWatchlists** AND **AssessRiskProfile** - Parallel risk assessment (both depend on #2)
+4. **ExecuteAutoDecision** - Decision synthesis (depends on #2, #3)
+5. **ProcessManualReview** - Conditional execution (depends on #4 if manual review required)
+6. **CreateBankAccount** - Account creation (depends on #4 or #5)
+7. **ProcessAccountFunding** AND **ProvisionAncillaryProducts** - Parallel post-creation (both depend on #6)
+8. **CalculateProcessMetrics** - Final metrics calculation (depends on #6, #7)
+
+## 8. Error Scenarios and Handling
+
+### ValidateApplicationData
+- **Invalid SSN format**: Return data_validation_status="failed", set manual_review_required=true
+- **OCR data mismatch > 25% discrepancy**: Lower data_consistency_score, flag for manual review
+- **Missing required fields**: Return validation_error_details with specific field list
+- **Age < 18 without custodial flag**: Set manual_review_reason="Minor account requires custodial setup"
+
+### ExecuteCIPVerification
+- **Document authenticity < 70.0**: Set cip_verification_status="failed", decline application
+- **Facial match 88.0-91.9**: Set manual_review_required=true, request secondary verification
+- **Credit bureau timeout**: Retry 3 times, then set credit_bureau_validation_status="insufficient_data"
+- **Expired ID document**: Set manual_review_required=true, request updated documentation
+
+### ScreenWatchlists
+- **Similarity score 95.0+**: Set watchlist_screening_result="confirmed_match", auto-decline
+- **Multiple potential matches**: Set watchlist_screening_result="potential_match", assign to compliance
+- **API timeout**: Retry with exponential backoff, maximum 5 attempts
+- **Beneficial owner on watchlist**: Flag entire application for enhanced due diligence
+
+### AssessRiskProfile
+- **ChexSystems API unavailable**: Set chexsystems_score=null, increase weight on fraud_risk_score
+- **Score at exact threshold boundary**: Apply tie-breaker logic (round down for customer benefit)
+- **High-risk industry detected**: Set due_diligence_level="enhanced_edd", route to specialized compliance
+- **Income/employment mismatch**: Increase fraud_risk_score by 18 points, document in risk_factor_breakdown
+
+### ExecuteAutoDecision
+- **Conflicting risk signals**: Default to more conservative decision (refer for manual review)
+- **All metrics at approval thresholds**: Calculate composite_risk_score as tie-breaker
+- **Enhanced EDD flag overrides auto-approval**: Set auto_decision_result="refer_for_manual_review"
+
+### ProcessManualReview
+- **Compliance officer unavailable**: Reassign to next available officer after 4-hour SLA breach
+- **Insufficient documentation**: Request additional documents, extend review timeline
+- **Watchlist match confirmed after investigation**: Set final_approval_status="declined", file SAR
+
+### CreateBankAccount
+- **Account number collision**: Regenerate new account number, retry creation
+- **Core Banking System timeout**: Implement idempotency key, retry with same application_id
+- **Invalid account type for customer type**: Return error, request application amendment
+
+### ProcessAccountFunding
+- **ACH transfer failure**: Update account_activation_status="pending_funding", notify customer
+- **Debit card decline**: Offer alternative funding methods, extend funding deadline
+- **Check bounce after posting**: Reverse transaction, set account_activation_status="dormant"
+
+### ProvisionAncillaryProducts
+- **Card processor rejection**: Issue temporary card, escalate name length issue
+- **Online banking username conflict**: Append numeric suffix, notify customer of modified username
+- **Check stock shortage**: Issue temporary checks, expedite permanent stock order
+
+### CalculateProcessMetrics
+- **Missing timestamp data**: Use current timestamp as fallback, flag data quality issue
+- **Negative processing time (clock skew)**: Log anomaly, use absolute value for reporting
+- **Division by zero in rate calculations**: Return 0.0, log insufficient data warning
+
+## 9. Sample Data Processing Coverage
+
+Each API must successfully process all 20 sample records:
+- **Records 1, 7, 19**: In-branch retail individual (manual_banker_entry, no biometrics)
+- **Records 2, 8, 17**: Mobile app digital remote (ocr_auto_fill, biometrics, high income)
+- **Records 3, 10, 20**: Web portal digital remote (customer_self_service, biometrics, student/varied income)
+- **Records 4, 9, 15**: Corporate business LLC/sole proprietorship (manual_banker_entry, beneficial owners)
+- **Records 5**: Mobile app digital remote (facial_match_confidence_score=89.5, borderline threshold)
+- **Records 6, 14**: Web portal digital remote (money_market, high deposit, retired/high income)
+- **Records 11**: Mobile app digital remote (OCR date mismatch: "1993-05-11" vs "1993-05-12")
+- **Records 12**: Corporate business sole proprietorship (professional services, moderate volume)
+- **Records 13**: Web portal digital remote (high facial match, standard checking)
+- **Records 16**: Corporate business partnership (legal services, high volume, $450k monthly)
+- **Records 18**: Web portal digital remote (savings account, external transfer funding)
+
+**Special Processing Requirements**:
+- Record 5: Trigger secondary verification due to facial_match_confidence_score=89.5
+- Record 11: Detect OCR inconsistency, lower data_consistency_score
+- Records 4, 9, 15, 16: Process beneficial_owners list for BOI compliance
+- Records 3, 10, 20: Handle student accounts with low income thresholds
+- Records 6, 14: Process high-value deposits for money market accounts
+
+</sop_breakdown>
+
+<TOOLS>
+
+<API>
+Name: ValidateApplicationData
+Description: Validates application data format, completeness, and internal consistency including OCR cross-reference for digital applications to ensure data quality before initiating external verification processes
+Endpoint: /api/v1/account-opening/validate-application-data
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "applicant_full_name": "Sarah Michelle Johnson",
+  "applicant_date_of_birth": "1990-03-15",
+  "applicant_ssn_tax_id": "XXX-XX-4521",
+  "applicant_residential_address": "456 Oak Avenue, Apt 2C, Boston, MA 02115",
+  "applicant_email": "sarah.johnson@email.com",
+  "applicant_phone": "+1-555-234-5678",
+  "id_document_type": "drivers_license",
+  "id_document_number": "DL987654321",
+  "id_document_expiry_date": "2028-03-15",
+  "application_data_entry_method": "manual_banker_entry",
+  "id_ocr_extracted_data": {},
+  "customer_type": "individual",
+  "business_type": "retail_individual"
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "data_validation_status": "valid",
+  "data_consistency_score": 100.0,
+  "validation_error_details": "",
+  "manual_review_required": false,
+  "manual_review_reason": ""
+}
+Dependencies: None (Entry point API)
+Error Scenarios:
+- Invalid SSN format (non-9-digit or sequential): Return data_validation_status="failed", set manual_review_required=true with manual_review_reason="Invalid SSN format detected"
+- OCR data mismatch exceeds 75.0 threshold: Lower data_consistency_score proportionally, set manual_review_required=true with manual_review_reason="OCR data inconsistency detected requiring verification"
+- Missing required fields: Return data_validation_status="incomplete", populate validation_error_details with specific missing field names
+- Applicant age less than 18: Set manual_review_required=true with manual_review_reason="Minor applicant requires custodial account setup"
+- Date of birth indicates age over 120: Return data_validation_status="failed" with validation_error_details="Invalid date of birth - age exceeds maximum"
+- Name contains only numeric characters: Return data_validation_status="failed" with validation_error_details="Invalid name format - numeric characters not permitted"
+- ID document expiry date before current date: Set manual_review_required=true with manual_review_reason="Expired identification document requires updated documentation"
+</API>
+
+<API>
+Name: ExecuteCIPVerification
+Description: Orchestrates comprehensive Customer Identification Program verification including document authentication, biometric liveness checks, facial matching, and credit bureau identity validation to satisfy regulatory CIP requirements under 31 CFR 1020.220
+Endpoint: /api/v1/account-opening/execute-cip-verification
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "applicant_full_name": "Sarah Michelle Johnson",
+  "applicant_date_of_birth": "1990-03-15",
+  "applicant_ssn_tax_id": "XXX-XX-4521",
+  "applicant_residential_address": "456 Oak Avenue, Apt 2C, Boston, MA 02115",
+  "id_document_type": "drivers_license",
+  "id_document_number": "DL987654321",
+  "id_document_issuing_country": "US",
+  "biometric_liveness_check_completed": false,
+  "application_channel": "in_branch",
+  "data_consistency_score": 100.0
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "cip_verification_status": "verified",
+  "facial_match_confidence_score": 0.0,
+  "credit_bureau_validation_status": "verified",
+  "document_authenticity_score": 92.5,
+  "manual_review_required": false,
+  "manual_review_reason": ""
+}
+Dependencies: ValidateApplicationData (requires validated applicant data and data_consistency_score)
+Error Scenarios:
+- Document authenticity score below 70.0: Set cip_verification_status="failed", manual_review_required=false, decline application with reason "Identification document authenticity could not be confirmed"
+- Document authenticity score between 70.0-85.0: Set manual_review_required=true with manual_review_reason="Document authenticity score below threshold requiring manual verification"
+- Facial match confidence score between 88.0-91.9: Set manual_review_required=true with manual_review_reason="Facial biometric confidence below threshold requiring secondary verification"
+- Facial match confidence score below 88.0: Set cip_verification_status="pending_manual_review" with manual_review_reason="Biometric verification failure requiring alternative documentary verification"
+- Credit bureau returns "not_verified": Set credit_bureau_validation_status="not_verified", manual_review_required=true with manual_review_reason="Credit bureau identity verification failed requiring supplementary documentation"
+- Credit bureau returns "insufficient_data": Set credit_bureau_validation_status="insufficient_data", require alternative verification methods
+- Identity Verification Service timeout: Retry 3 times with exponential backoff, if persistent failure set manual_review_required=true
+- Multiple credit files for same SSN: Set manual_review_required=true with manual_review_reason="Multiple credit bureau files detected requiring identity theft investigation"
+</API>
+
+<API>
+Name: ScreenWatchlists
+Description: Performs OFAC sanctions screening and watchlist matching against Specially Designated Nationals List, global sanctions databases, and PEP lists using fuzzy matching algorithms to ensure regulatory compliance with OFAC requirements under 31 CFR Chapter V
+Endpoint: /api/v1/account-opening/screen-watchlists
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "applicant_full_name": "Sarah Michelle Johnson",
+  "applicant_date_of_birth": "1990-03-15",
+  "applicant_residential_address": "456 Oak Avenue, Apt 2C, Boston, MA 02115",
+  "applicant_ssn_tax_id": "XXX-XX-4521",
+  "cip_verification_status": "verified",
+  "business_legal_name": "",
+  "beneficial_owners": []
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "watchlist_screening_result": "clear",
+  "watchlist_match_details": {},
+  "similarity_scores": [],
+  "manual_review_required": false,
+  "manual_review_reason": ""
+}
+Dependencies: ExecuteCIPVerification (requires cip_verification_status="verified" before screening)
+Error Scenarios:
+- Similarity score 95.0 or higher: Set watchlist_screening_result="confirmed_match", manual_review_required=false, auto-decline application with decline_reason="Applicant identified on OFAC Specially Designated Nationals List"
+- Similarity score between 85.0-94.9: Set watchlist_screening_result="potential_match", manual_review_required=true with manual_review_reason="Potential watchlist match requiring compliance officer disambiguation"
+- Multiple potential matches detected: Set watchlist_screening_result="potential_match", populate watchlist_match_details with all matches, assign to compliance officer for investigation
+- Beneficial owner appears on watchlist: Set watchlist_screening_result="confirmed_match" for business application, decline with decline_reason="Beneficial owner identified on sanctions watchlist"
+- Watchlist API timeout: Retry with exponential backoff up to 5 attempts, if persistent failure set manual_review_required=true
+- Common name with hundreds of potential matches: Apply secondary identifier filtering (DOB, address), escalate remaining matches to compliance
+- Date of birth within 30 days of watchlist entry: Increase similarity score weight, likely trigger potential_match classification
+</API>
+
+<API>
+Name: AssessRiskProfile
+Description: Calculates comprehensive risk assessment including ChexSystems deposit account history score retrieval and multi-factor fraud risk scoring based on behavioral analytics, device fingerprinting, and data consistency analysis to quantify deposit account risk and fraud probability
+Endpoint: /api/v1/account-opening/assess-risk-profile
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "applicant_full_name": "Sarah Michelle Johnson",
+  "applicant_ssn_tax_id": "XXX-XX-4521",
+  "applicant_date_of_birth": "1990-03-15",
+  "applicant_residential_address": "456 Oak Avenue, Apt 2C, Boston, MA 02115",
+  "applicant_employment_status": "employed",
+  "applicant_annual_income": 75000,
+  "initial_deposit_amount": 500.00,
+  "customer_type": "individual",
+  "cip_verification_status": "verified",
+  "credit_bureau_validation_status": "verified",
+  "facial_match_confidence_score": 0.0,
+  "id_ocr_extracted_data": {},
+  "data_consistency_score": 100.0,
+  "application_channel": "in_branch",
+  "business_industry": "",
+  "business_monthly_transaction_volume_estimate": null
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "chexsystems_score": 675,
+  "fraud_risk_score": 12.5,
+  "due_diligence_level": "standard_cdd",
+  "risk_factor_breakdown": {
+    "data_consistency_component": 0.0,
+    "address_validation_component": 0.0,
+    "income_coherence_component": 0.0,
+    "deposit_amount_component": 0.0,
+    "device_fingerprint_component": 0.0,
+    "behavioral_analytics_component": 0.0
+  },
+  "manual_review_required": false,
+  "manual_review_reason": ""
+}
+Dependencies: ExecuteCIPVerification (requires cip_verification_status, credit_bureau_validation_status, facial_match_confidence_score for fraud calculation and FCRA compliance before ChexSystems access)
+Error Scenarios:
+- ChexSystems score between 400-499: Set manual_review_required=true with manual_review_reason="ChexSystems score indicates elevated risk requiring compliance officer assessment"
+- ChexSystems score below 400: Set manual_review_required=true with manual_review_reason="ChexSystems score below institutional threshold requiring documented approval justification"
+- ChexSystems API unavailable: Set chexsystems_score=null, increase fraud_risk_score weight proportionally, document in risk_factor_breakdown
+- Fraud risk score between 40.1-60.0: Set manual_review_required=true with manual_review_reason="Elevated fraud risk score requiring investigation of contributing factors"
+- Fraud risk score exceeds 60.0: Set manual_review_required=true with manual_review_reason="High fraud probability detected requiring extensive documentation review"
+- Unemployed with income > $30,000: Add 18 risk points to fraud_risk_score, document in income_coherence_component
+- Student with income > $60,000: Add 10 risk points to fraud_risk_score, document in income_coherence_component
+- Initial deposit > 25% of annual income: Add 15 risk points to fraud_risk_score, document in deposit_amount_component
+- High-risk industry detected (money services, cannabis, cryptocurrency): Set due_diligence_level="enhanced_edd", manual_review_required=true
+- Business monthly transaction volume > $10,000,000: Set due_diligence_level="enhanced_edd", require enhanced documentation
+- VPN/proxy detected in device fingerprint: Add 20 risk points to device_fingerprint_component
+- Copy-paste operations detected in all form fields: Add 25 risk points to behavioral_analytics_component, indicating potential synthetic identity
+</API>
+
+<API>
+Name: ExecuteAutoDecision
+Description: Synthesizes all risk assessment metrics through multi-factor decision matrix to render automated approval, decline, or manual review referral decision based on institutional risk appetite thresholds, enabling straight-through processing for low-risk applications
+Endpoint: /api/v1/account-opening/execute-auto-decision
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "cip_verification_status": "verified",
+  "watchlist_screening_result": "clear",
+  "chexsystems_score": 675,
+  "fraud_risk_score": 12.5,
+  "credit_bureau_validation_status": "verified",
+  "facial_match_confidence_score": 0.0,
+  "due_diligence_level": "standard_cdd",
+  "customer_type": "individual",
+  "application_channel": "in_branch"
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "auto_decision_result": "auto_approved",
+  "composite_risk_score": 85.3,
+  "decision_rationale": "All risk metrics within acceptable thresholds: CIP verified, watchlist clear, ChexSystems score 675 (>=600), fraud risk score 12.5 (<=25.0), credit bureau verified",
+  "manual_review_required": false,
+  "manual_review_reason": "",
+  "final_approval_status": "approved",
+  "decline_reason": ""
+}
+Dependencies: ExecuteCIPVerification (requires cip_verification_status, credit_bureau_validation_status, facial_match_confidence_score), ScreenWatchlists (requires watchlist_screening_result), AssessRiskProfile (requires chexsystems_score, fraud_risk_score, due_diligence_level)
+Error Scenarios:
+- CIP verification status "failed": Set auto_decision_result="auto_declined", final_approval_status="declined", decline_reason="Unable to verify customer identity pursuant to Customer Identification Program requirements"
+- Watchlist screening result "confirmed_match": Set auto_decision_result="auto_declined", final_approval_status="declined", decline_reason="Applicant identified on OFAC Specially Designated Nationals List"
+- ChexSystems score between 500-599: Calculate composite_risk_score with increased scrutiny weight, if composite < 70.0 set auto_decision_result="refer_for_manual_review"
+- Fraud risk score between 25.1-40.0: Set auto_decision_result="refer_for_manual_review", manual_review_required=true with manual_review_reason="Moderate fraud risk requires additional verification steps"
+- Fraud risk score between 40.1-60.0: Set auto_decision_result="refer_for_manual_review", manual_review_required=true with manual_review_reason="Elevated fraud suspicion mandates compliance officer investigation"
+- Fraud risk score > 60.0: Set auto_decision_result="auto_declined", final_approval_status="declined", decline_reason="High fraud probability detected"
+- Facial match confidence 88.0-91.9: Set auto_decision_result="refer_for_manual_review", manual_review_required=true with manual_review_reason="Biometric confidence below threshold requires secondary verification"
+- Due diligence level "enhanced_edd": Set auto_decision_result="refer_for_manual_review", manual_review_required=true with manual_review_reason="Enhanced due diligence required for high-risk business profile"
+- Credit bureau validation "not_verified": Calculate composite_risk_score with reduced credit component weight, if composite < 70.0 set auto_decision_result="refer_for_manual_review"
+- Multiple marginal risk factors at thresholds: Default to auto_decision_result="refer_for_manual_review" for conservative risk management
+- Composite risk score exactly 70.0: Apply tie-breaker favoring customer (round up to approval threshold)
+</API>
+
+<API>
+Name: ProcessManualReview
+Description: Facilitates compliance officer adjudication for applications referred for manual review, including case assignment, investigation workflow, documentation capture, and final approval decision rendering to enable expert human judgment for ambiguous risk scenarios
+Endpoint: /api/v1/account-opening/process-manual-review
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418112345678",
+  "auto_decision_result": "refer_for_manual_review",
+  "manual_review_required": true,
+  "manual_review_reason": "Facial biometric confidence below threshold requiring secondary verification",
+  "watchlist_screening_result": "clear",
+  "fraud_risk_score": 15.2,
+  "chexsystems_score": 580,
+  "due_diligence_level": "standard_cdd",
+  "documents_submitted": [
+    {
+      "doc_type": "drivers_license",
+      "file_path": "/docs/APP_20250418112345678_dl.pdf",
+      "upload_timestamp": "2025-04-18T11:25:00Z"
+    },
+    {
+      "doc_type": "utility_bill",
+      "file_path": "/docs/APP_20250418112345678_utility.pdf",
+      "upload_timestamp": "2025-04-18T11:26:00Z"
+    }
+  ],
+  "beneficial_owners": [],
+  "compliance_officer_id": "COMP_OFF_001"
+}
+Response:
+{
+  "application_id": "APP_20250418112345678",
+  "final_approval_status": "approved",
+  "decline_reason": "",
+  "compliance_review_timestamp": "2025-04-18T14:30:00Z",
+  "compliance_review_notes": "Manual facial comparison conducted using physical ID document. Customer appearance matches ID photograph with high confidence. Secondary verification through knowledge-based authentication questions successfully completed with 4/4 correct answers. Approved for account opening with standard monitoring parameters.",
+  "compliance_officer_id": "COMP_OFF_001"
+}
+Dependencies: ExecuteAutoDecision (conditional execution when auto_decision_result="refer_for_manual_review"), ScreenWatchlists (requires watchlist_screening_result for potential match investigations), AssessRiskProfile (requires fraud_risk_score, chexsystems_score, due_diligence_level for officer assessment context)
+Error Scenarios:
+- Watchlist potential match investigation confirms identity: Set watchlist_screening_result="clear" (override), final_approval_status="approved", document investigation steps in compliance_review_notes
+- Watchlist potential match investigation confirms sanctioned individual: Set watchlist_screening_result="confirmed_match" (override), final_approval_status="declined", decline_reason="Applicant confirmed on OFAC watchlist after compliance investigation"
+- Insufficient documentation for beneficial ownership: Set final_approval_status="declined", decline_reason="Incomplete beneficial ownership documentation - unable to satisfy 31 CFR 1010.230 requirements"
+- High-risk industry without adequate business plan: Set final_approval_status="declined", decline_reason="Enhanced due diligence requirements not satisfied for high-risk business classification"
+- Compliance officer unavailable for > 4 hours: Reassign to next available compliance_officer_id, update compliance_officer_id field
+- ChexSystems score < 400 with mitigating circumstances: Set final_approval_status="conditional_approval", document restrictions in compliance_review_notes (delayed debit card, restricted mobile deposit)
+- Fraud risk score 40-60 with explainable factors: Conduct additional investigation, if satisfactorily resolved set final_approval_status="approved" with enhanced monitoring notation
+- Multiple review iterations required: Document each iteration in compliance_review_notes, track rework_count for metrics
+- Enhanced due diligence documentation incomplete: Request additional documents, extend review timeline, set temporary status pending document receipt
+</API>
+
+<API>
+Name: CreateBankAccount
+Description: Generates new account in Core Banking System of record including account number assignment, routing number association, product configuration, and initial account setup to establish the formal contractual banking relationship
+Endpoint: /api/v1/account-opening/create-bank-account
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "final_approval_status": "approved",
+  "applicant_full_name": "Sarah Michelle Johnson",
+  "applicant_date_of_birth": "1990-03-15",
+  "applicant_ssn_tax_id": "XXX-XX-4521",
+  "applicant_residential_address": "456 Oak Avenue, Apt 2C, Boston, MA 02115",
+  "applicant_email": "sarah.johnson@email.com",
+  "applicant_phone": "+1-555-234-5678",
+  "account_type_requested": "checking",
+  "customer_type": "individual",
+  "branch_code": "BR_BOS_003",
+  "business_legal_name": "",
+  "business_ein": "",
+  "authorized_signers": []
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "account_number_generated": "1234567890",
+  "routing_number": "011401533",
+  "account_creation_timestamp": "2025-04-18T10:45:30Z",
+  "account_activation_status": "pending_funding"
+}
+Dependencies: ExecuteAutoDecision (requires final_approval_status="approved" from auto-decision), ProcessManualReview (conditional - requires final_approval_status="approved" from manual review if applicable)
+Error Scenarios:
+- Final approval status not "approved": Return error "Account creation requires approved application status", do not proceed with account generation
+- Account number collision detected: Regenerate new account_number_generated using alternative algorithm, retry creation with idempotency key
+- Core Banking System timeout: Implement retry with exponential backoff (max 3 attempts), use application_id as idempotency key to prevent duplicate accounts
+- Invalid account type for customer type: Return error "Business checking requires customer_type of sole_proprietorship, llc, corporation, or partnership", request application amendment
+- Missing required business fields for corporate accounts: Return error "business_legal_name and business_ein required for corporate account types"
+- Branch code invalid or not found: Use default institutional headquarters branch_code, log warning for correction
+- Authorized signers list empty for business account: Return error "Business accounts require at least one authorized signer"
+- Duplicate account for same SSN and account type: Check for existing active accounts, if found set manual_review_required=true for duplicate account investigation
+- Core Banking System returns validation error: Parse error message, return specific validation failure details to calling system
+</API>
+
+<API>
+Name: ProcessAccountFunding
+Description: Executes initial deposit processing based on specified funding method including cash/check posting, external ACH transfer initiation, or debit card authorization and updates account activation status to complete account funding
+Endpoint: /api/v1/account-opening/process-account-funding
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "account_number_generated": "1234567890",
+  "initial_deposit_amount": 500.00,
+  "initial_deposit_method": "cash",
+  "external_bank_account_linked": false,
+  "account_activation_status": "pending_funding"
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "account_funding_completed": true,
+  "account_activation_status": "active",
+  "funding_transaction_id": "TXN_20250418_104545_001"
+}
+Dependencies: CreateBankAccount (requires account_number_generated and initial account_activation_status)
+Error Scenarios:
+- Cash/check deposit not completed within 7 days for in-branch: Set account_funding_completed=false, account_activation_status="dormant", send reminder notification
+- External ACH transfer failure after 3 days: Set account_funding_completed=false, account_activation_status="pending_funding", notify customer to retry funding
+- Debit card authorization declined: Set account_funding_completed=false, return error "Card authorization declined - please use alternative funding method"
+- External bank account linking fails: Set account_funding_completed=false, return error "Unable to verify external bank account - please re-link or select alternative funding method"
+- Initial deposit amount below minimum threshold: Return error "Deposit amount $X below minimum $Y required for account_type_requested"
+- Funding transaction timeout: Retry transaction up to 3 times, if persistent failure set account_activation_status="pending_funding" and notify customer
+- Check deposit bounces after posting: Reverse transaction, set account_funding_completed=false, account_activation_status="dormant", flag account for collections
+- Duplicate funding transaction detected: Check funding_transaction_id for existing successful transaction, if found return existing transaction details without processing duplicate
+- Account not found for account_number_generated: Return error "Invalid account number - account creation may not have completed successfully"
+</API>
+
+<API>
+Name: ProvisionAncillaryProducts
+Description: Coordinates issuance of debit cards, online banking credential creation, check stock ordering, and welcome kit assembly for newly created accounts to enable full account functionality
+Endpoint: /api/v1/account-opening/provision-ancillary-products
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "account_number_generated": "1234567890",
+  "routing_number": "011401533",
+  "applicant_full_name": "Sarah Michelle Johnson",
+  "applicant_residential_address": "456 Oak Avenue, Apt 2C, Boston, MA 02115",
+  "applicant_email": "sarah.johnson@email.com",
+  "account_type_requested": "checking",
+  "cross_sell_products_accepted": ["debit_card", "online_banking", "mobile_app"],
+  "customer_type": "individual"
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "debit_card_number_issued": "****-****-****-5678",
+  "online_banking_credentials_created": true,
+  "temporary_checks_issued": true,
+  "welcome_kit_issued": true
+}
+Dependencies: CreateBankAccount (requires account_number_generated, routing_number, and customer details)
+Error Scenarios:
+- Card processor rejects embossing due to name length: Issue temporary card without embossed name, escalate to manual card production, set debit_card_number_issued to temporary card number
+- Online banking username already taken: Append numeric suffix (username_01, username_02, etc.), send notification to applicant_email with modified username
+- Check stock out of inventory: Issue temporary checks (counter checks), set temporary_checks_issued=true, expedite permanent check stock order with 3-5 day delivery
+- Debit card not in cross_sell_products_accepted list: Skip debit card provisioning, set debit_card_number_issued=""
+- Online banking not in cross_sell_products_accepted: Skip credential creation, set online_banking_credentials_created=false
+- Card processor API timeout: Retry with exponential backoff (max 3 attempts), if persistent failure create manual card order ticket, set debit_card_number_issued to pending status
+- Email delivery failure for online banking credentials: Retry email send 3 times, if persistent failure flag for phone contact or physical mail delivery
+- Business account with multiple authorized signers: Issue debit cards for each authorized signer, return list of debit_card_numbers_issued
+- Check printing vendor rejects due to invalid address format: Standardize address format, retry submission, if persistent failure escalate for manual review
+- Welcome kit assembly incomplete: Log missing components, set welcome_kit_issued=false, create follow-up task to complete kit mailing
+</API>
+
+<API>
+Name: CalculateProcessMetrics
+Description: Computes process performance metrics including total processing time, first time yield, rework count, abandonment analysis, and updates all completion status fields to enable operational performance monitoring and continuous improvement analytics
+Endpoint: /api/v1/account-opening/calculate-process-metrics
+Method: POST
+Request Body:
+{
+  "application_id": "APP_20250418101234567",
+  "application_start_timestamp": "2025-04-18T10:12:34Z",
+  "account_creation_timestamp": "2025-04-18T10:45:30Z",
+  "account_funding_completed": true,
+  "final_approval_status": "approved",
+  "auto_decision_result": "auto_approved",
+  "manual_review_required": false,
+  "customer_consent_forms_signed": ["signature_card", "terms_and_conditions", "truth_in_savings_disclosure", "privacy_notice"],
+  "application_abandoned": false,
+  "abandonment_stage": ""
+}
+Response:
+{
+  "application_id": "APP_20250418101234567",
+  "total_processing_time_minutes": 33,
+  "first_time_yield": true,
+  "rework_count": 0,
+  "welcome_kit_issued": true,
+  "application_abandoned": false,
+  "abandonment_stage": ""
+}
+Dependencies: CreateBankAccount (requires account_creation_timestamp), ProcessAccountFunding (requires account_funding_completed), ExecuteAutoDecision (requires auto_decision_result and manual_review_required for metrics calculation)
+Error Scenarios:
+- Missing account_creation_timestamp: Use current timestamp as fallback, set total_processing_time_minutes based on fallback, flag data quality issue in logs
+- Negative processing time due to clock skew: Calculate absolute value of time difference, log anomaly for system time synchronization investigation
+- Application abandoned before completion: Set application_abandoned=true, populate abandonment_stage with specific workflow step, calculate partial processing metrics
+- Missing customer_consent_forms_signed data: Set welcome_kit_issued=false, flag incomplete documentation for remediation
+- Manual review occurred but manual_review_required=false: Log data inconsistency, correct manual_review_required to true for accurate metrics
+- Rework iterations not tracked: Default rework_count=0, set first_time_yield=true if no manual review, log potential underreporting
+- Division by zero in rate calculations: Return 0.0 for rate metrics, log insufficient data warning
+- Extremely long processing time (>7 days): Flag for operational review, investigate potential stuck application scenarios
+- Account funding not completed but account created: Set welcome_kit_issued=false, account_activation_status remains "pending_funding"
+- Conflicting final_approval_status and account_creation_timestamp: If declined but timestamp exists, flag data inconsistency for investigation
+</API>
+
+</TOOLS>

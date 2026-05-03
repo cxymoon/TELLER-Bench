@@ -1,0 +1,1304 @@
+```python
+<code>
+import json
+from datetime import datetime, timedelta
+from typing import Dict, Any, List, Optional, Union
+from pydantic import BaseModel, Field
+from langchain.tools import StructuredTool
+
+# Data storage - maintaining the sample data in its original format
+class DataStore:
+    def __init__(self):
+        self.data = []
+        
+    def parse_entry(self, entry_list: List[str]) -> Dict[str, Any]:
+        """Parse a data entry from list format to dictionary"""
+        entry_dict = {}
+        for item in entry_list:
+            if ':' in item:
+                key, value = item.split(':', 1)
+                entry_dict[key] = value
+        return entry_dict
+    
+    def load_data(self, raw_data: List[List[str]]):
+        """Load data from raw format"""
+        self.data = [self.parse_entry(entry) for entry in raw_data]
+    
+    def get_by_transaction_id(self, transaction_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve data entry by transaction_id"""
+        for entry in self.data:
+            if entry.get('transaction_id') == transaction_id:
+                return entry
+        return None
+    
+    def get_by_client_id(self, client_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve data entry by client_id"""
+        for entry in self.data:
+            if entry.get('client_id') == client_id:
+                return entry
+        return None
+    
+    def update_entry(self, transaction_id: str, updates: Dict[str, Any]):
+        """Update a data entry"""
+        for entry in self.data:
+            if entry.get('transaction_id') == transaction_id:
+                entry.update(updates)
+                return True
+        return False
+    
+    def get_by_application_id(self, application_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve data entry by application_id (alias for transaction_id)"""
+        return self.get_by_transaction_id(application_id)
+
+# Initialize global data store
+data_store = DataStore()
+
+# Load sample data
+raw_data = [
+    ['transaction_id:INV_2025041801234', 'client_id:CLI_987654', 'client_name:John Michael Smith', 'client_age:45', 'client_annual_income:150000.00', 'client_net_worth:850000.00', 'client_investment_experience_years:8', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_4521', 'relationship_manager_name:Sarah Johnson', 'transaction_timestamp:2025-04-18T10:15:30Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_TECH_001', 'product_name:Global Tech Growth Fund', 'product_risk_rating:Growth', 'product_category:Mutual_Fund', 'subscription_amount:50000.00', 'front_end_load_percentage:2.5', 'annual_management_fee_percentage:1.75', 'current_nav:15.42', 'settlement_account_number:ACC_1234567890', 'available_balance:75000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"41-50","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"High","q5_previous_investments":"Stocks_Bonds_Alternatives"}', 'risk_questionnaire_total_score:78', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2025-03-15T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:OTP', 'client_authorization_timestamp:2025-04-18T10:45:22Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_7821', 'market_data_source:Bloomberg', 'branch_code:BR_NYC_001', 'channel:Branch', 'region:US_Northeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801235', 'client_id:CLI_123456', 'client_name:Maria Elena Rodriguez', 'client_age:32', 'client_annual_income:85000.00', 'client_net_worth:250000.00', 'client_investment_experience_years:3', 'client_liquidity_needs:Medium', 'relationship_manager_id:RM_3342', 'relationship_manager_name:Robert Chen', 'transaction_timestamp:2025-04-18T11:22:15Z', 'transaction_type:Risk_Profiling', 'product_code:', 'product_name:', 'product_risk_rating:', 'product_category:', 'subscription_amount:0.00', 'front_end_load_percentage:0.0', 'annual_management_fee_percentage:0.0', 'current_nav:0.0', 'settlement_account_number:ACC_9876543210', 'available_balance:35000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"31-40","q2_income_stability":"Stable","q3_investment_horizon":"3-5_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks"}', 'risk_questionnaire_total_score:52', 'previous_risk_profile:None', 'previous_risk_profile_expiry_date:', 'disclosure_documents_presented:[]', 'aml_sanctions_screening_status:Pending', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Biometric', 'client_authorization_timestamp:2025-04-18T11:35:48Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_6542', 'market_data_source:Internal_System', 'branch_code:BR_LA_005', 'channel:Branch', 'region:US_West', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801236', 'client_id:CLI_445566', 'client_name:David Thompson', 'client_age:67', 'client_annual_income:95000.00', 'client_net_worth:1200000.00', 'client_investment_experience_years:25', 'client_liquidity_needs:High', 'relationship_manager_id:RM_7788', 'relationship_manager_name:Jennifer Liu', 'transaction_timestamp:2025-04-18T09:05:12Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_BOND_055', 'product_name:Conservative Income Fund', 'product_risk_rating:Conservative', 'product_category:Mutual_Fund', 'subscription_amount:30000.00', 'front_end_load_percentage:1.5', 'annual_management_fee_percentage:0.95', 'current_nav:10.85', 'settlement_account_number:ACC_5544332211', 'available_balance:150000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"61+","q2_income_stability":"Retired_Fixed","q3_investment_horizon":"1-3_years","q4_loss_tolerance":"Very_Low","q5_previous_investments":"Bonds_CDs"}', 'risk_questionnaire_total_score:28', 'previous_risk_profile:Conservative', 'previous_risk_profile_expiry_date:2026-08-10T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Physical_Signature', 'client_authorization_timestamp:2025-04-18T09:28:45Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_8821', 'market_data_source:Reuters', 'branch_code:BR_MIA_012', 'channel:Branch', 'region:US_Southeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801237', 'client_id:CLI_778899', 'client_name:Priya Patel', 'client_age:38', 'client_annual_income:220000.00', 'client_net_worth:650000.00', 'client_investment_experience_years:12', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_2233', 'relationship_manager_name:Michael Torres', 'transaction_timestamp:2025-04-18T14:18:42Z', 'transaction_type:Structured_Product_Enrollment', 'product_code:SN_DCI_088', 'product_name:USD-EUR Dual Currency Investment', 'product_risk_rating:Aggressive', 'product_category:Dual_Currency_Investment', 'subscription_amount:120000.00', 'front_end_load_percentage:0.0', 'annual_management_fee_percentage:0.0', 'current_nav:0.0', 'settlement_account_number:ACC_7788990011', 'available_balance:185000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"31-40","q2_income_stability":"Stable","q3_investment_horizon":"10+_years","q4_loss_tolerance":"High","q5_previous_investments":"Stocks_Options_Forex"}', 'risk_questionnaire_total_score:82', 'previous_risk_profile:Aggressive', 'previous_risk_profile_expiry_date:2026-11-22T00:00:00Z', 'disclosure_documents_presented:["Structured_Product_Term_Sheet","Risk_Disclosure_Statement","KID","Scenario_Analysis_Report"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:True', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:True', 'audio_video_recording_id:VR_2025041814001', 'cooling_off_period_required:True', 'cooling_off_period_hours:48', 'client_authorization_method:Digital_Signature', 'client_authorization_timestamp:2025-04-18T15:02:18Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_4455', 'market_data_source:Bloomberg', 'branch_code:BR_SF_008', 'channel:Branch', 'region:US_West', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801238', 'client_id:CLI_334455', 'client_name:Ahmed Hassan', 'client_age:29', 'client_annual_income:72000.00', 'client_net_worth:180000.00', 'client_investment_experience_years:2', 'client_liquidity_needs:High', 'relationship_manager_id:RM_9988', 'relationship_manager_name:Lisa Anderson', 'transaction_timestamp:2025-04-18T13:45:27Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_AGGR_122', 'product_name:Emerging Markets Equity Fund', 'product_risk_rating:Aggressive', 'product_category:Mutual_Fund', 'subscription_amount:15000.00', 'front_end_load_percentage:3.0', 'annual_management_fee_percentage:2.25', 'current_nav:22.18', 'settlement_account_number:ACC_4433221100', 'available_balance:18500.00', 'risk_questionnaire_responses:{"q1_age_bracket":"18-30","q2_income_stability":"Stable","q3_investment_horizon":"1-3_years","q4_loss_tolerance":"Low","q5_previous_investments":"Savings_Only"}', 'risk_questionnaire_total_score:25', 'previous_risk_profile:None', 'previous_risk_profile_expiry_date:', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:OTP', 'client_authorization_timestamp:2025-04-18T14:12:55Z', 'mismatch_waiver_required:True', 'mismatch_waiver_document_id:MW_2025041813001', 'supervisor_approval_required:True', 'supervisor_id:SUP_5566', 'compliance_officer_id:CO_3344', 'market_data_source:Reuters', 'branch_code:BR_CHI_015', 'channel:Branch', 'region:US_Midwest', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801239', 'client_id:CLI_556677', 'client_name:Elizabeth Wong', 'client_age:52', 'client_annual_income:195000.00', 'client_net_worth:1850000.00', 'client_investment_experience_years:18', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_6677', 'relationship_manager_name:Thomas Wright', 'transaction_timestamp:2025-04-18T08:30:15Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_BAL_045', 'product_name:Balanced Growth and Income Fund', 'product_risk_rating:Balanced', 'product_category:Mutual_Fund', 'subscription_amount:80000.00', 'front_end_load_percentage:2.0', 'annual_management_fee_percentage:1.45', 'current_nav:18.75', 'settlement_account_number:ACC_6655443322', 'available_balance:125000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"51-60","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_Bonds_Mutual_Funds"}', 'risk_questionnaire_total_score:58', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-02-28T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Digital_Signature', 'client_authorization_timestamp:2025-04-18T09:05:42Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_7821', 'market_data_source:Bloomberg', 'branch_code:BR_BOS_020', 'channel:Online_Banking', 'region:US_Northeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801240', 'client_id:CLI_998877', 'client_name:Carlos Martinez', 'client_age:41', 'client_annual_income:135000.00', 'client_net_worth:420000.00', 'client_investment_experience_years:6', 'client_liquidity_needs:Medium', 'relationship_manager_id:RM_1122', 'relationship_manager_name:Angela Davis', 'transaction_timestamp:2025-04-18T16:22:33Z', 'transaction_type:Structured_Product_Enrollment', 'product_code:PPN_TECH_077', 'product_name:Tech Sector Principal Protected Note', 'product_risk_rating:Growth', 'product_category:Principal_Protected_Note', 'subscription_amount:75000.00', 'front_end_load_percentage:1.0', 'annual_management_fee_percentage:0.85', 'current_nav:0.0', 'settlement_account_number:ACC_9988776655', 'available_balance:92000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"41-50","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_Bonds"}', 'risk_questionnaire_total_score:62', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-07-15T00:00:00Z', 'disclosure_documents_presented:["Product_Term_Sheet","Risk_Disclosure_Statement","KID","Principal_Protection_Mechanism_Explanation"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:True', 'audio_video_recording_id:VR_2025041816002', 'cooling_off_period_required:True', 'cooling_off_period_hours:24', 'client_authorization_method:Biometric', 'client_authorization_timestamp:2025-04-18T16:58:17Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_5544', 'market_data_source:Bloomberg', 'branch_code:BR_HOU_018', 'channel:Branch', 'region:US_South', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801241', 'client_id:CLI_112233', 'client_name:Sandra Kowalski', 'client_age:58', 'client_annual_income:88000.00', 'client_net_worth:975000.00', 'client_investment_experience_years:22', 'client_liquidity_needs:Medium', 'relationship_manager_id:RM_4455', 'relationship_manager_name:Kevin Park', 'transaction_timestamp:2025-04-18T10:50:28Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_MOD_033', 'product_name:Moderate Allocation Fund', 'product_risk_rating:Moderate', 'product_category:Mutual_Fund', 'subscription_amount:45000.00', 'front_end_load_percentage:1.75', 'annual_management_fee_percentage:1.25', 'current_nav:12.34', 'settlement_account_number:ACC_1122334455', 'available_balance:62000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"51-60","q2_income_stability":"Stable","q3_investment_horizon":"3-5_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_Bonds_Mutual_Funds"}', 'risk_questionnaire_total_score:50', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-05-10T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:OTP', 'client_authorization_timestamp:2025-04-18T11:18:44Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_6655', 'market_data_source:Internal_System', 'branch_code:BR_SEA_022', 'channel:Phone_Banking', 'region:US_West', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801242', 'client_id:CLI_224466', 'client_name:Jason Lee', 'client_age:35', 'client_annual_income:112000.00', 'client_net_worth:310000.00', 'client_investment_experience_years:7', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_7799', 'relationship_manager_name:Patricia Moore', 'transaction_timestamp:2025-04-18T12:08:55Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_TECH_001', 'product_name:Global Tech Growth Fund', 'product_risk_rating:Growth', 'product_category:Mutual_Fund', 'subscription_amount:25000.00', 'front_end_load_percentage:2.5', 'annual_management_fee_percentage:1.75', 'current_nav:15.42', 'settlement_account_number:ACC_2244668800', 'available_balance:18000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"31-40","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_ETFs"}', 'risk_questionnaire_total_score:55', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-09-30T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Digital_Signature', 'client_authorization_timestamp:2025-04-18T12:35:22Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_7788', 'market_data_source:Bloomberg', 'branch_code:BR_ATL_009', 'channel:Mobile_App', 'region:US_Southeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801243', 'client_id:CLI_667788', 'client_name:Fatima Al-Rashid', 'client_age:48', 'client_annual_income:275000.00', 'client_net_worth:2100000.00', 'client_investment_experience_years:15', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_8899', 'relationship_manager_name:David Kim', 'transaction_timestamp:2025-04-18T15:42:18Z', 'transaction_type:Structured_Product_Enrollment', 'product_code:SN_EQU_155', 'product_name:S&P 500 Linked Structured Note', 'product_risk_rating:Growth', 'product_category:Structured_Note', 'subscription_amount:150000.00', 'front_end_load_percentage:0.5', 'annual_management_fee_percentage:0.75', 'current_nav:0.0', 'settlement_account_number:ACC_6677889900', 'available_balance:280000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"41-50","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"High","q5_previous_investments":"Stocks_Bonds_Derivatives_Real_Estate"}', 'risk_questionnaire_total_score:75', 'previous_risk_profile:Aggressive', 'previous_risk_profile_expiry_date:2027-01-15T00:00:00Z', 'disclosure_documents_presented:["Structured_Note_Term_Sheet","Risk_Disclosure_Statement","KID","Payoff_Scenario_Analysis","Credit_Risk_Disclosure"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:True', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:True', 'audio_video_recording_id:VR_2025041815003', 'cooling_off_period_required:True', 'cooling_off_period_hours:48', 'client_authorization_method:Digital_Signature', 'client_authorization_timestamp:2025-04-18T16:28:45Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_4455', 'market_data_source:Bloomberg', 'branch_code:BR_NYC_001', 'channel:Branch', 'region:US_Northeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801244', 'client_id:CLI_334567', 'client_name:Robert Jackson', 'client_age:71', 'client_annual_income:68000.00', 'client_net_worth:1450000.00', 'client_investment_experience_years:30', 'client_liquidity_needs:High', 'relationship_manager_id:RM_5566', 'relationship_manager_name:Michelle Green', 'transaction_timestamp:2025-04-18T09:25:40Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_BOND_022', 'product_name:Short-Term Bond Fund', 'product_risk_rating:Conservative', 'product_category:Mutual_Fund', 'subscription_amount:55000.00', 'front_end_load_percentage:0.75', 'annual_management_fee_percentage:0.65', 'current_nav:9.98', 'settlement_account_number:ACC_3345678901', 'available_balance:88000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"61+","q2_income_stability":"Retired_Fixed","q3_investment_horizon":"<1_year","q4_loss_tolerance":"Very_Low","q5_previous_investments":"Bonds_CDs_Money_Market"}', 'risk_questionnaire_total_score:32', 'previous_risk_profile:Conservative', 'previous_risk_profile_expiry_date:2026-12-05T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Physical_Signature', 'client_authorization_timestamp:2025-04-18T09:48:12Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_9900', 'market_data_source:Internal_System', 'branch_code:BR_PHX_025', 'channel:Branch', 'region:US_Southwest', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801245', 'client_id:CLI_445678', 'client_name:Nina Petrov', 'client_age:26', 'client_annual_income:58000.00', 'client_net_worth:85000.00', 'client_investment_experience_years:1', 'client_liquidity_needs:High', 'relationship_manager_id:RM_3344', 'relationship_manager_name:James Wilson', 'transaction_timestamp:2025-04-18T11:15:33Z', 'transaction_type:Risk_Profiling', 'product_code:', 'product_name:', 'product_risk_rating:', 'product_category:', 'subscription_amount:0.00', 'front_end_load_percentage:0.0', 'annual_management_fee_percentage:0.0', 'current_nav:0.0', 'settlement_account_number:ACC_4456789012', 'available_balance:12000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"18-30","q2_income_stability":"Stable","q3_investment_horizon":"3-5_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Savings_401k"}', 'risk_questionnaire_total_score:38', 'previous_risk_profile:None', 'previous_risk_profile_expiry_date:', 'disclosure_documents_presented:[]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:OTP', 'client_authorization_timestamp:2025-04-18T11:28:55Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_5566', 'market_data_source:Internal_System', 'branch_code:BR_DEN_011', 'channel:Online_Banking', 'region:US_Mountain', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801246', 'client_id:CLI_556789', 'client_name:William Chen', 'client_age:44', 'client_annual_income:165000.00', 'client_net_worth:720000.00', 'client_investment_experience_years:10', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_6688', 'relationship_manager_name:Emily Roberts', 'transaction_timestamp:2025-04-18T14:35:48Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_BAL_045', 'product_name:Balanced Growth and Income Fund', 'product_risk_rating:Balanced', 'product_category:Mutual_Fund', 'subscription_amount:95000.00', 'front_end_load_percentage:2.0', 'annual_management_fee_percentage:1.45', 'current_nav:18.75', 'settlement_account_number:ACC_5567890123', 'available_balance:105000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"41-50","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_Bonds_Mutual_Funds"}', 'risk_questionnaire_total_score:60', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-06-20T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Biometric', 'client_authorization_timestamp:2025-04-18T15:02:15Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_6677', 'market_data_source:Reuters', 'branch_code:BR_LA_005', 'channel:Branch', 'region:US_West', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801247', 'client_id:CLI_667890', 'client_name:Sophia Nguyen', 'client_age:39', 'client_annual_income:145000.00', 'client_net_worth:485000.00', 'client_investment_experience_years:9', 'client_liquidity_needs:Medium', 'relationship_manager_id:RM_7799', 'relationship_manager_name:Christopher Lee', 'transaction_timestamp:2025-04-18T10:42:20Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_GROW_099', 'product_name:International Growth Fund', 'product_risk_rating:Growth', 'product_category:Mutual_Fund', 'subscription_amount:40000.00', 'front_end_load_percentage:2.75', 'annual_management_fee_percentage:1.95', 'current_nav:24.56', 'settlement_account_number:ACC_6678901234', 'available_balance:55000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"31-40","q2_income_stability":"Stable","q3_investment_horizon":"10+_years","q4_loss_tolerance":"High","q5_previous_investments":"Stocks_Mutual_Funds_ETFs"}', 'risk_questionnaire_total_score:72', 'previous_risk_profile:Aggressive', 'previous_risk_profile_expiry_date:2027-03-12T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Digital_Signature', 'client_authorization_timestamp:2025-04-18T11:08:35Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_7788', 'market_data_source:Bloomberg', 'branch_code:BR_SF_008', 'channel:Online_Banking', 'region:US_West', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801248', 'client_id:CLI_778901', 'client_name:Daniel O'Brien', 'client_age:55', 'client_annual_income:128000.00', 'client_net_worth:1125000.00', 'client_investment_experience_years:20', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_8811', 'relationship_manager_name:Rachel Martinez', 'transaction_timestamp:2025-04-18T13:18:25Z', 'transaction_type:Structured_Product_Enrollment', 'product_code:DCI_GBP_044', 'product_name:GBP-USD Dual Currency Investment', 'product_risk_rating:Aggressive', 'product_category:Dual_Currency_Investment', 'subscription_amount:110000.00', 'front_end_load_percentage:0.0', 'annual_management_fee_percentage:0.0', 'current_nav:0.0', 'settlement_account_number:ACC_7789012345', 'available_balance:145000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"51-60","q2_income_stability":"Stable","q3_investment_horizon":"3-5_years","q4_loss_tolerance":"High","q5_previous_investments":"Stocks_Bonds_Options_Forex"}', 'risk_questionnaire_total_score:68', 'previous_risk_profile:Aggressive', 'previous_risk_profile_expiry_date:2026-10-18T00:00:00Z', 'disclosure_documents_presented:["Dual_Currency_Term_Sheet","Currency_Risk_Disclosure","KID","Scenario_Payoff_Matrix"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:True', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:True', 'audio_video_recording_id:VR_2025041813004', 'cooling_off_period_required:True', 'cooling_off_period_hours:48', 'client_authorization_method:Digital_Signature', 'client_authorization_timestamp:2025-04-18T14:05:52Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_4455', 'market_data_source:Bloomberg', 'branch_code:BR_CHI_015', 'channel:Branch', 'region:US_Midwest', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801249', 'client_id:CLI_889012', 'client_name:Grace Kim', 'client_age:63', 'client_annual_income:102000.00', 'client_net_worth:1680000.00', 'client_investment_experience_years:28', 'client_liquidity_needs:Medium', 'relationship_manager_id:RM_9922', 'relationship_manager_name:Brian Taylor', 'transaction_timestamp:2025-04-18T08:52:18Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_MOD_033', 'product_name:Moderate Allocation Fund', 'product_risk_rating:Moderate', 'product_category:Mutual_Fund', 'subscription_amount:65000.00', 'front_end_load_percentage:1.75', 'annual_management_fee_percentage:1.25', 'current_nav:12.34', 'settlement_account_number:ACC_8890123456', 'available_balance:98000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"61+","q2_income_stability":"Retired_Fixed","q3_investment_horizon":"3-5_years","q4_loss_tolerance":"Low","q5_previous_investments":"Bonds_Mutual_Funds_Annuities"}', 'risk_questionnaire_total_score:42', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-04-25T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Physical_Signature', 'client_authorization_timestamp:2025-04-18T09:22:45Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_8899', 'market_data_source:Internal_System', 'branch_code:BR_MIA_012', 'channel:Branch', 'region:US_Southeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801250', 'client_id:CLI_990123', 'client_name:Marcus Washington', 'client_age:47', 'client_annual_income:185000.00', 'client_net_worth:625000.00', 'client_investment_experience_years:11', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_1133', 'relationship_manager_name:Susan Chang', 'transaction_timestamp:2025-04-18T15:08:42Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_TECH_001', 'product_name:Global Tech Growth Fund', 'product_risk_rating:Growth', 'product_category:Mutual_Fund', 'subscription_amount:70000.00', 'front_end_load_percentage:2.5', 'annual_management_fee_percentage:1.75', 'current_nav:15.42', 'settlement_account_number:ACC_9901234567', 'available_balance:85000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"41-50","q2_income_stability":"Stable","q3_investment_horizon":"10+_years","q4_loss_tolerance":"High","q5_previous_investments":"Stocks_Bonds_Options_Real_Estate"}', 'risk_questionnaire_total_score:77', 'previous_risk_profile:Aggressive', 'previous_risk_profile_expiry_date:2026-11-08T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:OTP', 'client_authorization_timestamp:2025-04-18T15:35:18Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_5544', 'market_data_source:Bloomberg', 'branch_code:BR_ATL_009', 'channel:Mobile_App', 'region:US_Southeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801251', 'client_id:CLI_101234', 'client_name:Linda Foster', 'client_age:50', 'client_annual_income:118000.00', 'client_net_worth:940000.00', 'client_investment_experience_years:16', 'client_liquidity_needs:Medium', 'relationship_manager_id:RM_2244', 'relationship_manager_name:Andrew Bennett', 'transaction_timestamp:2025-04-18T12:45:30Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_BAL_045', 'product_name:Balanced Growth and Income Fund', 'product_risk_rating:Balanced', 'product_category:Mutual_Fund', 'subscription_amount:85000.00', 'front_end_load_percentage:2.0', 'annual_management_fee_percentage:1.45', 'current_nav:18.75', 'settlement_account_number:ACC_1012345678', 'available_balance:92000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"41-50","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_Bonds_Mutual_Funds"}', 'risk_questionnaire_total_score:57', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-08-30T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Biometric', 'client_authorization_timestamp:2025-04-18T13:15:22Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_6677', 'market_data_source:Reuters', 'branch_code:BR_BOS_020', 'channel:Branch', 'region:US_Northeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801252', 'client_id:CLI_212345', 'client_name:Raj Sharma', 'client_age:36', 'client_annual_income:98000.00', 'client_net_worth:285000.00', 'client_investment_experience_years:5', 'client_liquidity_needs:Medium', 'relationship_manager_id:RM_3355', 'relationship_manager_name:Karen White', 'transaction_timestamp:2025-04-18T11:52:45Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_MOD_033', 'product_name:Moderate Allocation Fund', 'product_risk_rating:Moderate', 'product_category:Mutual_Fund', 'subscription_amount:35000.00', 'front_end_load_percentage:1.75', 'annual_management_fee_percentage:1.25', 'current_nav:12.34', 'settlement_account_number:ACC_2123456789', 'available_balance:42000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"31-40","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_Mutual_Funds"}', 'risk_questionnaire_total_score:54', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-07-22T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:Digital_Signature', 'client_authorization_timestamp:2025-04-18T12:18:33Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_7788', 'market_data_source:Internal_System', 'branch_code:BR_SEA_022', 'channel:Phone_Banking', 'region:US_West', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801253', 'client_id:CLI_323456', 'client_name:Catherine Dubois', 'client_age:59', 'client_annual_income:142000.00', 'client_net_worth:1525000.00', 'client_investment_experience_years:24', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_4466', 'relationship_manager_name:Jonathan Reed', 'transaction_timestamp:2025-04-18T09:38:55Z', 'transaction_type:Structured_Product_Enrollment', 'product_code:PPN_DIV_099', 'product_name:Dividend Aristocrats Principal Protected Note', 'product_risk_rating:Balanced', 'product_category:Principal_Protected_Note', 'subscription_amount:125000.00', 'front_end_load_percentage:0.75', 'annual_management_fee_percentage:0.95', 'current_nav:0.0', 'settlement_account_number:ACC_3234567890', 'available_balance:165000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"51-60","q2_income_stability":"Stable","q3_investment_horizon":"5-10_years","q4_loss_tolerance":"Moderate","q5_previous_investments":"Stocks_Bonds_Real_Estate"}', 'risk_questionnaire_total_score:63', 'previous_risk_profile:Balanced', 'previous_risk_profile_expiry_date:2026-09-14T00:00:00Z', 'disclosure_documents_presented:["Product_Term_Sheet","Principal_Protection_Mechanism","Risk_Disclosure","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:True', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:True', 'audio_video_recording_id:VR_2025041809005', 'cooling_off_period_required:True', 'cooling_off_period_hours:24', 'client_authorization_method:Biometric', 'client_authorization_timestamp:2025-04-18T10:25:42Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_5544', 'market_data_source:Bloomberg', 'branch_code:BR_NYC_001', 'channel:Branch', 'region:US_Northeast', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+    ['transaction_id:INV_2025041801254', 'client_id:CLI_434567', 'client_name:Thomas Mueller', 'client_age:42', 'client_annual_income:156000.00', 'client_net_worth:595000.00', 'client_investment_experience_years:13', 'client_liquidity_needs:Low', 'relationship_manager_id:RM_5577', 'relationship_manager_name:Nicole Brown', 'transaction_timestamp:2025-04-18T16:12:20Z', 'transaction_type:Mutual_Fund_Subscription', 'product_code:MF_GROW_099', 'product_name:International Growth Fund', 'product_risk_rating:Growth', 'product_category:Mutual_Fund', 'subscription_amount:60000.00', 'front_end_load_percentage:2.75', 'annual_management_fee_percentage:1.95', 'current_nav:24.56', 'settlement_account_number:ACC_4345678901', 'available_balance:78000.00', 'risk_questionnaire_responses:{"q1_age_bracket":"41-50","q2_income_stability":"Stable","q3_investment_horizon":"10+_years","q4_loss_tolerance":"High","q5_previous_investments":"Stocks_Mutual_Funds_ETFs_Options"}', 'risk_questionnaire_total_score:80', 'previous_risk_profile:Aggressive', 'previous_risk_profile_expiry_date:2027-02-05T00:00:00Z', 'disclosure_documents_presented:["Fund_Fact_Sheet","Prospectus","KID"]', 'aml_sanctions_screening_status:Clear', 'source_of_wealth_documented:True', 'transaction_threshold_exceeded:False', 'monitoring_threshold_amount:100000.00', 'audio_video_recording_required:False', 'audio_video_recording_id:', 'cooling_off_period_required:False', 'cooling_off_period_hours:0', 'client_authorization_method:OTP', 'client_authorization_timestamp:2025-04-18T16:42:38Z', 'mismatch_waiver_required:False', 'mismatch_waiver_document_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'compliance_officer_id:CO_6655', 'market_data_source:Bloomberg', 'branch_code:BR_HOU_018', 'channel:Online_Banking', 'region:US_South', 'calculated_risk_profile:', 'risk_profile_expiry_date:', 'investable_status:', 'suitability_check_passed:', 'suitability_mismatch_flag:', 'pre_trade_compliance_passed:', 'funds_availability_verified:', 'estimated_units:', 'front_end_load_amount:', 'net_investment_amount:', 'annual_management_fee_amount:', 'trade_reference_number:', 'contract_note_number:', 'transaction_status:', 'execution_timestamp:', 'settlement_date:', 'straight_through_processing_flag:', 'compliance_defect_flag:', 'compliance_review_notes:', 'supervisor_approval_timestamp:', 'total_processing_time_minutes:'],
+]
+
+data_store.load_data(raw_data)
+
+
+def ValidateExistingRiskProfile(client_id: str, transaction_timestamp: str, 
+                                previous_risk_profile: Optional[str] = None,
+                                previous_risk_profile_expiry_date: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Validates whether the client has an existing, unexpired risk profile assessment on file.
+    Determines if a new risk assessment questionnaire administration is required.
+    """
+    # Parse transaction timestamp
+    transaction_dt = datetime.fromisoformat(transaction_timestamp.replace('Z', '+00:00'))
+    
+    # Check if profile exists and is not null
+    if previous_risk_profile is None or previous_risk_profile == "None" or previous_risk_profile == "":
+        requires_new_assessment = True
+        profile_validity_status = "No_Previous_Profile"
+        days_until_expiry = None
+    else:
+        # Check expiry date
+        if previous_risk_profile_expiry_date and previous_risk_profile_expiry_date != "":
+            expiry_dt = datetime.fromisoformat(previous_risk_profile_expiry_date.replace('Z', '+00:00'))
+            
+            # Compare dates
+            if transaction_dt >= expiry_dt:
+                requires_new_assessment = True
+                profile_validity_status = "Expired"
+                days_until_expiry = 0
+            else:
+                requires_new_assessment = False
+                profile_validity_status = "Valid"
+                days_until_expiry = (expiry_dt - transaction_dt).days
+        else:
+            requires_new_assessment = True
+            profile_validity_status = "No_Expiry_Date"
+            days_until_expiry = None
+    
+    result = {
+        "client_id": client_id,
+        "previous_risk_profile": previous_risk_profile if previous_risk_profile and previous_risk_profile != "None" else None,
+        "previous_risk_profile_expiry_date": previous_risk_profile_expiry_date if previous_risk_profile_expiry_date else None,
+        "transaction_timestamp": transaction_timestamp,
+        "requires_new_assessment": requires_new_assessment,
+        "profile_validity_status": profile_validity_status,
+        "days_until_expiry": days_until_expiry
+    }
+    
+    return result
+
+
+def AdministerRiskQuestionnaire(client_id: str, client_age: int, client_annual_income: float,
+                                client_investment_experience_years: int, client_liquidity_needs: str,
+                                risk_questionnaire_responses: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Administers the regulatory-mandated Risk Tolerance Questionnaire to the client.
+    Applies weighted scoring algorithm based on questionnaire responses.
+    """
+    total_score = 0
+    
+    # Parse risk_questionnaire_responses if it's a string
+    if isinstance(risk_questionnaire_responses, str):
+        risk_questionnaire_responses = json.loads(risk_questionnaire_responses)
+    
+    # Age bracket scoring (from q1_age_bracket or client_age)
+    if client_age <= 30:
+        age_score = 0
+    elif client_age <= 40:
+        age_score = 5
+    elif client_age <= 50:
+        age_score = 10
+    elif client_age <= 60:
+        age_score = 15
+    else:
+        age_score = 20
+    
+    total_score += age_score
+    
+    # Investment experience scoring
+    if client_investment_experience_years == 0:
+        experience_score = 0
+    elif client_investment_experience_years <= 3:
+        experience_score = 5
+    elif client_investment_experience_years <= 7:
+        experience_score = 10
+    elif client_investment_experience_years <= 15:
+        experience_score = 15
+    else:
+        experience_score = 20
+    
+    total_score += experience_score
+    
+    # Income stability scoring (from q2_income_stability)
+    income_stability = risk_questionnaire_responses.get("q2_income_stability", "")
+    if "Stable" in income_stability:
+        income_score = 15
+    elif "Retired" in income_stability:
+        income_score = 10
+    else:
+        income_score = 5
+    
+    total_score += income_score
+    
+    # Investment horizon scoring (from q3_investment_horizon)
+    horizon = risk_questionnaire_responses.get("q3_investment_horizon", "")
+    if "10+" in horizon or "10+_years" in horizon:
+        horizon_score = 20
+    elif "5-10" in horizon or "5-10_years" in horizon:
+        horizon_score = 15
+    elif "3-5" in horizon or "3-5_years" in horizon:
+        horizon_score = 10
+    elif "1-3" in horizon or "1-3_years" in horizon:
+        horizon_score = 5
+    else:
+        horizon_score = 0
+    
+    total_score += horizon_score
+    
+    # Loss tolerance scoring (from q4_loss_tolerance)
+    loss_tolerance = risk_questionnaire_responses.get("q4_loss_tolerance", "")
+    if "High" in loss_tolerance:
+        loss_score = 20
+    elif "Moderate" in loss_tolerance:
+        loss_score = 10
+    elif "Low" in loss_tolerance:
+        loss_score = 5
+    else:  # Very_Low
+        loss_score = 0
+    
+    total_score += loss_score
+    
+    # Previous investments scoring (from q5_previous_investments)
+    previous_investments = risk_questionnaire_responses.get("q5_previous_investments", "")
+    investment_types = previous_investments.split("_")
+    
+    if len(investment_types) >= 4 or "Derivatives" in previous_investments or "Options" in previous_investments or "Forex" in previous_investments:
+        investment_score = 15
+    elif len(investment_types) >= 3 or "Stocks" in previous_investments:
+        investment_score = 10
+    elif "Bonds" in previous_investments or "Mutual" in previous_investments:
+        investment_score = 5
+    else:
+        investment_score = 0
+    
+    total_score += investment_score
+    
+    # Liquidity needs adjustment (inverse scoring)
+    if client_liquidity_needs == "Low":
+        liquidity_score = 10
+    elif client_liquidity_needs == "Medium":
+        liquidity_score = 5
+    else:  # High
+        liquidity_score = 0
+    
+    total_score += liquidity_score
+    
+    result = {
+        "client_id": client_id,
+        "risk_questionnaire_responses": risk_questionnaire_responses,
+        "risk_questionnaire_total_score": total_score,
+        "questionnaire_completion_status": "Completed"
+    }
+    
+    # Update data store
+    entry = data_store.get_by_client_id(client_id)
+    if entry:
+        data_store.update_entry(entry['transaction_id'], {
+            'risk_questionnaire_total_score': str(total_score)
+        })
+    
+    return result
+
+
+def CalculateRiskProfile(risk_questionnaire_total_score: int) -> Dict[str, Any]:
+    """
+    Applies deterministic mapping algorithm to convert numerical risk_questionnaire_total_score 
+    into categorical risk profile classification.
+    """
+    # Deterministic mapping: 0-35 = Conservative, 36-65 = Balanced, 66-100 = Aggressive
+    if risk_questionnaire_total_score <= 35:
+        calculated_risk_profile = "Conservative"
+    elif risk_questionnaire_total_score <= 65:
+        calculated_risk_profile = "Balanced"
+    else:
+        calculated_risk_profile = "Aggressive"
+    
+    result = {
+        "risk_questionnaire_total_score": risk_questionnaire_total_score,
+        "calculated_risk_profile": calculated_risk_profile,
+        "score_range_applied": f"{0 if calculated_risk_profile == 'Conservative' else (36 if calculated_risk_profile == 'Balanced' else 66)}-{35 if calculated_risk_profile == 'Conservative' else (65 if calculated_risk_profile == 'Balanced' else 100)}"
+    }
+    
+    return result
+
+
+def AuthorizeAndActivateRiskProfile(client_id: str, calculated_risk_profile: str,
+                                   client_authorization_method: str, transaction_timestamp: str) -> Dict[str, Any]:
+    """
+    Presents the calculated risk profile to the client for review and explicit consent.
+    Computes risk profile expiry date by adding 730 days to current timestamp.
+    Updates client master record to set investable_status to 'Active'.
+    """
+    # Parse transaction timestamp
+    transaction_dt = datetime.fromisoformat(transaction_timestamp.replace('Z', '+00:00'))
+    
+    # Calculate expiry date (730 days from now)
+    expiry_dt = transaction_dt + timedelta(days=730)
+    risk_profile_expiry_date = expiry_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    
+    # Set investable status
+    investable_status = "Active"
+    
+    # Authorization captured flag
+    authorization_captured = True
+    
+    result = {
+        "client_id": client_id,
+        "calculated_risk_profile": calculated_risk_profile,
+        "client_authorization_method": client_authorization_method,
+        "authorization_captured": authorization_captured,
+        "risk_profile_expiry_date": risk_profile_expiry_date,
+        "investable_status": investable_status,
+        "profile_activation_timestamp": transaction_timestamp
+    }
+    
+    # Update data store
+    entry = data_store.get_by_client_id(client_id)
+    if entry:
+        data_store.update_entry(entry['transaction_id'], {
+            'calculated_risk_profile': calculated_risk_profile,
+            'risk_profile_expiry_date': risk_profile_expiry_date,
+            'investable_status': investable_status
+        })
+    
+    return result
+
+
+def RecommendSuitableProducts(client_id: str, calculated_risk_profile: str, 
+                              investable_status: str) -> Dict[str, Any]:
+    """
+    Queries product master database applying hierarchical suitability filters based on 
+    client calculated_risk_profile to return only suitable investment products.
+    """
+    # Check investable status
+    if investable_status != "Active":
+        return {
+            "client_id": client_id,
+            "calculated_risk_profile": calculated_risk_profile,
+            "investable_status": investable_status,
+            "recommendation_status": "Blocked_Inactive_Status",
+            "suitable_products": []
+        }
+    
+    # Define product suitability matrix
+    # Conservative: Conservative, Moderate
+    # Balanced: Conservative, Moderate, Balanced
+    # Aggressive: All (Conservative, Moderate, Balanced, Growth, Aggressive)
+    
+    suitable_risk_ratings = []
+    if calculated_risk_profile == "Conservative":
+        suitable_risk_ratings = ["Conservative", "Moderate"]
+    elif calculated_risk_profile == "Balanced":
+        suitable_risk_ratings = ["Conservative", "Moderate", "Balanced"]
+    elif calculated_risk_profile == "Aggressive":
+        suitable_risk_ratings = ["Conservative", "Moderate", "Balanced", "Growth", "Aggressive"]
+    
+    # Simulate product recommendations (in real system, would query product database)
+    suitable_products = []
+    if "Conservative" in suitable_risk_ratings:
+        suitable_products.append({
+            "product_code": "MF_BOND_055",
+            "product_name": "Conservative Income Fund",
+            "product_risk_rating": "Conservative"
+        })
+    if "Moderate" in suitable_risk_ratings:
+        suitable_products.append({
+            "product_code": "MF_MOD_033",
+            "product_name": "Moderate Allocation Fund",
+            "product_risk_rating": "Moderate"
+        })
+    if "Balanced" in suitable_risk_ratings:
+        suitable_products.append({
+            "product_code": "MF_BAL_045",
+            "product_name": "Balanced Growth and Income Fund",
+            "product_risk_rating": "Balanced"
+        })
+    if "Growth" in suitable_risk_ratings:
+        suitable_products.append({
+            "product_code": "MF_TECH_001",
+            "product_name": "Global Tech Growth Fund",
+            "product_risk_rating": "Growth"
+        })
+    if "Aggressive" in suitable_risk_ratings:
+        suitable_products.append({
+            "product_code": "MF_AGGR_122",
+            "product_name": "Emerging Markets Equity Fund",
+            "product_risk_rating": "Aggressive"
+        })
+    
+    result = {
+        "client_id": client_id,
+        "calculated_risk_profile": calculated_risk_profile,
+        "investable_status": investable_status,
+        "recommendation_status": "Products_Available",
+        "suitable_products": suitable_products,
+        "number_of_suitable_products": len(suitable_products)
+    }
+    
+    return result
+
+
+def CreateInvestmentOrder(client_id: str, relationship_manager_id: str, product_code: str,
+                         subscription_amount: float, settlement_account_number: str,
+                         transaction_timestamp: str, branch_code: str, channel: str,
+                         region: str) -> Dict[str, Any]:
+    """
+    Creates comprehensive new transaction record with system-generated transaction_id.
+    Captures all order parameters and retrieves product master data.
+    """
+    # Get existing entry for this client
+    entry = data_store.get_by_client_id(client_id)
+    
+    if not entry:
+        # Generate new transaction ID
+        transaction_id = f"INV_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    else:
+        transaction_id = entry.get('transaction_id', f"INV_{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    
+    # Retrieve product data from entry if exists
+    product_name = entry.get('product_name', '') if entry else ''
+    product_risk_rating = entry.get('product_risk_rating', '') if entry else ''
+    product_category = entry.get('product_category', '') if entry else ''
+    current_nav = float(entry.get('current_nav', 0)) if entry and entry.get('current_nav') else 0.0
+    front_end_load_percentage = float(entry.get('front_end_load_percentage', 0)) if entry and entry.get('front_end_load_percentage') else 0.0
+    annual_management_fee_percentage = float(entry.get('annual_management_fee_percentage', 0)) if entry and entry.get('annual_management_fee_percentage') else 0.0
+    compliance_officer_id = entry.get('compliance_officer_id', '') if entry else ''
+    
+    result = {
+        "transaction_id": transaction_id,
+        "client_id": client_id,
+        "relationship_manager_id": relationship_manager_id,
+        "product_code": product_code,
+        "product_name": product_name,
+        "product_risk_rating": product_risk_rating,
+        "product_category": product_category,
+        "subscription_amount": subscription_amount,
+        "settlement_account_number": settlement_account_number,
+        "transaction_timestamp": transaction_timestamp,
+        "branch_code": branch_code,
+        "channel": channel,
+        "region": region,
+        "current_nav": current_nav,
+        "front_end_load_percentage": front_end_load_percentage,
+        "annual_management_fee_percentage": annual_management_fee_percentage,
+        "compliance_officer_id": compliance_officer_id,
+        "order_creation_status": "Order_Created"
+    }
+    
+    return result
+
+
+def ValidateProductSuitability(transaction_id: str, calculated_risk_profile: str,
+                               product_risk_rating: str) -> Dict[str, Any]:
+    """
+    Executes automated real-time suitability check by comparing product_risk_rating 
+    against client calculated_risk_profile using hierarchical matching matrix.
+    """
+    # Hierarchical suitability matrix
+    suitability_matrix = {
+        "Conservative": ["Conservative", "Moderate"],
+        "Balanced": ["Conservative", "Moderate", "Balanced"],
+        "Aggressive": ["Conservative", "Moderate", "Balanced", "Growth", "Aggressive"]
+    }
+    
+    suitable_ratings = suitability_matrix.get(calculated_risk_profile, [])
+    
+    # Check suitability
+    if product_risk_rating in suitable_ratings:
+        suitability_check_passed = True
+        suitability_mismatch_flag = False
+        suitability_assessment = "Suitable"
+    else:
+        suitability_check_passed = False
+        suitability_mismatch_flag = True
+        suitability_assessment = "Unsuitable_Requires_Waiver"
+    
+    result = {
+        "transaction_id": transaction_id,
+        "calculated_risk_profile": calculated_risk_profile,
+        "product_risk_rating": product_risk_rating,
+        "suitability_check_passed": suitability_check_passed,
+        "suitability_mismatch_flag": suitability_mismatch_flag,
+        "suitability_assessment": suitability_assessment
+    }
+    
+    # Update data store
+    data_store.update_entry(transaction_id, {
+        'suitability_check_passed': str(suitability_check_passed),
+        'suitability_mismatch_flag': str(suitability_mismatch_flag)
+    })
+    
+    return result
+
+
+def ExecuteAMLSanctionsScreening(client_id: str, client_name: str, 
+                                 transaction_id: str) -> Dict[str, Any]:
+    """
+    Interfaces with enterprise AML monitoring platform to perform real-time sanctions 
+    list screening of client_id and client_name against all relevant sanctions databases.
+    """
+    # Get entry data
+    entry = data_store.get_by_transaction_id(transaction_id)
+    
+    # Retrieve existing AML status if available
+    if entry:
+        aml_status = entry.get('aml_sanctions_screening_status', 'Clear')
+    else:
+        aml_status = 'Clear'
+    
+    # Parse status
+    if aml_status == "Pending":
+        screening_status = "Pending"
+        screening_result = "Screening_In_Progress"
+    elif aml_status == "Flagged":
+        screening_status = "Flagged"
+        screening_result = "Potential_Match_Manual_Review_Required"
+    else:
+        screening_status = "Clear"
+        screening_result = "No_Matches_Found"
+    
+    result = {
+        "transaction_id": transaction_id,
+        "client_id": client_id,
+        "client_name": client_name,
+        "aml_sanctions_screening_status": screening_status,
+        "screening_result": screening_result,
+        "screening_timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    return result
+
+
+def ValidateThresholdAndSOW(subscription_amount: float, monitoring_threshold_amount: float,
+                            source_of_wealth_documented: bool) -> Dict[str, Any]:
+    """
+    Compares subscription_amount against configured monitoring_threshold_amount to determine 
+    if transaction exceeds regulatory large-transaction threshold requiring enhanced due diligence.
+    """
+    # Check if threshold exceeded (inclusive rule: >= is treated as exceeding)
+    transaction_threshold_exceeded = subscription_amount >= monitoring_threshold_amount
+    
+    # Validate SOW documentation
+    if transaction_threshold_exceeded:
+        if source_of_wealth_documented:
+            threshold_validation_status = "Passed"
+            sow_validation_result = "SOW_Documentation_Valid"
+        else:
+            threshold_validation_status = "Failed"
+            sow_validation_result = "SOW_Documentation_Missing"
+    else:
+        threshold_validation_status = "Passed"
+        sow_validation_result = "Below_Threshold_SOW_Not_Required"
+    
+    result = {
+        "subscription_amount": subscription_amount,
+        "monitoring_threshold_amount": monitoring_threshold_amount,
+        "transaction_threshold_exceeded": transaction_threshold_exceeded,
+        "source_of_wealth_documented": source_of_wealth_documented,
+        "threshold_validation_status": threshold_validation_status,
+        "sow_validation_result": sow_validation_result
+    }
+    
+    return result
+
+
+def VerifyFundsAvailability(settlement_account_number: str, 
+                           subscription_amount: float) -> Dict[str, Any]:
+    """
+    Queries Core Banking System to retrieve real-time available_balance for specified 
+    settlement_account_number and compares against subscription_amount.
+    """
+    # Get available balance from data store
+    available_balance = 0.0
+    for entry in data_store.data:
+        if entry.get('settlement_account_number') == settlement_account_number:
+            available_balance = float(entry.get('available_balance', 0))
+            break
+    
+    # Compare balance (inclusive rule: equal amounts pass)
+    funds_availability_verified = available_balance >= subscription_amount
+    
+    if funds_availability_verified:
+        verification_result = "Sufficient_Funds_Available"
+    else:
+        verification_result = "Insufficient_Funds"
+    
+    result = {
+        "settlement_account_number": settlement_account_number,
+        "subscription_amount": subscription_amount,
+        "available_balance": available_balance,
+        "funds_availability_verified": funds_availability_verified,
+        "verification_result": verification_result
+    }
+    
+    return result
+
+
+def AggregateComplianceChecks(suitability_check_passed: bool, aml_sanctions_screening_status: str,
+                              transaction_threshold_exceeded: bool, source_of_wealth_documented: bool,
+                              funds_availability_verified: bool) -> Dict[str, Any]:
+    """
+    Aggregates validation results from all parallel pre-trade compliance checks.
+    Applies boolean AND logic across all validation outcomes.
+    """
+    # Check AML status
+    aml_passed = aml_sanctions_screening_status == "Clear"
+    
+    # Check threshold/SOW
+    if transaction_threshold_exceeded:
+        threshold_sow_passed = source_of_wealth_documented
+    else:
+        threshold_sow_passed = True
+    
+    # Apply boolean AND logic
+    pre_trade_compliance_passed = (
+        suitability_check_passed and 
+        aml_passed and 
+        threshold_sow_passed and 
+        funds_availability_verified
+    )
+    
+    # Build compliance summary
+    compliance_checks_summary = {
+        "suitability_check": "Passed" if suitability_check_passed else "Failed",
+        "aml_sanctions_screening": "Passed" if aml_passed else "Failed",
+        "threshold_sow_validation": "Passed" if threshold_sow_passed else "Failed",
+        "funds_availability": "Passed" if funds_availability_verified else "Failed"
+    }
+    
+    if pre_trade_compliance_passed:
+        overall_compliance_status = "All_Checks_Passed"
+    else:
+        overall_compliance_status = "One_Or_More_Checks_Failed"
+    
+    result = {
+        "suitability_check_passed": suitability_check_passed,
+        "aml_sanctions_screening_status": aml_sanctions_screening_status,
+        "transaction_threshold_exceeded": transaction_threshold_exceeded,
+        "source_of_wealth_documented": source_of_wealth_documented,
+        "funds_availability_verified": funds_availability_verified,
+        "pre_trade_compliance_passed": pre_trade_compliance_passed,
+        "overall_compliance_status": overall_compliance_status,
+        "compliance_checks_summary": compliance_checks_summary
+    }
+    
+    return result
+
+
+def CalculateTransactionFinancials(subscription_amount: float, front_end_load_percentage: float,
+                                  annual_management_fee_percentage: float, current_nav: float,
+                                  product_category: str, pre_trade_compliance_passed: bool) -> Dict[str, Any]:
+    """
+    Computes comprehensive transaction financial metrics with regulatory precision.
+    Only executes when pre_trade_compliance_passed = TRUE.
+    """
+    if not pre_trade_compliance_passed:
+        return {
+            "subscription_amount": subscription_amount,
+            "calculation_status": "Blocked_Compliance_Not_Passed",
+            "front_end_load_amount": None,
+            "net_investment_amount": None,
+            "estimated_units": None,
+            "annual_management_fee_amount": None
+        }
+    
+    # Calculate front end load amount
+    front_end_load_amount = round(subscription_amount * front_end_load_percentage / 100, 2)
+    
+    # Calculate net investment amount
+    net_investment_amount = round(subscription_amount - front_end_load_amount, 2)
+    
+    # Calculate estimated units (only for Mutual_Fund category with NAV)
+    if product_category == "Mutual_Fund" and current_nav > 0:
+        estimated_units = round(net_investment_amount / current_nav, 4)
+    else:
+        estimated_units = None
+    
+    # Calculate annual management fee amount
+    annual_management_fee_amount = round(net_investment_amount * annual_management_fee_percentage / 100, 2)
+    
+    result = {
+        "subscription_amount": subscription_amount,
+        "front_end_load_percentage": front_end_load_percentage,
+        "front_end_load_amount": front_end_load_amount,
+        "net_investment_amount": net_investment_amount,
+        "current_nav": current_nav,
+        "estimated_units": estimated_units,
+        "annual_management_fee_percentage": annual_management_fee_percentage,
+        "annual_management_fee_amount": annual_management_fee_amount,
+        "calculation_status": "Completed"
+    }
+    
+    return result
+
+
+def ManageCoolingOffPeriod(transaction_id: str, product_category: str, 
+                          cooling_off_period_required: bool, cooling_off_period_hours: int,
+                          client_authorization_timestamp: str) -> Dict[str, Any]:
+    """
+    Evaluates product_category against cooling-off period requirements to determine applicability.
+    When applicable, calculates cooling-off expiry timestamp.
+    """
+    # Categories requiring cooling-off
+    cooling_off_categories = ["Structured_Note", "Dual_Currency_Investment", "Principal_Protected_Note"]
+    
+    # Check if cooling-off applies
+    cooling_off_applicable = product_category in cooling_off_categories and cooling_off_period_required
+    
+    if cooling_off_applicable:
+        # Parse authorization timestamp
+        auth_dt = datetime.fromisoformat(client_authorization_timestamp.replace('Z', '+00:00'))
+        
+        # Calculate expiry timestamp
+        expiry_dt = auth_dt + timedelta(hours=cooling_off_period_hours)
+        cooling_off_expiry_timestamp = expiry_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        
+        # Check if cooling-off period has elapsed
+        current_dt = datetime.now()
+        if current_dt >= expiry_dt:
+            transaction_status = "Ready_for_Execution"
+            cooling_off_status = "Cooling_Off_Period_Elapsed"
+        else:
+            transaction_status = "Pending_Cooling_Off"
+            cooling_off_status = "Cooling_Off_Period_Active"
+    else:
+        transaction_status = "Ready_for_Execution"
+        cooling_off_status = "Cooling_Off_Not_Required"
+        cooling_off_expiry_timestamp = None
+    
+    result = {
+        "transaction_id": transaction_id,
+        "product_category": product_category,
+        "cooling_off_period_required": cooling_off_applicable,
+        "cooling_off_period_hours": cooling_off_period_hours if cooling_off_applicable else 0,
+        "client_authorization_timestamp": client_authorization_timestamp,
+        "cooling_off_expiry_timestamp": cooling_off_expiry_timestamp,
+        "transaction_status": transaction_status,
+        "cooling_off_status": cooling_off_status
+    }
+    
+    # Update data store
+    data_store.update_entry(transaction_id, {
+        'transaction_status': transaction_status
+    })
+    
+    return result
+
+
+def ExecuteInvestmentTransaction(transaction_id: str, product_category: str, product_code: str,
+                                 net_investment_amount: float, settlement_account_number: str,
+                                 client_id: str, transaction_status: str, 
+                                 subscription_amount: float) -> Dict[str, Any]:
+    """
+    Final execution step consummating investment transaction through appropriate channel routing.
+    Only executes when transaction_status = 'Ready_for_Execution'.
+    """
+    if transaction_status != "Ready_for_Execution":
+        return {
+            "transaction_id": transaction_id,
+            "execution_status": "Blocked_Not_Ready_For_Execution",
+            "transaction_status": transaction_status,
+            "execution_timestamp": None
+        }
+    
+    # Generate execution timestamp
+    execution_timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    execution_dt = datetime.now()
+    
+    # Route based on product category
+    if product_category == "Mutual_Fund":
+        # Route to fund house gateway
+        trade_reference_number = f"TRF_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        contract_note_number = None
+        execution_channel = "Fund_House_Gateway"
+        settlement_cycle = "T+1"
+        settlement_date = (execution_dt + timedelta(days=1)).strftime("%Y-%m-%d")
+    else:
+        # Route to Treasury/Global Markets desk
+        trade_reference_number = None
+        contract_note_number = f"CN_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        execution_channel = "Treasury_Desk"
+        settlement_cycle = "T+2"
+        settlement_date = (execution_dt + timedelta(days=2)).strftime("%Y-%m-%d")
+    
+    # Update transaction status
+    new_transaction_status = "Executed"
+    
+    result = {
+        "transaction_id": transaction_id,
+        "product_category": product_category,
+        "product_code": product_code,
+        "client_id": client_id,
+        "net_investment_amount": net_investment_amount,
+        "subscription_amount": subscription_amount,
+        "settlement_account_number": settlement_account_number,
+        "execution_timestamp": execution_timestamp,
+        "execution_channel": execution_channel,
+        "trade_reference_number": trade_reference_number,
+        "contract_note_number": contract_note_number,
+        "settlement_cycle": settlement_cycle,
+        "settlement_date": settlement_date,
+        "transaction_status": new_transaction_status,
+        "execution_status": "Successfully_Executed"
+    }
+    
+    # Update data store
+    data_store.update_entry(transaction_id, {
+        'transaction_status': new_transaction_status,
+        'execution_timestamp': execution_timestamp,
+        'settlement_date': settlement_date,
+        'trade_reference_number': trade_reference_number if trade_reference_number else '',
+        'contract_note_number': contract_note_number if contract_note_number else ''
+    })
+    
+    return result
+
+
+def CalculateSTPFlag(transaction_id: str, suitability_mismatch_flag: bool,
+                    supervisor_approval_required: bool, aml_sanctions_screening_status: str) -> Dict[str, Any]:
+    """
+    Evaluates entire transaction lifecycle to determine if straight-through processing was achieved.
+    Sets straight_through_processing_flag to TRUE only for zero-touch transactions.
+    """
+    # Check for any manual intervention indicators
+    has_suitability_mismatch = suitability_mismatch_flag
+    has_supervisor_approval = supervisor_approval_required
+    has_aml_flag = aml_sanctions_screening_status != "Clear"
+    
+    # STP achieved only if no manual interventions
+    straight_through_processing_flag = not (has_suitability_mismatch or has_supervisor_approval or has_aml_flag)
+    
+    if straight_through_processing_flag:
+        stp_assessment = "Zero_Touch_STP_Achieved"
+    else:
+        stp_assessment = "Manual_Intervention_Required"
+    
+    # Build intervention summary
+    manual_interventions = []
+    if has_suitability_mismatch:
+        manual_interventions.append("Suitability_Mismatch_Waiver")
+    if has_supervisor_approval:
+        manual_interventions.append("Supervisor_Approval")
+    if has_aml_flag:
+        manual_interventions.append("AML_Screening_Flag")
+    
+    result = {
+        "transaction_id": transaction_id,
+        "suitability_mismatch_flag": suitability_mismatch_flag,
+        "supervisor_approval_required": supervisor_approval_required,
+        "aml_sanctions_screening_status": aml_sanctions_screening_status,
+        "straight_through_processing_flag": straight_through_processing_flag,
+        "stp_assessment": stp_assessment,
+        "manual_interventions": manual_interventions if manual_interventions else None
+    }
+    
+    # Update data store
+    data_store.update_entry(transaction_id, {
+        'straight_through_processing_flag': str(straight_through_processing_flag)
+    })
+    
+    return result
+
+
+def ExecutePostTradeComplianceReview(transaction_id: str, audio_video_recording_id: Optional[str],
+                                    suitability_mismatch_flag: bool, transaction_threshold_exceeded: bool,
+                                    disclosure_documents_presented: List[str]) -> Dict[str, Any]:
+    """
+    Performs post-execution quality assurance and regulatory compliance verification.
+    Only executes after transaction_status = 'Executed'.
+    """
+    compliance_defects = []
+    
+    # Check audio/video recording for complex products
+    entry = data_store.get_by_transaction_id(transaction_id)
+    if entry:
+        recording_required = entry.get('audio_video_recording_required', 'False') == 'True'
+        if recording_required:
+            if not audio_video_recording_id or audio_video_recording_id == "":
+                compliance_defects.append("Missing_Audio_Video_Recording")
+    
+    # Check suitability mismatch documentation
+    if suitability_mismatch_flag:
+        if entry:
+            waiver_doc = entry.get('mismatch_waiver_document_id', '')
+            if not waiver_doc or waiver_doc == "":
+                compliance_defects.append("Missing_Suitability_Waiver_Documentation")
+    
+    # Check threshold SOW documentation
+    if transaction_threshold_exceeded:
+        if entry:
+            sow_doc = entry.get('source_of_wealth_documented', 'False')
+            if sow_doc != 'True':
+                compliance_defects.append("Missing_SOW_Documentation")
+    
+    # Check disclosure documents completeness
+    if entry:
+        product_category = entry.get('product_category', '')
+        required_docs = []
+        
+        if product_category == "Mutual_Fund":
+            required_docs = ["Fund_Fact_Sheet", "Prospectus", "KID"]
+        elif product_category in ["Structured_Note", "Dual_Currency_Investment", "Principal_Protected_Note"]:
+            required_docs = ["Risk_Disclosure_Statement", "KID"]
+        
+        # Parse disclosure_documents_presented if string
+        if isinstance(disclosure_documents_presented, str):
+            try:
+                disclosure_documents_presented = json.loads(disclosure_documents_presented)
+            except:
+                disclosure_documents_presented = []
+        
+        for req_doc in required_docs:
+            doc_found = False
+            for presented_doc in disclosure_documents_presented:
+                if req_doc in presented_doc or presented_doc in req_doc:
+                    doc_found = True
+                    break
+            if not doc_found:
+                compliance_defects.append(f"Missing_{req_doc}")
+    
+    # Set compliance defect flag
+    compliance_defect_flag = len(compliance_defects) > 0
+    
+    if compliance_defect_flag:
+        review_conclusion = "Deficiencies_Identified"
+    else:
+        review_conclusion = "No_Deficiencies_Found"
+    
+    compliance_review_notes = "; ".join(compliance_defects) if compliance_defects else "All compliance requirements met"
+    
+    result = {
+        "transaction_id": transaction_id,
+        "compliance_defect_flag": compliance_defect_flag,
+        "compliance_defects_identified": compliance_defects if compliance_defects else None,
+        "review_conclusion": review_conclusion,
+        "compliance_review_notes": compliance_review_notes,
+        "review_timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update data store
+    data_store.update_entry(transaction_id, {
+        'compliance_defect_flag': str(compliance_defect_flag),
+        'compliance_review_notes': compliance_review_notes
+    })
+    
+    return result
+
+
+def CalculateProcessingMetrics(transaction_timestamp: str, execution_timestamp: str) -> Dict[str, Any]:
+    """
+    Computes end-to-end transaction processing efficiency metrics by calculating 
+    total_processing_time_minutes as elapsed time between transaction initiation and completion.
+    """
+    # Parse timestamps
+    transaction_dt = datetime.fromisoformat(transaction_timestamp.replace('Z', '+00:00'))
+    execution_dt = datetime.fromisoformat(execution_timestamp.replace('Z', '+00:00'))
+    
+    # Calculate elapsed time in minutes
+    elapsed_time = execution_dt - transaction_dt
+    total_processing_time_minutes = round(elapsed_time.total_seconds() / 60, 2)
+    
+    # Calculate processing efficiency metrics
+    if total_processing_time_minutes <= 30:
+        processing_efficiency_rating = "Excellent"
+    elif total_processing_time_minutes <= 60:
+        processing_efficiency_rating = "Good"
+    elif total_processing_time_minutes <= 120:
+        processing_efficiency_rating = "Average"
+    else:
+        processing_efficiency_rating = "Below_Target"
+    
+    result = {
+        "transaction_timestamp": transaction_timestamp,
+        "execution_timestamp": execution_timestamp,
+        "total_processing_time_minutes": total_processing_time_minutes,
+        "processing_efficiency_rating": processing_efficiency_rating
+    }
+    
+    return result
+
+
+def process_tool_call(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Central function to process tool calls and route to appropriate API function.
+    """
+    if tool_name == "ValidateExistingRiskProfile":
+        return ValidateExistingRiskProfile(**tool_input)
+    elif tool_name == "AdministerRiskQuestionnaire":
+        return AdministerRiskQuestionnaire(**tool_input)
+    elif tool_name == "CalculateRiskProfile":
+        return CalculateRiskProfile(**tool_input)
+    elif tool_name == "AuthorizeAndActivateRiskProfile":
+        return AuthorizeAndActivateRiskProfile(**tool_input)
+    elif tool_name == "RecommendSuitableProducts":
+        return RecommendSuitableProducts(**tool_input)
+    elif tool_name == "CreateInvestmentOrder":
+        return CreateInvestmentOrder(**tool_input)
+    elif tool_name == "ValidateProductSuitability":
+        return ValidateProductSuitability(**tool_input)
+    elif tool_name == "ExecuteAMLSanctionsScreening":
+        return ExecuteAMLSanctionsScreening(**tool_input)
+    elif tool_name == "ValidateThresholdAndSOW":
+        return ValidateThresholdAndSOW(**tool_input)
+    elif tool_name == "VerifyFundsAvailability":
+        return VerifyFundsAvailability(**tool_input)
+    elif tool_name == "AggregateComplianceChecks":
+        return AggregateComplianceChecks(**tool_input)
+    elif tool_name == "CalculateTransactionFinancials":
+        return CalculateTransactionFinancials(**tool_input)
+    elif tool_name == "ManageCoolingOffPeriod":
+        return ManageCoolingOffPeriod(**tool_input)
+    elif tool_name == "ExecuteInvestmentTransaction":
+        return ExecuteInvestmentTransaction(**tool_input)
+    elif tool_name == "CalculateSTPFlag":
+        return CalculateSTPFlag(**tool_input)
+    elif tool_name == "ExecutePostTradeComplianceReview":
+        return ExecutePostTradeComplianceReview(**tool_input)
+    elif tool_name == "CalculateProcessingMetrics":
+        return CalculateProcessingMetrics(**tool_input)
+    else:
+        return {"error": f"Unknown tool: {tool_name}"}
+
+
+# Test cases
+if __name__ == "__main__":
+    print("=== Test Case 1: Validate Expired Risk Profile ===")
+    result1 = ValidateExistingRiskProfile(
+        client_id="CLI_987654",
+        transaction_timestamp="2025-04-18T10:15:30Z",
+        previous_risk_profile="Balanced",
+        previous_risk_profile_expiry_date="2025-03-15T00:00:00Z"
+    )
+    print(json.dumps(result1, indent=2))
+    
+    print("\n=== Test Case 2: Administer Risk Questionnaire ===")
+    result2 = AdministerRiskQuestionnaire(
+        client_id="CLI_987654",
+        client_age=45,
+        client_annual_income=150000.00,
+        client_investment_experience_years=8,
+        client_liquidity_needs="Low",
+        risk_questionnaire_responses={
+            "q1_age_bracket": "41-50",
+            "q2_income_stability": "Stable",
+            "q3_investment_horizon": "5-10_years",
+            "q4_loss_tolerance": "High",
+            "q5_previous_investments": "Stocks_Bonds_Alternatives"
+        }
+    )
+    print(json.dumps(result2, indent=2))
+    
+    print("\n=== Test Case 3: Calculate Risk Profile ===")
+    result3 = CalculateRiskProfile(risk_questionnaire_total_score=78)
+    print(json.dumps(result3, indent=2))
+    
+    print("\n=== Test Case 4: Authorize and Activate Risk Profile ===")
+    result4 = AuthorizeAndActivateRiskProfile(
+        client_id="CLI_987654",
+        calculated_risk_profile="Aggressive",
+        client_authorization_method="OTP",
+        transaction_timestamp="2025-04-18T10:45:22Z"
+    )
+    print(json.dumps(result4, indent=2))
+    
+    print("\n=== Test Case 5: Recommend Suitable Products ===")
+    result5 = RecommendSuitableProducts(
+        client_id="CLI_987654",
+        calculated_risk_profile="Aggressive",
+        investable_status="Active"
+    )
+    print(json.dumps(result5, indent=2))
+    
+    print("\n=== Test Case 6: Validate Product Suitability ===")
+    result6 = ValidateProductSuitability(
+        transaction_id="INV_2025041801234",
+        calculated_risk_profile="Aggressive",
+        product_risk_rating="Growth"
+    )
+    print(json.dumps(result6, indent=2))
+    
+    print("\n=== Test Case 7: Calculate Transaction Financials ===")
+    result7 = CalculateTransactionFinancials(
+        subscription_amount=50000.00,
+        front_end_load_percentage=2.5,
+        annual_management_fee_percentage=1.75,
+        current_nav=15.42,
+        product_category="Mutual_Fund",
+        pre_trade_compliance_passed=True
+    )
+    print(json.dumps(result7, indent=2))
+    
+    print("\n=== Test Case 8: Verify Funds Availability ===")
+    result8 = VerifyFundsAvailability(
+        settlement_account_number="ACC_1234567890",
+        subscription_amount=50000.00
+    )
+    print(json.dumps(result8, indent=2))
+</code>
+
+<class>
+class Tool_ValidateExistingRiskProfile(BaseModel):
+    client_id: str = Field(..., description="Unique identifier for the client whose risk profile validity is being checked")
+    transaction_timestamp: str = Field(..., description="Current transaction initiation timestamp in ISO 8601 format")
+    previous_risk_profile: Optional[str] = Field(None, description="The client's existing risk profile classification if one exists")
+    previous_risk_profile_expiry_date: Optional[str] = Field(None, description="The expiration date of the existing risk profile in ISO 8601 format")
+
+class Tool_AdministerRiskQuestionnaire(BaseModel):
+    client_id: str = Field(..., description="Unique identifier for the client completing the risk tolerance questionnaire")
+    client_age: int = Field(..., description="Client's age in years, used for age bracket scoring")
+    client_annual_income: float = Field(..., description="Client's declared annual income in USD")
+    client_investment_experience_years: int = Field(..., description="Number of years of investment experience")
+    client_liquidity_needs: str = Field(..., description="Client's liquidity requirements classification")
+    risk_questionnaire_responses: Dict[str, Any] = Field(..., description="JSON object containing structured questionnaire answers")
+
+class Tool_CalculateRiskProfile(BaseModel):
+    risk_questionnaire_total_score: int = Field(..., description="Total numerical score from risk tolerance questionnaire ranging from 0 to 100 points")
+
+class Tool_AuthorizeAndActivateRiskProfile(BaseModel):
+    client_id: str = Field(..., description="Unique identifier for the client authorizing their calculated risk profile")
+    calculated_risk_profile: str = Field(..., description="The system-calculated risk profile classification")
+    client_authorization_method: str = Field(..., description="Method used to capture legally binding client consent")
+    transaction_timestamp: str = Field(..., description="Current timestamp in ISO 8601 format")
+
+class Tool_RecommendSuitableProducts(BaseModel):
+    client_id: str = Field(..., description="Unique identifier for the client for whom suitable investment products are being recommended")
+    calculated_risk_profile: str = Field(..., description="Client's authorized risk profile classification")
+    investable_status: str = Field(..., description="Client's current investable status flag")
+
+class Tool_CreateInvestmentOrder(BaseModel):
+    client_id: str = Field(..., description="Unique identifier for the client placing the investment order")
+    relationship_manager_id: str = Field(..., description="Unique identifier for the Relationship Manager")
+    product_code: str = Field(..., description="Unique product identifier code from the product master database")
+    subscription_amount: float = Field(..., description="Total investment amount in USD")
+    settlement_account_number: str = Field(..., description="Client's bank account number")
+    transaction_timestamp: str = Field(..., description="Transaction initiation timestamp in ISO 8601 format")
+    branch_code: str = Field(..., description="Code identifying the originating branch location")
+    channel: str = Field(..., description="Distribution channel through which the transaction was initiated")
+    region: str = Field(..., description="Geographic region code for the transaction")
+
+class Tool_ValidateProductSuitability(BaseModel):
+    transaction_id: str = Field(..., description="Unique system-generated transaction identifier")
+    calculated_risk_profile: str = Field(..., description="Client's authorized risk profile classification")
+    product_risk_rating: str = Field(..., description="Risk rating of the selected investment product")
+
+class Tool_ExecuteAMLSanctionsScreening(BaseModel):
+    client_id: str = Field(..., description="Unique client identifier to be screened")
+    client_name: str = Field(..., description="Client's full legal name to be screened")
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+
+class Tool_ValidateThresholdAndSOW(BaseModel):
+    subscription_amount: float = Field(..., description="Total investment subscription amount in USD")
+    monitoring_threshold_amount: float = Field(..., description="Configured regulatory monitoring threshold in USD")
+    source_of_wealth_documented: bool = Field(..., description="Boolean flag indicating whether Source of Wealth documentation is on file")
+
+class Tool_VerifyFundsAvailability(BaseModel):
+    settlement_account_number: str = Field(..., description="Client's bank account number")
+    subscription_amount: float = Field(..., description="Total investment subscription amount in USD")
+
+class Tool_AggregateComplianceChecks(BaseModel):
+    suitability_check_passed: bool = Field(..., description="Boolean result from ValidateProductSuitability")
+    aml_sanctions_screening_status: str = Field(..., description="Status from ExecuteAMLSanctionsScreening")
+    transaction_threshold_exceeded: bool = Field(..., description="Boolean from ValidateThresholdAndSOW")
+    source_of_wealth_documented: bool = Field(..., description="Boolean from ValidateThresholdAndSOW")
+    funds_availability_verified: bool = Field(..., description="Boolean result from VerifyFundsAvailability")
+
+class Tool_CalculateTransactionFinancials(BaseModel):
+    subscription_amount: float = Field(..., description="Total investment amount in USD")
+    front_end_load_percentage: float = Field(..., description="Sales charge percentage from product master database")
+    annual_management_fee_percentage: float = Field(..., description="Ongoing annual management fee percentage")
+    current_nav: float = Field(..., description="Current Net Asset Value per unit")
+    product_category: str = Field(..., description="Product classification")
+    pre_trade_compliance_passed: bool = Field(..., description="Consolidated compliance validation result")
+
+class Tool_ManageCoolingOffPeriod(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    product_category: str = Field(..., description="Product classification")
+    cooling_off_period_required: bool = Field(..., description="Boolean flag indicating whether cooling-off period applies")
+    cooling_off_period_hours: int = Field(..., description="Duration of cooling-off period in hours")
+    client_authorization_timestamp: str = Field(..., description="ISO 8601 timestamp when client authorized the transaction")
+
+class Tool_ExecuteInvestmentTransaction(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    product_category: str = Field(..., description="Product classification")
+    product_code: str = Field(..., description="Unique product identifier")
+    net_investment_amount: float = Field(..., description="Actual capital deployed into investment product")
+    settlement_account_number: str = Field(..., description="Client's bank account")
+    client_id: str = Field(..., description="Unique client identifier")
+    transaction_status: str = Field(..., description="Current transaction status")
+    subscription_amount: float = Field(..., description="Total gross investment amount")
+
+class Tool_CalculateSTPFlag(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    suitability_mismatch_flag: bool = Field(..., description="Boolean from ValidateProductSuitability")
+    supervisor_approval_required: bool = Field(..., description="Boolean indicating whether transaction required supervisor approval")
+    aml_sanctions_screening_status: str = Field(..., description="AML screening outcome")
+
+class Tool_ExecutePostTradeComplianceReview(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    audio_video_recording_id: Optional[str] = Field(None, description="Unique identifier for audio/video recording")
+    suitability_mismatch_flag: bool = Field(..., description="Boolean from ValidateProductSuitability")
+    transaction_threshold_exceeded: bool = Field(..., description="Boolean from ValidateThresholdAndSOW")
+    disclosure_documents_presented: List[str] = Field(..., description="Array of document types presented to client")
+
+class Tool_CalculateProcessingMetrics(BaseModel):
+    transaction_timestamp: str = Field(..., description="Transaction initiation timestamp in ISO 8601 format")
+    execution_timestamp: str = Field(..., description="Transaction execution completion timestamp in ISO 8601 format")
+</class>
+
+<tools>
+tools = [
+    StructuredTool.from_function(
+        func=ValidateExistingRiskProfile,
+        name="ValidateExistingRiskProfile",
+        description="Validates whether the client has an existing, unexpired risk profile assessment on file by comparing the previous_risk_profile_expiry_date against the current transaction_timestamp. Determines if a new risk assessment questionnaire administration is required or if the existing profile can be utilized for the investment transaction.",
+        args_schema=Tool_ValidateExistingRiskProfile
+    ),
+    StructuredTool.from_function(
+        func=AdministerRiskQuestionnaire,
+        name="AdministerRiskQuestionnaire",
+        description="Administers the regulatory-mandated Risk Tolerance Questionnaire to the client, collecting structured responses across multiple dimensions. Applies weighted scoring algorithm based on questionnaire responses to generate a numerical risk_questionnaire_total_score ranging from 0 to 100 points.",
+        args_schema=Tool_AdministerRiskQuestionnaire
+    ),
+    StructuredTool.from_function(
+        func=CalculateRiskProfile,
+        name="CalculateRiskProfile",
+        description="Applies deterministic mapping algorithm to convert numerical risk_questionnaire_total_score into categorical risk profile classification using regulatory-defined score ranges: Conservative (0-35 points), Balanced (36-65 points), and Aggressive (66-100 points).",
+        args_schema=Tool_CalculateRiskProfile
+    ),
+    StructuredTool.from_function(
+        func=AuthorizeAndActivateRiskProfile,
+        name="AuthorizeAndActivateRiskProfile",
+        description="Presents the calculated risk profile to the client for review and explicit consent, captures client authorization via configured method, computes risk profile expiry date by adding 730 days to current timestamp, and updates client master record to set investable_status to 'Active'.",
+        args_schema=Tool_AuthorizeAndActivateRiskProfile
+    ),
+    StructuredTool.from_function(
+        func=RecommendSuitableProducts,
+        name="RecommendSuitableProducts",
+        description="Queries product master database applying hierarchical suitability filters based on client calculated_risk_profile to return only investment products whose product_risk_rating aligns with or is lower than client risk tolerance according to regulatory suitability matrix.",
+        args_schema=Tool_RecommendSuitableProducts
+    ),
+    StructuredTool.from_function(
+        func=CreateInvestmentOrder,
+        name="CreateInvestmentOrder",
+        description="Creates comprehensive new transaction record with system-generated transaction_id, captures all order parameters including client identification, relationship manager, product selection, subscription amount, and settlement account.",
+        args_schema=Tool_CreateInvestmentOrder
+    ),
+    StructuredTool.from_function(
+        func=ValidateProductSuitability,
+        name="ValidateProductSuitability",
+        description="Executes automated real-time suitability check by comparing product_risk_rating against client calculated_risk_profile using hierarchical matching matrix enforcing regulatory suitability rules.",
+        args_schema=Tool_ValidateProductSuitability
+    ),
+    StructuredTool.from_function(
+        func=ExecuteAMLSanctionsScreening,
+        name="ExecuteAMLSanctionsScreening",
+        description="Interfaces with enterprise AML monitoring platform to perform real-time sanctions list screening of client_id and client_name against all relevant sanctions databases.",
+        args_schema=Tool_ExecuteAMLSanctionsScreening
+    ),
+    StructuredTool.from_function(
+        func=ValidateThresholdAndSOW,
+        name="ValidateThresholdAndSOW",
+        description="Compares subscription_amount against configured monitoring_threshold_amount to determine if transaction exceeds regulatory large-transaction threshold requiring enhanced due diligence.",
+        args_schema=Tool_ValidateThresholdAndSOW
+    ),
+    StructuredTool.from_function(
+        func=VerifyFundsAvailability,
+        name="VerifyFundsAvailability",
+        description="Queries Core Banking System to retrieve real-time available_balance for specified settlement_account_number and compares retrieved available_balance against subscription_amount to confirm sufficient liquid funds exist.",
+        args_schema=Tool_VerifyFundsAvailability
+    ),
+    StructuredTool.from_function(
+        func=AggregateComplianceChecks,
+        name="AggregateComplianceChecks",
+        description="Aggregates validation results from all parallel pre-trade compliance checks including suitability validation, AML sanctions screening, threshold/SOW validation, and funds availability verification. Applies boolean AND logic across all validation outcomes.",
+        args_schema=Tool_AggregateComplianceChecks
+    ),
+    StructuredTool.from_function(
+        func=CalculateTransactionFinancials,
+        name="CalculateTransactionFinancials",
+        description="Computes comprehensive transaction financial metrics with regulatory precision including front-end load amount, net investment amount, estimated units, and annual management fee amount. Only executes when pre_trade_compliance_passed = TRUE.",
+        args_schema=Tool_CalculateTransactionFinancials
+    ),
+    StructuredTool.from_function(
+        func=ManageCoolingOffPeriod,
+        name="ManageCoolingOffPeriod",
+        description="Evaluates product_category against cooling-off period requirements to determine applicability. When applicable, calculates cooling-off expiry timestamp by adding cooling_off_period_hours to client_authorization_timestamp.",
+        args_schema=Tool_ManageCoolingOffPeriod
+    ),
+    StructuredTool.from_function(
+        func=ExecuteInvestmentTransaction,
+        name="ExecuteInvestmentTransaction",
+        description="Final execution step consummating investment transaction through appropriate channel routing. For Mutual_Fund products, transmits electronic purchase order to fund house gateway. For structured products, routes order to Treasury/Global Markets desk.",
+        args_schema=Tool_ExecuteInvestmentTransaction
+    ),
+    StructuredTool.from_function(
+        func=CalculateSTPFlag,
+        name="CalculateSTPFlag",
+        description="Evaluates entire transaction lifecycle to determine if straight-through processing was achieved by checking for any manual intervention indicators. Sets straight_through_processing_flag to TRUE only for zero-touch transactions.",
+        args_schema=Tool_CalculateSTPFlag
+    ),
+    StructuredTool.from_function(
+        func=ExecutePostTradeComplianceReview,
+        name="ExecutePostTradeComplianceReview",
+        description="Performs post-execution quality assurance and regulatory compliance verification by reviewing transaction against standardized compliance checklist. Documents findings and sets compliance_defect_flag if violations or deficiencies identified.",
+        args_schema=Tool_ExecutePostTradeComplianceReview
+    ),
+    StructuredTool.from_function(
+        func=CalculateProcessingMetrics,
+        name="CalculateProcessingMetrics",
+        description="Computes end-to-end transaction processing efficiency metrics by calculating total_processing_time_minutes as elapsed time between transaction_timestamp (initiation) and execution_timestamp (completion).",
+        args_schema=Tool_CalculateProcessingMetrics
+    )
+]
+</tools>
+```

@@ -1,0 +1,49 @@
+
+prompts:
+  name: generate_dataset_schema
+  parameters: [sop_title, additional_context]
+  text: |
+    You are an expert AI assistant specialized in generating synthetic dataset schemas based on Standard Operating Procedures (SOPs). You will use the provided SOP text to generate a dataset schema description.
+    ***The number of fields in the schema must be designed to be within 50.***
+    First, please carefully read the following SOP title:
+
+    <sop_title>
+      {{sop_title}}
+    </sop_title>
+
+    {
+    Here are the additional contextual instructions you must follow during the SOP generation process:
+      <additional_context>
+      {{additional_context}}
+      </additional_context>
+    {
+
+    Below is an example of a video information schema. You must mimic the following format for output, but ***if the actual task is not related to video, do not output these template information***:
+    <schema>
+      <Existing_fields>
+        video_id - string, unique identifier for the video (e.g., "vid_00123").
+        video_path - string, file path or URI of the video (e.g., "/data/videos/vid_00123.mp4").
+        upload_timestamp - datetime, time of video upload (e.g., "2025-04-18T15:32:10Z").
+        uploader_id - string, anonymized user identifier (e.g., "user_487").
+        video_language - string, detected or declared language of video audio (e.g., "en", "es").
+        region - string, region associated with the video or uploader (e.g., "US", "IN").
+        metadata_tags - list[string], keywords or tags extracted from video metadata (e.g., ["protest", "crowd", "chanting"]).
+        duration_seconds - integer, total duration of the video in seconds (e.g., 312).
+      </Existing_fields>
+      <Field_to_be_obtained>
+        format_validated - boolean, whether the video passed format validation (e.g., True).
+      </Field_to_be_obtained>
+    </schema>
+
+
+    Now, please combine the above SOP title and additional context to generate a dataset schema within the <schema></schema> tags, following the specified format.
+    <requirements>
+    1. Define the dataset schema fields, including for each field:
+      - Name
+      - Type (e.g., string, integer, float, boolean, datetime, enum, list, etc.)
+      - Description (what this field represents)
+      - Example value
+    2. Where applicable, include data value ranges and options. Appropriately include independent fields such as funding amounts (300,000), time, etc.
+    3. Existing data before approval must be wrapped inside <Existing_fields></Existing_fields>, while fields that need to be obtained through processes like calculation, approval, etc., such as credit scores calculated, approval results (whether passed), must be wrapped inside <Field_to_be_obtained></Field_to_be_obtained>.
+    4. If a field's value format is JSON, all sub-fields within it must be determined.
+    </requirements>

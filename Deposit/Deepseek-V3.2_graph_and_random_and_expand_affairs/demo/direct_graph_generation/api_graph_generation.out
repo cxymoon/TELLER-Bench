@@ -1,0 +1,1019 @@
+<dependency_analysis>
+
+## 1. Business Process Deconstruction
+
+### Mapping SOP Steps to API Operations:
+
+**Section 5.1 - Customer Identification and KYC Verification:**
+- **API Operation**: KYC_Verification_API
+- **Purpose**: Validate customer identity, check ID documents, calculate confidence scores
+- **Data Transfer**: Receives customer identification data → Outputs kyc_verification_status, kyc_verification_timestamp
+
+**Section 5.2 - Anti-Money Laundering and Sanctions Screening:**
+- **API Operation**: AML_Sanctions_Screening_API
+- **Purpose**: Screen against watchlists, calculate AML risk scores
+- **Data Transfer**: Requires KYC verified status → Outputs aml_screening_result, aml_risk_score, sanctions_screening_timestamp
+
+**Section 5.3 - Currency Transaction Report Evaluation:**
+- **API Operation**: CTR_Evaluation_API
+- **Purpose**: Determine CTR filing requirements, detect structuring patterns
+- **Data Transfer**: Requires deposit amount and funding source → Outputs ctr_filing_required boolean
+
+**Section 5.4 - Physical Currency Validation:**
+- **API Operation**: Currency_Validation_API
+- **Purpose**: Validate physical cash, detect counterfeits, reconcile denominations
+- **Data Transfer**: Requires cash denomination breakdown → Outputs counterfeit_detection_result, cash_drawer_total_after_transaction
+
+**Section 5.5 - Real-Time Fraud Detection:**
+- **API Operation**: Fraud_Detection_Scoring_API
+- **Purpose**: Calculate behavioral fraud risk scores based on transaction patterns
+- **Data Transfer**: Requires customer history and current transaction data → Outputs fraud_detection_score
+
+**Section 5.6 - Supervisory Approval Routing:**
+- **API Operation**: Supervisor_Approval_Routing_API
+- **Purpose**: Determine if supervisor approval needed, route to appropriate authority
+- **Data Transfer**: Requires all risk scores and validation results → Outputs supervisor_approval_required, supervisor_id, supervisor_approval_timestamp
+
+**Section 5.7 - Term Deposit Specific Processing:**
+- **API Operation**: Term_Deposit_Processing_API
+- **Purpose**: Calculate interest, generate certificates, compute maturity dates
+- **Data Transfer**: Requires deposit type and amount → Outputs cd_certificate_number, maturity_date, calculated_interest_at_maturity
+
+**Section 5.8 - Account Balance Update:**
+- **API Operation**: Account_Ledger_Posting_API
+- **Purpose**: Execute double-entry accounting, update balances, generate transaction references
+- **Data Transfer**: Requires all approvals → Outputs new_account_balance, transaction_reference_id, account_status
+
+**Section 5.9 - Compliance Verification Aggregation:**
+- **API Operation**: Compliance_Aggregation_API
+- **Purpose**: Aggregate all compliance checks, determine final approval
+- **Data Transfer**: Requires all validation results → Outputs compliance_check_passed, transaction_approved, approval_rejection_reason
+
+**Section 5.10 - Receipt Generation:**
+- **API Operation**: Receipt_Generation_API
+- **Purpose**: Generate customer receipts, format documentation
+- **Data Transfer**: Requires approved transaction data → Outputs receipt_number, formatted receipt data
+
+**Section 5.11 - Audit Trail Generation:**
+- **API Operation**: Audit_Trail_Recording_API
+- **Purpose**: Create immutable audit records, implement data integrity controls
+- **Data Transfer**: Requires complete transaction lifecycle data → Outputs audit trail records with cryptographic hashes
+
+## 2. Data Flow Analysis
+
+### Entity Relationship Analysis:
+
+**Customer Entity Flow:**
+- customer_id links to customer_name, customer_id_type, customer_id_number, customer_address, customer_tax_id
+- Flows through: KYC → AML → Fraud Detection → All downstream APIs
+
+**Transaction Entity Flow:**
+- transaction_id serves as primary key throughout entire process
+- Links to: account_number, deposit_amount, deposit_type, funding_source_type
+- Flows through: All APIs in sequence
+
+**Account Entity Flow:**
+- account_number links to account_type, previous_account_balance
+- Critical for: Term Deposit Processing → Ledger Posting
+- Outputs: new_account_balance, account_status
+
+**Validation Results Flow:**
+- kyc_verification_status → Input to AML_Sanctions_Screening_API
+- aml_screening_result, aml_risk_score → Input to Supervisor_Approval_Routing_API
+- counterfeit_detection_result → Input to Compliance_Aggregation_API
+- fraud_detection_score → Input to Supervisor_Approval_Routing_API
+
+**Approval Chain Flow:**
+- All validation outputs → Supervisor_Approval_Routing_API → Compliance_Aggregation_API
+- compliance_check_passed → Account_Ledger_Posting_API
+- transaction_approved → Receipt_Generation_API
+
+### Parameter Source Tracing:
+
+**User Input Sources:**
+- All customer identification fields (customer_name, customer_id_type, etc.)
+- Transaction details (deposit_amount, deposit_type, account_number)
+- Cash denomination breakdown (for cash transactions)
+- Branch and teller identification (branch_code, teller_id)
+
+**API-Generated Sources:**
+- kyc_verification_status (from KYC_Verification_API)
+- aml_screening_result, aml_risk_score (from AML_Sanctions_Screening_API)
+- fraud_detection_score (from Fraud_Detection_Scoring_API)
+- supervisor_approval_timestamp (from Supervisor_Approval_Routing_API)
+- new_account_balance (from Account_Ledger_Posting_API)
+
+**System State Sources:**
+- previous_account_balance (from Core Banking System ledger)
+- interest_rate_apy (from treasury rate tables)
+- cash_drawer_total_after_transaction (from teller system state)
+
+## 3. Dependency Relationship Deduction
+
+### Direct Data Dependencies:
+
+1. **AML_Sanctions_Screening_API depends on KYC_Verification_API**
+   - Reason: SOP 5.2 explicitly states "Following successful completion of Know Your Customer verification procedures as evidenced by kyc_verification_status field attaining VERIFIED enumeration"
+   - Type: Data dependency (requires kyc_verification_status = VERIFIED)
+
+2. **Supervisor_Approval_Routing_API depends on multiple validation APIs**
+   - Depends on: KYC_Verification_API, AML_Sanctions_Screening_API, Currency_Validation_API, Fraud_Detection_Scoring_API, CTR_Evaluation_API
+   - Reason: SOP 5.6 states it evaluates "aggregated risk assessment outcomes from Know Your Customer verification, Anti-Money Laundering screening, Currency Transaction Report evaluation, counterfeit detection, and fraud scoring"
+   - Type: Data dependency (requires all risk scores and validation results)
+
+3. **Compliance_Aggregation_API depends on all validation and approval APIs**
+   - Depends on: KYC_Verification_API, AML_Sanctions_Screening_API, Currency_Validation_API, Fraud_Detection_Scoring_API, Supervisor_Approval_Routing_API
+   - Reason: SOP 5.9 implements "logical AND operation across multiple condition predicates"
+   - Type: Data dependency (requires all compliance check results)
+
+4. **Account_Ledger_Posting_API depends on Compliance_Aggregation_API**
+   - Reason: SOP 5.8 states execution occurs "Upon successful completion of all validation, screening, approval, and product-specific processing workflows"
+   - Type: State dependency (requires compliance_check_passed = true)
+
+5. **Receipt_Generation_API depends on Account_Ledger_Posting_API**
+   - Reason: SOP 5.10 states "Upon successful transaction approval as evidenced by transaction_approved boolean flag evaluating to true"
+   - Type: Data dependency (requires new_account_balance, transaction_reference_id)
+
+### Indirect Dependencies:
+
+1. **Account_Ledger_Posting_API indirectly depends on KYC_Verification_API**
+   - Chain: KYC → AML → Supervisor Approval → Compliance → Ledger Posting
+   - Reason: Cannot post without passing KYC
+
+2. **Term_Deposit_Processing_API has parallel dependency**
+   - Can execute in parallel with validation APIs but results feed into Compliance_Aggregation_API
+   - Type: Conditional data dependency (only executes if deposit_type = TERM_DEPOSIT)
+
+### Temporal Dependencies:
+
+1. **Currency_Validation_API must execute before Supervisor_Approval_Routing_API**
+   - Reason: Counterfeit detection results influence approval routing
+   - Type: Temporal dependency (sequence matters)
+
+2. **CTR_Evaluation_API executes in parallel with AML screening**
+   - Reason: SOP 5.3 states "In parallel with Anti-Money Laundering screening execution"
+   - Type: No temporal dependency with AML (can run concurrently)
+
+## 4. Complexity Assessment
+
+### Technical Complexity Ratings:
+
+**High Complexity:**
+- **Fraud_Detection_Scoring_API**: Requires machine learning models, historical pattern analysis, z-score calculations, weighted logistic regression
+- **AML_Sanctions_Screening_API**: Fuzzy matching algorithms, multiple watchlist integrations, complex risk scoring
+- **Account_Ledger_Posting_API**: Double-entry accounting, atomic transactions, multiple GL account handling
+
+**Medium Complexity:**
+- **KYC_Verification_API**: Multi-source identity validation, confidence scoring, third-party integrations
+- **Term_Deposit_Processing_API**: Interest calculations, maturity date computation, certificate generation
+- **Compliance_Aggregation_API**: Complex boolean logic, multi-condition evaluation
+- **Supervisor_Approval_Routing_API**: Authorization matrix evaluation, tiered escalation logic
+
+**Low Complexity:**
+- **CTR_Evaluation_API**: Threshold comparison, aggregation queries
+- **Currency_Validation_API**: Hardware interface, count reconciliation
+- **Receipt_Generation_API**: Formatting and output generation
+- **Audit_Trail_Recording_API**: Data persistence and hashing
+
+### Cyclic Dependency Risk:
+- **No cyclic dependencies detected** - all flows are unidirectional from validation → approval → posting → output
+
+### Dependency Chain Analysis:
+
+**Longest Critical Path:**
+KYC_Verification_API → AML_Sanctions_Screening_API → Supervisor_Approval_Routing_API → Compliance_Aggregation_API → Account_Ledger_Posting_API → Receipt_Generation_API → Audit_Trail_Recording_API
+- **Chain Length**: 7 APIs
+- **Total estimated processing time**: 60-300 seconds (per SOP output specifications)
+
+**Parallel Execution Opportunities:**
+- CTR_Evaluation_API can run parallel with AML_Sanctions_Screening_API
+- Currency_Validation_API can run parallel with Fraud_Detection_Scoring_API
+- Term_Deposit_Processing_API can run parallel with validation APIs (conditional)
+
+## 5. Verification and Optimization
+
+### Rationality Verification:
+
+✓ **All dependencies are justified by SOP requirements**
+✓ **No circular dependencies exist**
+✓ **Data flow follows business logic sequence**
+✓ **Critical validation occurs before approval and posting**
+✓ **Audit trail creation occurs after transaction completion**
+
+### Parallel Execution Identification:
+
+**Parallel Group 1 (After KYC completion):**
+- AML_Sanctions_Screening_API
+- CTR_Evaluation_API
+- Fraud_Detection_Scoring_API
+- Currency_Validation_API (if funding_source_type = CASH)
+
+These can execute concurrently as they don't depend on each other's outputs.
+
+**Parallel Group 2 (Conditional):**
+- Term_Deposit_Processing_API (only if deposit_type = TERM_DEPOSIT)
+- Can execute parallel with validation group
+
+### Optimization Suggestions:
+
+1. **Implement batch risk scoring**: Combine AML and fraud scoring API calls to reduce latency
+2. **Cache customer data**: Store frequently accessed customer profile data to speed up fraud detection
+3. **Asynchronous audit trail**: Execute Audit_Trail_Recording_API asynchronously after receipt generation to reduce customer wait time
+4. **Optimize approval routing**: Pre-calculate supervisor requirements to reduce decision latency
+5. **Conditional API execution**: Skip Currency_Validation_API entirely for non-cash transactions
+
+### Exception Handling Considerations:
+
+1. **KYC Failure**: Should halt entire process immediately
+2. **AML WATCHLIST_HIT**: Should route to manual review queue
+3. **Supervisor Approval Timeout**: Should have escalation mechanism
+4. **Ledger Posting Failure**: Requires full transaction rollback
+5. **Receipt Generation Failure**: Should not block transaction approval (can retry)
+
+</dependency_analysis>
+
+<api_dependency_graph>
+```yaml
+apis:
+  - api_name: "KYC_Verification_API"
+    description: "Executes comprehensive Know Your Customer identity verification workflows including multi-source identity validation, confidence scoring algorithms, third-party data aggregator queries, and documentation completeness assessment to satisfy Customer Identification Program regulatory requirements under 31 CFR 1020.220"
+    purpose: "Validate customer identity credentials, verify correlation between presented identification documents and customer master data, calculate identity confidence scores, and determine kyc_verification_status to gate subsequent compliance processing workflows"
+    input_parameters:
+      - name: "customer_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_name"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_id_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "customer_id_number"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_tax_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_phone"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_email"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "kyc_verification_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "kyc_verification_timestamp"
+        data_type: "datetime"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "AML_Sanctions_Screening_API"
+    description: "Performs automated Anti-Money Laundering screening through fuzzy matching algorithms against consolidated sanctions databases including OFAC SDN list, UN Security Council sanctions, and proprietary watchlists, calculates composite AML risk scores using weighted multi-dimensional risk modeling, and determines screening result classification requiring manual review escalation when risk thresholds are exceeded"
+    purpose: "Screen customer identifying information against governmental and institutional watchlists, calculate probabilistic AML risk scores based on transaction characteristics and customer behavioral patterns, and output aml_screening_result and aml_risk_score to inform approval routing decisions"
+    input_parameters:
+      - name: "customer_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_name"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "customer_tax_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "kyc_verification_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "deposit_channel"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "branch_code"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "funding_source_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "aml_screening_result"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "aml_risk_score"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "sanctions_screening_timestamp"
+        data_type: "datetime"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires kyc_verification_status to equal VERIFIED before executing AML screening per SOP Section 5.2 statement 'Following successful completion of Know Your Customer verification procedures as evidenced by kyc_verification_status field attaining VERIFIED enumeration'"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "CTR_Evaluation_API"
+    description: "Executes real-time Currency Transaction Report filing obligation evaluation by comparing deposit amounts against statutory thresholds codified in 31 USC 5313, performs aggregation queries to detect potential structuring patterns across multiple transactions within rolling twelve-month windows, and determines ctr_filing_required boolean flag triggering FinCEN Form 112 generation workflows"
+    purpose: "Assess CTR filing requirements based on deposit amount thresholds and funding source type, detect structuring activity patterns through transaction aggregation analysis, and output ctr_filing_required flag to inform compliance verification and regulatory reporting obligations"
+    input_parameters:
+      - name: "customer_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "funding_source_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "ctr_threshold_amount"
+        data_type: "float"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "ctr_filing_required"
+        data_type: "boolean"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "Currency_Validation_API"
+    description: "Interfaces with certified currency discriminator hardware to execute multi-spectral imaging analysis including ultraviolet fluorescence detection, infrared absorption spectroscopy, magnetic sensing, and dimensional measurement for physical currency authentication, performs denomination count reconciliation against teller-declared cash_denomination_breakdown, and calculates updated cash_drawer_total_after_transaction for teller balancing workflows"
+    purpose: "Validate authenticity of physical currency through counterfeit detection mechanisms, reconcile machine-counted denominations against declared amounts, update teller cash drawer totals, and output counterfeit_detection_result and cash_drawer_total_after_transaction for compliance verification and operational reconciliation"
+    input_parameters:
+      - name: "funding_source_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "cash_denomination_breakdown"
+        data_type: "JSON"
+        source: "user_input"
+        required: false
+      - name: "cash_counter_machine_id"
+        data_type: "string"
+        source: "system_state"
+        required: false
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "counterfeit_detection_result"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "cash_drawer_total_after_transaction"
+        data_type: "float"
+        destination: "storage"
+    direct_dependencies: []
+    complexity_level: "low"
+    business_criticality: "medium"
+
+  - api_name: "Fraud_Detection_Scoring_API"
+    description: "Executes real-time behavioral analytics fraud detection through machine learning models trained on historical fraud incident patterns, retrieves customer transaction profile baselines from CRM data warehouse, calculates z-score deviations for deposit amounts and behavioral characteristics, evaluates geographic impossibility scenarios and channel switching patterns, and generates probabilistic fraud_detection_score through weighted logistic regression aggregation of individual risk signals"
+    purpose: "Calculate real-time fraud risk probability scores based on transaction behavioral deviations from customer baseline patterns, detect account takeover indicators and geographic anomalies, and output fraud_detection_score to inform approval routing and enhanced authentication requirement determination"
+    input_parameters:
+      - name: "customer_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "account_number"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "deposit_channel"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "deposit_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "branch_code"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "fraud_detection_score"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "Supervisor_Approval_Routing_API"
+    description: "Evaluates multiple conditional criteria against employee authorization matrices to determine supervisor_approval_required flag status, assesses whether deposit amounts exceed teller authority limits, aggregates risk indicators from KYC, AML, CTR, counterfeit detection, and fraud scoring workflows, implements tiered escalation logic routing transactions to Branch Manager or Regional Manager approval queues with comprehensive risk context presentation, and captures supervisor_id and supervisor_approval_timestamp upon approval execution"
+    purpose: "Determine supervisory approval necessity based on transaction amount thresholds and aggregated risk assessment outcomes, route high-risk or high-value transactions to appropriate authorization levels, capture approval chain documentation, and output supervisor_approval_required flag with corresponding approval metadata for compliance verification"
+    input_parameters:
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "teller_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "kyc_verification_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "aml_screening_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "aml_risk_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "fraud_detection_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "counterfeit_detection_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "ctr_filing_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "transaction_notes"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "supervisor_approval_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "supervisor_id"
+        data_type: "string"
+        destination: "other_api"
+      - name: "supervisor_approval_timestamp"
+        data_type: "datetime"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires kyc_verification_status as input to evaluate whether KYC status equals REQUIRES_REVIEW triggering supervisor approval per SOP Section 5.6 conditional criteria"
+      - dependent_api: "AML_Sanctions_Screening_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires aml_screening_result and aml_risk_score to evaluate whether AML results equal WATCHLIST_HIT or MANUAL_REVIEW_REQUIRED or risk score exceeds 75 threshold per SOP Section 5.6"
+      - dependent_api: "Fraud_Detection_Scoring_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires fraud_detection_score to evaluate whether score exceeds 0.70 threshold triggering mandatory supervisor approval per SOP Section 5.6"
+      - dependent_api: "Currency_Validation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires counterfeit_detection_result to evaluate whether result equals FAIL necessitating Branch Manager intervention per SOP Section 5.6"
+      - dependent_api: "CTR_Evaluation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires ctr_filing_required flag to determine if CTR filing combined with suspicious transaction notes triggers supervisor notification per SOP Section 5.6"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "Term_Deposit_Processing_API"
+    description: "Executes specialized term deposit product processing logic including retrieval of treasury-approved interest_rate_apy from rate matrix tables indexed by term_length_months and deposit_amount tier thresholds, calculates maturity_date through calendar month addition with business day adjustment logic, computes calculated_interest_at_maturity using compound interest formula with configurable compounding frequency, generates unique cd_certificate_number identifiers, and establishes automated maturity notification calendar triggers"
+    purpose: "Process term deposit specific calculations and certificate generation for TERM_DEPOSIT transaction types, retrieve applicable interest rates from treasury rate tables, calculate maturity parameters and projected interest earnings, and output cd_certificate_number, maturity_date, and calculated_interest_at_maturity for customer disclosure and ledger posting"
+    input_parameters:
+      - name: "deposit_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "term_length_months"
+        data_type: "integer"
+        source: "user_input"
+        required: false
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "interest_rate_apy"
+        data_type: "float"
+        source: "system_state"
+        required: false
+      - name: "early_withdrawal_penalty_rate"
+        data_type: "float"
+        source: "system_state"
+        required: false
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "cd_certificate_number"
+        data_type: "string"
+        destination: "other_api"
+      - name: "maturity_date"
+        data_type: "datetime"
+        destination: "other_api"
+      - name: "calculated_interest_at_maturity"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "Compliance_Aggregation_API"
+    description: "Performs comprehensive compliance verification aggregation by implementing logical AND operation across all mandatory control checkpoint boolean states, evaluates whether kyc_verification_status equals VERIFIED, aml_screening_result equals CLEAR or has documented override approval, counterfeit_detection_result passes validation, fraud_detection_score falls below institutional tolerance thresholds, and supervisor approvals are satisfied when required, determines final compliance_check_passed boolean and transaction_approved status, and populates approval_rejection_reason field with structured rejection rationale when any control checkpoint fails"
+    purpose: "Aggregate all compliance validation results through boolean logic evaluation, determine final transaction approval status based on comprehensive control checkpoint assessment, generate approval or rejection determination with detailed rationale documentation, and output compliance_check_passed, transaction_approved, and approval_rejection_reason for ledger posting gate control"
+    input_parameters:
+      - name: "kyc_verification_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "aml_screening_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "aml_risk_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "counterfeit_detection_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "fraud_detection_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "supervisor_approval_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "supervisor_id"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "supervisor_approval_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: false
+      - name: "ctr_filing_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "compliance_check_passed"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "transaction_approved"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "approval_rejection_reason"
+        data_type: "string"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires kyc_verification_status to evaluate whether status equals VERIFIED as mandatory condition for compliance_check_passed per SOP Section 5.9 logical AND operation"
+      - dependent_api: "AML_Sanctions_Screening_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires aml_screening_result and aml_risk_score to evaluate whether screening equals CLEAR or has override approval as compliance condition per SOP Section 5.9"
+      - dependent_api: "Currency_Validation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires counterfeit_detection_result to evaluate whether result equals PASS or NOT_APPLICABLE for compliance verification per SOP Section 5.9"
+      - dependent_api: "Fraud_Detection_Scoring_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires fraud_detection_score to evaluate whether score below 0.70 threshold or has analyst override approval per SOP Section 5.9"
+      - dependent_api: "Supervisor_Approval_Routing_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires supervisor_approval_required flag and corresponding approval metadata to evaluate whether approvals satisfied when required per SOP Section 5.9"
+      - dependent_api: "CTR_Evaluation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires ctr_filing_required to evaluate regulatory filing completeness as part of compliance aggregation per SOP Section 5.9"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "Account_Ledger_Posting_API"
+    description: "Executes atomic transaction commit operation implementing double-entry accounting principles by simultaneously debiting appropriate asset accounts based on funding_source_type and crediting customer deposit account general ledger, calculates new_account_balance through decimal precision arithmetic addition of deposit_amount to previous_account_balance, generates globally unique transaction_reference_id, updates account_status to ACTIVE, triggers ancillary provisioning workflows for debit card issuance and online banking enablement, records processing_time_seconds performance metric, and ensures general ledger coding for regulatory reserve requirement reporting"
+    purpose: "Execute final ledger posting with double-entry accounting integrity, update customer account balance with transaction amount, generate immutable transaction reference identifier, activate account status and ancillary service provisioning, and output new_account_balance, transaction_reference_id, account_status, and processing_time_seconds as definitive transaction completion evidence"
+    input_parameters:
+      - name: "account_number"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "previous_account_balance"
+        data_type: "float"
+        source: "system_state"
+        required: true
+      - name: "funding_source_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "funding_source_account"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "branch_code"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "account_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "compliance_check_passed"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "transaction_approved"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "cd_certificate_number"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "debit_card_issued"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+      - name: "online_banking_enabled"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+      - name: "mobile_app_enabled"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+      - name: "checkbook_ordered"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "new_account_balance"
+        data_type: "float"
+        destination: "other_api"
+      - name: "transaction_reference_id"
+        data_type: "string"
+        destination: "other_api"
+      - name: "account_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "processing_time_seconds"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "debit_card_number"
+        data_type: "string"
+        destination: "storage"
+      - name: "final_transaction_fee"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "Compliance_Aggregation_API"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires compliance_check_passed to equal true and transaction_approved to equal true before executing ledger posting per SOP Section 5.8 statement 'Upon successful completion of all validation, screening, approval, and product-specific processing workflows'"
+      - dependent_api: "Term_Deposit_Processing_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires cd_certificate_number for term deposit transactions to link certificate instrument to ledger account per SOP Section 5.8 term deposit processing requirements"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "Receipt_Generation_API"
+    description: "Generates comprehensive transaction documentation for customer delivery including receipt_number formatted with branch and date identifiers, retrieves and formats transaction details with currency symbols and comma separators, incorporates Truth in Savings Act mandatory disclosures for interest-bearing accounts including APY and early withdrawal penalties, executes receipt delivery via specified receipt_delivery_method including printed thermal output, email PDF transmission, SMS text notification, or mobile app push notification, updates customer profile in CRM with relationship value recalculation and next-best-action recommendations"
+    purpose: "Generate formatted transaction receipts with regulatory disclosure compliance, deliver documentation through customer-selected channel, update CRM relationship data, and output receipt_number as customer reference identifier for inquiry and dispute resolution procedures"
+    input_parameters:
+      - name: "customer_name"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "account_number"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "new_account_balance"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "transaction_reference_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "branch_code"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "receipt_delivery_method"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "customer_email"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "customer_phone"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "cd_certificate_number"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "maturity_date"
+        data_type: "datetime"
+        source: "other_api"
+        required: false
+      - name: "interest_rate_apy"
+        data_type: "float"
+        source: "system_state"
+        required: false
+      - name: "calculated_interest_at_maturity"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "transaction_notes"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "transaction_approved"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "minimum_balance_requirement"
+        data_type: "float"
+        source: "system_state"
+        required: false
+      - name: "monthly_maintenance_fee"
+        data_type: "float"
+        source: "system_state"
+        required: false
+      - name: "early_withdrawal_penalty_rate"
+        data_type: "float"
+        source: "system_state"
+        required: false
+      - name: "final_transaction_fee"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "receipt_number"
+        data_type: "string"
+        destination: "ui_display"
+    direct_dependencies:
+      - dependent_api: "Account_Ledger_Posting_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires new_account_balance and transaction_reference_id from ledger posting to populate receipt with updated balance and reference number per SOP Section 5.10 receipt generation requirements"
+      - dependent_api: "Term_Deposit_Processing_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires cd_certificate_number, maturity_date, and calculated_interest_at_maturity for term deposit receipt documentation per SOP Section 5.10 Truth in Savings Act disclosure requirements"
+      - dependent_api: "Compliance_Aggregation_API"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires transaction_approved boolean to confirm successful approval before generating customer receipt per SOP Section 5.10 statement 'Upon successful transaction approval'"
+    complexity_level: "low"
+    business_criticality: "medium"
+
+  - api_name: "Audit_Trail_Recording_API"
+    description: "Creates comprehensive immutable audit trail documentation capturing complete transaction lifecycle from initiation through final approval and posting, incorporates all schema fields from Existing_fields and Field_to_be_obtained specifications along with supplementary metadata including IP addresses and device fingerprints, preserves pre-transaction state snapshots and validation check result details, implements blockchain-inspired cryptographic hashing for data integrity verification, establishes multi-dimensional indexing for efficient retrieval, and executes automated data lifecycle management transitioning records through cost-optimized storage tiers"
+    purpose: "Generate complete audit trail records with cryptographic integrity controls, preserve transaction lifecycle documentation for regulatory examination and incident investigation, implement efficient retrieval indexing across multiple query dimensions, and establish compliance with Bank Secrecy Act five-year retention requirements for deposit account transaction records"
+    input_parameters:
+      - name: "transaction_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "customer_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "account_number"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "transaction_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "deposit_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "teller_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "branch_code"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "kyc_verification_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "kyc_verification_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: true
+      - name: "aml_screening_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "aml_risk_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "sanctions_screening_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: true
+      - name: "fraud_detection_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "counterfeit_detection_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "supervisor_approval_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "supervisor_id"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "supervisor_approval_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: false
+      - name: "compliance_check_passed"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "transaction_approved"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "approval_rejection_reason"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "new_account_balance"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "transaction_reference_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "account_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "processing_time_seconds"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "receipt_number"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "previous_account_balance"
+        data_type: "float"
+        source: "system_state"
+        required: true
+      - name: "ctr_filing_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "cash_drawer_total_after_transaction"
+        data_type: "float"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "audit_trail_hash"
+        data_type: "string"
+        destination: "storage"
+      - name: "audit_record_id"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires kyc_verification_status and kyc_verification_timestamp for complete audit trail documentation per SOP Section 5.11 comprehensive lifecycle capture requirements"
+      - dependent_api: "AML_Sanctions_Screening_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires aml_screening_result, aml_risk_score, and sanctions_screening_timestamp for audit trail validation check results per SOP Section 5.11"
+      - dependent_api: "Fraud_Detection_Scoring_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires fraud_detection_score and dimensional score components for audit trail model performance analysis per SOP Section 5.11"
+      - dependent_api: "Currency_Validation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires counterfeit_detection_result and cash_drawer_total_after_transaction for cash handling audit documentation per SOP Section 5.11"
+      - dependent_api: "Supervisor_Approval_Routing_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires supervisor_approval_required, supervisor_id, and supervisor_approval_timestamp for authorization hierarchy audit chain per SOP Section 5.11"
+      - dependent_api: "Compliance_Aggregation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires compliance_check_passed, transaction_approved, and approval_rejection_reason for final approval determination audit documentation per SOP Section 5.11"
+      - dependent_api: "Account_Ledger_Posting_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires new_account_balance, transaction_reference_id, account_status, and processing_time_seconds for ledger posting results audit capture per SOP Section 5.11"
+      - dependent_api: "Receipt_Generation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires receipt_number for complete transaction documentation audit trail per SOP Section 5.11 customer interaction record requirements"
+      - dependent_api: "CTR_Evaluation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires ctr_filing_required for regulatory filing obligation audit documentation per SOP Section 5.11 compliance record retention"
+    complexity_level: "low"
+    business_criticality: "high"
+```
+</api_dependency_graph>
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件

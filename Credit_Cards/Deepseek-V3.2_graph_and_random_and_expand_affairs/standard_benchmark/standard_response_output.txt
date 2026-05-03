@@ -1,0 +1,276 @@
+```python
+import json
+import re
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Union
+
+# ==================== Data Storage Layer ====================
+APPLICATION_DATA = []
+
+def parse_data_entry(entry: List[str]) -> Dict[str, Any]:
+    """Parse a data entry list into a dictionary"""
+    data_dict = {}
+    for item in entry:
+        if ':' in item:
+            key, value = item.split(':', 1)
+            if value == '':
+                data_dict[key] = None
+            elif value in ['True', 'False']:
+                data_dict[key] = value == 'True'
+            elif value.startswith('['):
+                try:
+                    data_dict[key] = json.loads(value.replace("'", '"'))
+                except:
+                    data_dict[key] = []
+            else:
+                try:
+                    if '.' not in value:
+                        data_dict[key] = int(value)
+                    else:
+                        data_dict[key] = float(value)
+                except:
+                    data_dict[key] = value
+    return data_dict
+
+def initialize_data(raw_data: List[List[str]]):
+    """Initialize the APPLICATION_DATA from raw data"""
+    global APPLICATION_DATA
+    APPLICATION_DATA = [parse_data_entry(entry) for entry in raw_data]
+
+def get_application_by_id(application_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieve application data by application_id"""
+    for app in APPLICATION_DATA:
+        if app.get('application_id') == application_id:
+            return app
+    return None
+
+def update_application_data(application_id: str, updates: Dict[str, Any]):
+    """Update application data with new fields"""
+    app = get_application_by_id(application_id)
+    if app:
+        app.update(updates)
+
+def calculate_timestamp_diff_seconds(start_ts: str, end_ts: str) -> int:
+    """Calculate difference between two ISO 8601 timestamps in seconds"""
+    start = datetime.fromisoformat(start_ts.replace('Z', '+00:00'))
+    end = datetime.fromisoformat(end_ts.replace('Z', '+00:00'))
+    return int((end - start).total_seconds())
+
+def add_business_days(start_date: datetime, days: int) -> str:
+    """Add business days to a date (excluding weekends)"""
+    current = start_date
+    added = 0
+    while added < days:
+        current += timedelta(days=1)
+        if current.weekday() < 5:
+            added += 1
+    return current.strftime('%Y-%m-%d')
+
+# ==================== API Function Implementations ====================
+# [All API functions from the provided code are included here - ValidateApplicationData, 
+# VerifyIdentity, ScreenSanctionsWatchlist, DetectFraudIndicators, RetrieveCreditBureauData,
+# CalculateDebtToIncomeRatio, EvaluateCreditScorecard, DetermineCreditDecision, 
+# AssignCreditTerms, GenerateAdverseActionNotice, FinalizeApplicationOutputs]
+
+# ==================== Main Processing Logic ====================
+
+# Sample raw data
+raw_data = [
+    ['application_id:APP_CC_2025041801234', 'application_timestamp:2025-04-18T10:23:45Z', 'application_channel:mobile_app', 'business_type:retail', 'product_type:Rewards Platinum', 'applicant_id:CUST_789456', 'applicant_age:34', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:75000.00', 'applicant_housing_status:mortgage', 'applicant_monthly_housing_cost:1800.00', 'applicant_years_at_address:3', 'applicant_years_employed:5', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T10:24:12Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_998877', 'ip_address_location:New York, NY, US', 'credit_bureau_inquiry_timestamp:2025-04-18T10:24:30Z', 'credit_bureau_source:experian', 'credit_score:720', 'credit_utilization_ratio:0.32', 'number_of_open_accounts:8', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:25000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "pay_stub", "doc_id": "DOC_112233", "upload_timestamp": "2025-04-18T10:22:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T10:24:35Z', 'processing_end_timestamp:2025-04-18T10:25:02Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801235', 'application_timestamp:2025-04-18T11:15:22Z', 'application_channel:web', 'business_type:retail', 'product_type:Cashback Gold', 'applicant_id:CUST_445521', 'applicant_age:28', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:52000.00', 'applicant_housing_status:rent', 'applicant_monthly_housing_cost:1200.00', 'applicant_years_at_address:2', 'applicant_years_employed:3', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:kba', 'identity_verification_timestamp:2025-04-18T11:16:05Z', 'watchlist_check_result:clear', 'fraud_alert_flags:["address_mismatch"]', 'device_fingerprint_id:DEV_FP_112244', 'ip_address_location:Los Angeles, CA, US', 'credit_bureau_inquiry_timestamp:2025-04-18T11:16:45Z', 'credit_bureau_source:transunion', 'credit_score:685', 'credit_utilization_ratio:0.45', 'number_of_open_accounts:5', 'number_of_delinquent_accounts:1', 'total_outstanding_debt:18500.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:8', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T11:16:50Z', 'processing_end_timestamp:2025-04-18T11:17:25Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801236', 'application_timestamp:2025-04-18T14:30:18Z', 'application_channel:branch', 'business_type:small_business', 'product_type:Business Expense Card', 'applicant_id:CUST_667788', 'applicant_age:42', 'applicant_employment_status:self_employed', 'applicant_annual_income:95000.00', 'applicant_housing_status:own', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:8', 'applicant_years_employed:12', 'business_entity_name:Tech Solutions LLC', 'business_tin_ein:12-3456789', 'business_incorporation_date:2018-06-15', 'business_annual_revenue:500000.00', 'business_industry_code:541511', 'guarantor_personal_income:120000.00', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T14:31:02Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_334455', 'ip_address_location:Austin, TX, US', 'credit_bureau_inquiry_timestamp:2025-04-18T14:31:30Z', 'credit_bureau_source:dnb_commercial', 'credit_score:78', 'credit_utilization_ratio:0.28', 'number_of_open_accounts:6', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:35000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "tax_return", "doc_id": "DOC_223344", "upload_timestamp": "2025-04-18T14:29:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T14:31:35Z', 'processing_end_timestamp:2025-04-18T14:32:18Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801237', 'application_timestamp:2025-04-18T09:45:30Z', 'application_channel:mobile_app', 'business_type:secured', 'product_type:Secured Builder Card', 'applicant_id:CUST_112233', 'applicant_age:22', 'applicant_employment_status:employed_part_time', 'applicant_annual_income:24000.00', 'applicant_housing_status:living_with_family', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:1', 'applicant_years_employed:1', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:500.00', 'deposit_verification_status:verified', 'deposit_account_id:DEP_ACC_445566', 'identity_verification_method:document_scan', 'identity_verification_timestamp:2025-04-18T09:46:45Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_556677', 'ip_address_location:Chicago, IL, US', 'credit_bureau_inquiry_timestamp:2025-04-18T09:47:10Z', 'credit_bureau_source:equifax', 'credit_score:610', 'credit_utilization_ratio:0.00', 'number_of_open_accounts:1', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:3500.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "government_id", "doc_id": "DOC_334455", "upload_timestamp": "2025-04-18T09:46:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T09:47:15Z', 'processing_end_timestamp:2025-04-18T09:47:38Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801238', 'application_timestamp:2025-04-18T16:22:10Z', 'application_channel:web', 'business_type:retail', 'product_type:Low Interest Silver', 'applicant_id:CUST_998877', 'applicant_age:55', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:125000.00', 'applicant_housing_status:own', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:15', 'applicant_years_employed:22', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T16:22:55Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_778899', 'ip_address_location:Boston, MA, US', 'credit_bureau_inquiry_timestamp:2025-04-18T16:23:20Z', 'credit_bureau_source:experian', 'credit_score:805', 'credit_utilization_ratio:0.12', 'number_of_open_accounts:12', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:42000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T16:23:25Z', 'processing_end_timestamp:2025-04-18T16:23:47Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801239', 'application_timestamp:2025-04-18T13:10:05Z', 'application_channel:phone', 'business_type:retail', 'product_type:Rewards Platinum', 'applicant_id:CUST_223344', 'applicant_age:31', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:48000.00', 'applicant_housing_status:rent', 'applicant_monthly_housing_cost:1500.00', 'applicant_years_at_address:1', 'applicant_years_employed:2', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:kba', 'identity_verification_timestamp:2025-04-18T13:11:20Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_445566', 'ip_address_location:Seattle, WA, US', 'credit_bureau_inquiry_timestamp:2025-04-18T13:11:55Z', 'credit_bureau_source:transunion', 'credit_score:595', 'credit_utilization_ratio:0.78', 'number_of_open_accounts:4', 'number_of_delinquent_accounts:2', 'total_outstanding_debt:22000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:3', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T13:12:00Z', 'processing_end_timestamp:2025-04-18T13:12:28Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801240', 'application_timestamp:2025-04-18T08:30:42Z', 'application_channel:branch', 'business_type:corporate', 'product_type:Business Expense Card', 'applicant_id:CUST_556677', 'applicant_age:48', 'applicant_employment_status:self_employed', 'applicant_annual_income:180000.00', 'applicant_housing_status:own', 'applicant_monthly_housing_cost:2500.00', 'applicant_years_at_address:10', 'applicant_years_employed:18', 'business_entity_name:Global Consulting Inc', 'business_tin_ein:98-7654321', 'business_incorporation_date:2012-03-22', 'business_annual_revenue:2500000.00', 'business_industry_code:541611', 'guarantor_personal_income:250000.00', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T08:31:28Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_667788', 'ip_address_location:San Francisco, CA, US', 'credit_bureau_inquiry_timestamp:2025-04-18T08:31:55Z', 'credit_bureau_source:dnb_commercial', 'credit_score:85', 'credit_utilization_ratio:0.22', 'number_of_open_accounts:10', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:125000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "bank_statement", "doc_id": "DOC_445566", "upload_timestamp": "2025-04-18T08:30:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T08:32:00Z', 'processing_end_timestamp:2025-04-18T08:32:45Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801241', 'application_timestamp:2025-04-18T12:05:15Z', 'application_channel:mobile_app', 'business_type:retail', 'product_type:Cashback Gold', 'applicant_id:CUST_334455', 'applicant_age:26', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:38000.00', 'applicant_housing_status:rent', 'applicant_monthly_housing_cost:950.00', 'applicant_years_at_address:2', 'applicant_years_employed:4', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T12:06:02Z', 'watchlist_check_result:clear', 'fraud_alert_flags:["velocity_anomaly"]', 'device_fingerprint_id:DEV_FP_889900', 'ip_address_location:Miami, FL, US', 'credit_bureau_inquiry_timestamp:2025-04-18T12:06:35Z', 'credit_bureau_source:experian', 'credit_score:650', 'credit_utilization_ratio:0.55', 'number_of_open_accounts:3', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:8500.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:14', 'uploaded_documents:[]', 'manual_review_required:True', 'manual_review_reason:Fraud alert investigation', 'underwriter_id:UW_001', 'processing_start_timestamp:2025-04-18T12:06:40Z', 'processing_end_timestamp:2025-04-18T15:22:15Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801242', 'application_timestamp:2025-04-18T15:40:28Z', 'application_channel:web', 'business_type:secured', 'product_type:Secured Builder Card', 'applicant_id:CUST_778899', 'applicant_age:19', 'applicant_employment_status:employed_part_time', 'applicant_annual_income:18000.00', 'applicant_housing_status:living_with_family', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:1', 'applicant_years_employed:1', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:300.00', 'deposit_verification_status:verified', 'deposit_account_id:DEP_ACC_667788', 'identity_verification_method:biometric', 'identity_verification_timestamp:2025-04-18T15:41:35Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_990011', 'ip_address_location:Phoenix, AZ, US', 'credit_bureau_inquiry_timestamp:2025-04-18T15:42:00Z', 'credit_bureau_source:equifax', 'credit_score:0', 'credit_utilization_ratio:0.00', 'number_of_open_accounts:0', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:0.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "government_id", "doc_id": "DOC_556677", "upload_timestamp": "2025-04-18T15:41:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T15:42:05Z', 'processing_end_timestamp:2025-04-18T15:42:22Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801243', 'application_timestamp:2025-04-18T10:55:33Z', 'application_channel:branch', 'business_type:retail', 'product_type:Low Interest Silver', 'applicant_id:CUST_445566', 'applicant_age:63', 'applicant_employment_status:retired', 'applicant_annual_income:65000.00', 'applicant_housing_status:own', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:25', 'applicant_years_employed:0', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T10:56:18Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_112233', 'ip_address_location:Denver, CO, US', 'credit_bureau_inquiry_timestamp:2025-04-18T10:56:45Z', 'credit_bureau_source:transunion', 'credit_score:760', 'credit_utilization_ratio:0.18', 'number_of_open_accounts:9', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:28000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T10:56:50Z', 'processing_end_timestamp:2025-04-18T10:57:15Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801244', 'application_timestamp:2025-04-18T11:42:50Z', 'application_channel:mobile_app', 'business_type:retail', 'product_type:Rewards Platinum', 'applicant_id:CUST_889900', 'applicant_age:39', 'applicant_employment_status:self_employed', 'applicant_annual_income:88000.00', 'applicant_housing_status:mortgage', 'applicant_monthly_housing_cost:2100.00', 'applicant_years_at_address:6', 'applicant_years_employed:14', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:kba', 'identity_verification_timestamp:2025-04-18T11:43:52Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_223344', 'ip_address_location:Portland, OR, US', 'credit_bureau_inquiry_timestamp:2025-04-18T11:44:25Z', 'credit_bureau_source:experian', 'credit_score:735', 'credit_utilization_ratio:0.38', 'number_of_open_accounts:7', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:32000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "tax_return", "doc_id": "DOC_667788", "upload_timestamp": "2025-04-18T11:42:00Z"}]', 'manual_review_required:True', 'manual_review_reason:Income verification required', 'underwriter_id:UW_002', 'processing_start_timestamp:2025-04-18T11:44:30Z', 'processing_end_timestamp:2025-04-18T14:18:45Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801245', 'application_timestamp:2025-04-18T09:15:08Z', 'application_channel:web', 'business_type:retail', 'product_type:Cashback Gold', 'applicant_id:CUST_556688', 'applicant_age:44', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:72000.00', 'applicant_housing_status:mortgage', 'applicant_monthly_housing_cost:1650.00', 'applicant_years_at_address:7', 'applicant_years_employed:9', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T09:15:55Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_334455', 'ip_address_location:Atlanta, GA, US', 'credit_bureau_inquiry_timestamp:2025-04-18T09:16:22Z', 'credit_bureau_source:equifax', 'credit_score:705', 'credit_utilization_ratio:0.42', 'number_of_open_accounts:6', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:29000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:18', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T09:16:27Z', 'processing_end_timestamp:2025-04-18T09:16:52Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801246', 'application_timestamp:2025-04-18T14:08:22Z', 'application_channel:phone', 'business_type:small_business', 'product_type:Business Expense Card', 'applicant_id:CUST_223355', 'applicant_age:36', 'applicant_employment_status:self_employed', 'applicant_annual_income:68000.00', 'applicant_housing_status:rent', 'applicant_monthly_housing_cost:1400.00', 'applicant_years_at_address:3', 'applicant_years_employed:8', 'business_entity_name:Creative Design Studio', 'business_tin_ein:45-6789012', 'business_incorporation_date:2020-09-10', 'business_annual_revenue:185000.00', 'business_industry_code:541430', 'guarantor_personal_income:75000.00', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:document_scan', 'identity_verification_timestamp:2025-04-18T14:09:35Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_445577', 'ip_address_location:Nashville, TN, US', 'credit_bureau_inquiry_timestamp:2025-04-18T14:10:05Z', 'credit_bureau_source:dnb_commercial', 'credit_score:68', 'credit_utilization_ratio:0.51', 'number_of_open_accounts:4', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:22500.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "bank_statement", "doc_id": "DOC_778899", "upload_timestamp": "2025-04-18T14:08:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T14:10:10Z', 'processing_end_timestamp:2025-04-18T14:10:48Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801247', 'application_timestamp:2025-04-18T16:50:12Z', 'application_channel:mobile_app', 'business_type:retail', 'product_type:Low Interest Silver', 'applicant_id:CUST_990022', 'applicant_age:29', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:45000.00', 'applicant_housing_status:rent', 'applicant_monthly_housing_cost:1100.00', 'applicant_years_at_address:1', 'applicant_years_employed:3', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T16:51:00Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_556688', 'ip_address_location:Philadelphia, PA, US', 'credit_bureau_inquiry_timestamp:2025-04-18T16:51:28Z', 'credit_bureau_source:transunion', 'credit_score:572', 'credit_utilization_ratio:0.82', 'number_of_open_accounts:5', 'number_of_delinquent_accounts:3', 'total_outstanding_debt:16500.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:2', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T16:51:33Z', 'processing_end_timestamp:2025-04-18T16:51:58Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801248', 'application_timestamp:2025-04-18T13:35:45Z', 'application_channel:branch', 'business_type:secured', 'product_type:Secured Builder Card', 'applicant_id:CUST_667799', 'applicant_age:25', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:32000.00', 'applicant_housing_status:rent', 'applicant_monthly_housing_cost:850.00', 'applicant_years_at_address:2', 'applicant_years_employed:2', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:1000.00', 'deposit_verification_status:verified', 'deposit_account_id:DEP_ACC_889900', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T13:36:32Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_667799', 'ip_address_location:Detroit, MI, US', 'credit_bureau_inquiry_timestamp:2025-04-18T13:37:00Z', 'credit_bureau_source:experian', 'credit_score:635', 'credit_utilization_ratio:0.68', 'number_of_open_accounts:3', 'number_of_delinquent_accounts:1', 'total_outstanding_debt:9800.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:6', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T13:37:05Z', 'processing_end_timestamp:2025-04-18T13:37:28Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801249', 'application_timestamp:2025-04-18T10:18:30Z', 'application_channel:web', 'business_type:retail', 'product_type:Rewards Platinum', 'applicant_id:CUST_112244', 'applicant_age:51', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:145000.00', 'applicant_housing_status:own', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:18', 'applicant_years_employed:25', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T10:19:15Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_778800', 'ip_address_location:Minneapolis, MN, US', 'credit_bureau_inquiry_timestamp:2025-04-18T10:19:42Z', 'credit_bureau_source:equifax', 'credit_score:825', 'credit_utilization_ratio:0.08', 'number_of_open_accounts:15', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:55000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T10:19:47Z', 'processing_end_timestamp:2025-04-18T10:20:08Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801250', 'application_timestamp:2025-04-18T15:22:18Z', 'application_channel:phone', 'business_type:retail', 'product_type:Cashback Gold', 'applicant_id:CUST_334466', 'applicant_age:33', 'applicant_employment_status:unemployed', 'applicant_annual_income:28000.00', 'applicant_housing_status:living_with_family', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:1', 'applicant_years_employed:0', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:kba', 'identity_verification_timestamp:2025-04-18T15:23:25Z', 'watchlist_check_result:clear', 'fraud_alert_flags:["device_fingerprint_suspicious"]', 'device_fingerprint_id:DEV_FP_889911', 'ip_address_location:Las Vegas, NV, US', 'credit_bureau_inquiry_timestamp:2025-04-18T15:24:00Z', 'credit_bureau_source:transunion', 'credit_score:548', 'credit_utilization_ratio:0.92', 'number_of_open_accounts:6', 'number_of_delinquent_accounts:4', 'total_outstanding_debt:14200.00', 'bankruptcy_flag:True', 'foreclosure_flag:False', 'months_since_last_delinquency:1', 'uploaded_documents:[]', 'manual_review_required:True', 'manual_review_reason:Fraud alert investigation', 'underwriter_id:UW_003', 'processing_start_timestamp:2025-04-18T15:24:05Z', 'processing_end_timestamp:2025-04-18T16:42:30Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801251', 'application_timestamp:2025-04-18T11:28:55Z', 'application_channel:mobile_app', 'business_type:corporate', 'product_type:Business Expense Card', 'applicant_id:CUST_445577', 'applicant_age:57', 'applicant_employment_status:self_employed', 'applicant_annual_income:220000.00', 'applicant_housing_status:own', 'applicant_monthly_housing_cost:3200.00', 'applicant_years_at_address:12', 'applicant_years_employed:28', 'business_entity_name:Financial Services Group LLC', 'business_tin_ein:67-8901234', 'business_incorporation_date:2008-11-05', 'business_annual_revenue:5500000.00', 'business_industry_code:522110', 'guarantor_personal_income:300000.00', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T11:29:42Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_990022', 'ip_address_location:Charlotte, NC, US', 'credit_bureau_inquiry_timestamp:2025-04-18T11:30:10Z', 'credit_bureau_source:dnb_commercial', 'credit_score:92', 'credit_utilization_ratio:0.15', 'number_of_open_accounts:14', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:185000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "tax_return", "doc_id": "DOC_889900", "upload_timestamp": "2025-04-18T11:28:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T11:30:15Z', 'processing_end_timestamp:2025-04-18T11:31:02Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801252', 'application_timestamp:2025-04-18T08:52:40Z', 'application_channel:branch', 'business_type:retail', 'product_type:Low Interest Silver', 'applicant_id:CUST_556699', 'applicant_age:46', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:67000.00', 'applicant_housing_status:mortgage', 'applicant_monthly_housing_cost:1550.00', 'applicant_years_at_address:9', 'applicant_years_employed:11', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T08:53:28Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_112255', 'ip_address_location:Columbus, OH, US', 'credit_bureau_inquiry_timestamp:2025-04-18T08:53:55Z', 'credit_bureau_source:experian', 'credit_score:692', 'credit_utilization_ratio:0.48', 'number_of_open_accounts:7', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:31500.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:22', 'uploaded_documents:[]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T08:54:00Z', 'processing_end_timestamp:2025-04-18T08:54:26Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801253', 'application_timestamp:2025-04-18T14:45:12Z', 'application_channel:web', 'business_type:secured', 'product_type:Secured Builder Card', 'applicant_id:CUST_667800', 'applicant_age:21', 'applicant_employment_status:employed_part_time', 'applicant_annual_income:22000.00', 'applicant_housing_status:living_with_family', 'applicant_monthly_housing_cost:0.00', 'applicant_years_at_address:1', 'applicant_years_employed:2', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:750.00', 'deposit_verification_status:pending', 'deposit_account_id:DEP_ACC_990011', 'identity_verification_method:document_scan', 'identity_verification_timestamp:2025-04-18T14:46:20Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_223366', 'ip_address_location:San Diego, CA, US', 'credit_bureau_inquiry_timestamp:2025-04-18T14:46:48Z', 'credit_bureau_source:equifax', 'credit_score:598', 'credit_utilization_ratio:0.88', 'number_of_open_accounts:2', 'number_of_delinquent_accounts:1', 'total_outstanding_debt:4800.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:4', 'uploaded_documents:[{"doc_type": "government_id", "doc_id": "DOC_990011", "upload_timestamp": "2025-04-18T14:45:30Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T14:46:53Z', 'processing_end_timestamp:2025-04-18T14:47:15Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+    ['application_id:APP_CC_2025041801254', 'application_timestamp:2025-04-18T12:38:25Z', 'application_channel:mobile_app', 'business_type:retail', 'product_type:Rewards Platinum', 'applicant_id:CUST_778811', 'applicant_age:37', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:82000.00', 'applicant_housing_status:mortgage', 'applicant_monthly_housing_cost:1950.00', 'applicant_years_at_address:5', 'applicant_years_employed:8', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T12:39:12Z', 'watchlist_check_result:potential_match', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_334477', 'ip_address_location:Houston, TX, US', 'credit_bureau_inquiry_timestamp:2025-04-18T12:39:40Z', 'credit_bureau_source:transunion', 'credit_score:745', 'credit_utilization_ratio:0.35', 'number_of_open_accounts:9', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:36000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[]', 'manual_review_required:True', 'manual_review_reason:OFAC potential match review', 'underwriter_id:UW_004', 'processing_start_timestamp:2025-04-18T12:39:45Z', 'processing_end_timestamp:2025-04-18T13:55:20Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:'],
+]
+
+# Initialize data
+initialize_data(raw_data)
+
+# Process each application
+for app in APPLICATION_DATA:
+    try:
+        application_id = app['application_id']
+        
+        # Step 1: Validate Application Data (Section 5.1)
+        validation_result = ValidateApplicationData(
+            application_id=app['application_id'],
+            application_timestamp=app['application_timestamp'],
+            application_channel=app['application_channel'],
+            business_type=app['business_type'],
+            product_type=app['product_type'],
+            applicant_id=app['applicant_id'],
+            applicant_age=app['applicant_age'],
+            applicant_employment_status=app['applicant_employment_status'],
+            applicant_annual_income=app['applicant_annual_income'],
+            applicant_housing_status=app['applicant_housing_status'],
+            applicant_monthly_housing_cost=app['applicant_monthly_housing_cost'],
+            applicant_years_at_address=app['applicant_years_at_address'],
+            applicant_years_employed=app['applicant_years_employed'],
+            business_entity_name=app.get('business_entity_name'),
+            business_tin_ein=app.get('business_tin_ein'),
+            business_incorporation_date=app.get('business_incorporation_date'),
+            business_annual_revenue=app.get('business_annual_revenue'),
+            business_industry_code=app.get('business_industry_code'),
+            guarantor_personal_income=app.get('guarantor_personal_income'),
+            security_deposit_amount=app.get('security_deposit_amount'),
+            deposit_verification_status=app.get('deposit_verification_status'),
+            deposit_account_id=app.get('deposit_account_id')
+        )
+        
+        if not validation_result['validation_status']:
+            continue
+        
+        # Step 2: Verify Identity (Section 5.2)
+        identity_result = VerifyIdentity(
+            application_id=application_id,
+            applicant_id=app['applicant_id'],
+            applicant_age=app['applicant_age'],
+            device_fingerprint_id=app['device_fingerprint_id'],
+            ip_address_location=app['ip_address_location'],
+            fraud_alert_flags=app.get('fraud_alert_flags', [])
+        )
+        
+        # Step 3: Screen Sanctions Watchlist (Section 5.2)
+        sanctions_result = ScreenSanctionsWatchlist(
+            application_id=application_id,
+            applicant_id=app['applicant_id'],
+            identity_verification_method=identity_result['identity_verification_method'],
+            business_entity_name=app.get('business_entity_name')
+        )
+        
+        # Step 4: Detect Fraud Indicators (Section 5.2)
+        fraud_result = DetectFraudIndicators(
+            application_id=application_id,
+            watchlist_check_result=sanctions_result['watchlist_check_result'],
+            device_fingerprint_id=app['device_fingerprint_id'],
+            ip_address_location=app['ip_address_location'],
+            fraud_alert_flags=app.get('fraud_alert_flags', [])
+        )
+        
+        # Step 5: Retrieve Credit Bureau Data (Section 5.3)
+        credit_result = RetrieveCreditBureauData(
+            application_id=application_id,
+            applicant_id=app['applicant_id'],
+            business_type=app['business_type'],
+            fraud_risk_level=fraud_result['fraud_risk_level'],
+            business_tin_ein=app.get('business_tin_ein')
+        )
+        
+        # Step 6: Calculate Debt-to-Income Ratio (Section 5.4)
+        dti_result = CalculateDebtToIncomeRatio(
+            application_id=application_id,
+            business_type=app['business_type'],
+            applicant_annual_income=app['applicant_annual_income'],
+            applicant_monthly_housing_cost=app['applicant_monthly_housing_cost'],
+            total_outstanding_debt=credit_result['total_outstanding_debt'],
+            business_annual_revenue=app.get('business_annual_revenue'),
+            guarantor_personal_income=app.get('guarantor_personal_income')
+        )
+        
+        # Step 7: Evaluate Credit Scorecard (Section 5.5)
+        scorecard_result = EvaluateCreditScorecard(
+            application_id=application_id,
+            business_type=app['business_type'],
+            credit_score=credit_result['credit_score'],
+            credit_utilization_ratio=credit_result['credit_utilization_ratio'],
+            debt_to_income_ratio=dti_result['debt_to_income_ratio'],
+            number_of_open_accounts=credit_result['number_of_open_accounts'],
+            number_of_delinquent_accounts=credit_result['number_of_delinquent_accounts'],
+            bankruptcy_flag=credit_result['bankruptcy_flag'],
+            applicant_years_employed=app['applicant_years_employed'],
+            applicant_years_at_address=app['applicant_years_at_address'],
+            months_since_last_delinquency=credit_result['months_since_last_delinquency']
+        )
+        
+        # Step 8: Determine Credit Decision (Section 5.6)
+        decision_result = DetermineCreditDecision(
+            application_id=application_id,
+            business_type=app['business_type'],
+            product_type=app['product_type'],
+            internal_risk_score=scorecard_result['internal_risk_score'],
+            scorecard_reason_codes=scorecard_result['scorecard_reason_codes'],
+            watchlist_check_result=sanctions_result['watchlist_check_result'],
+            identity_verification_method=identity_result['identity_verification_method'],
+            bankruptcy_flag=credit_result['bankruptcy_flag'],
+            fraud_alert_flags=fraud_result['fraud_alert_flags'],
+            applicant_annual_income=app['applicant_annual_income'],
+            business_industry_code=app.get('business_industry_code')
+        )
+        
+        # Step 9: Assign Credit Terms (Section 5.7) - Only for approved applications
+        if decision_result['final_decision'] == 'approved':
+            terms_result = AssignCreditTerms(
+                application_id=application_id,
+                final_decision=decision_result['final_decision'],
+                business_type=app['business_type'],
+                product_type=app['product_type'],
+                internal_risk_score=scorecard_result['internal_risk_score'],
+                applicant_annual_income=app['applicant_annual_income'],
+                business_annual_revenue=app.get('business_annual_revenue'),
+                security_deposit_amount=app.get('security_deposit_amount'),
+                deposit_verification_status=app.get('deposit_verification_status')
+            )
+        
+        # Step 10: Generate Adverse Action Notice (Section 5.9) - Only for declined
+        if decision_result['final_decision'] == 'declined':
+            adverse_result = GenerateAdverseActionNotice(
+                application_id=application_id,
+                final_decision=decision_result['final_decision'],
+                decline_reason_code=decision_result['decline_reason_code'],
+                applicant_id=app['applicant_id'],
+                credit_bureau_source=credit_result['credit_bureau_source'],
+                application_timestamp=app['application_timestamp']
+            )
+        
+        # Step 11: Finalize Application Outputs (Section 5.8)
+        final_result = FinalizeApplicationOutputs(
+            application_id=application_id,
+            processing_start_timestamp=app['processing_start_timestamp'],
+            final_decision=decision_result['final_decision'],
+            adverse_action_letter_generated=app.get('adverse_action_letter_generated', False),
+            manual_review_required=decision_result.get('manual_review_required', app.get('manual_review_required', False)),
+            fraud_alert_flags=fraud_result['fraud_alert_flags'],
+            uploaded_documents=app.get('uploaded_documents', []),
+            approved_credit_limit=app.get('approved_credit_limit'),
+            assigned_apr=app.get('assigned_apr'),
+            underwriter_id=app.get('underwriter_id'),
+            deposit_verification_status=app.get('deposit_verification_status')
+        )
+        
+    except Exception as e:
+        print(f"Error processing {application_id}: {str(e)}")
+        continue
+
+# Output results
+for app in APPLICATION_DATA:
+    print(f"\napplication_id:{app['application_id']}")
+    print(f"debt_to_income_ratio:{app.get('debt_to_income_ratio', 'N/A')}")
+    print(f"internal_risk_score:{app.get('internal_risk_score', 'N/A')}")
+    print(f"final_decision:{app.get('final_decision', 'N/A')}")
+    print(f"decline_reason_code:{app.get('decline_reason_code', 'N/A')}")
+    print(f"adverse_action_letter_generated:{app.get('adverse_action_letter_generated', 'N/A')}")
+    print(f"approved_credit_limit:{app.get('approved_credit_limit', 'N/A')}")
+    print(f"assigned_apr:{app.get('assigned_apr', 'N/A')}")
+    print(f"credit_limit_to_deposit_ratio:{app.get('credit_limit_to_deposit_ratio', 'N/A')}")
+    print(f"cardholder_limit_distribution:{app.get('cardholder_limit_distribution', 'N/A')}")
+    print(f"turnaround_time_seconds:{app.get('turnaround_time_seconds', 'N/A')}")
+    print(f"auto_decision_flag:{app.get('auto_decision_flag', 'N/A')}")
+    print(f"account_activation_eligible:{app.get('account_activation_eligible', 'N/A')}")
+    print(f"estimated_card_delivery_date:{app.get('estimated_card_delivery_date', 'N/A')}")
+```

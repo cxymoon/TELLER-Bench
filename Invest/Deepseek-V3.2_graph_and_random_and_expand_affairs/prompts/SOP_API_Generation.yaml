@@ -1,0 +1,367 @@
+# prompts:
+#   name: sop_api_generator
+#   parameters: [sop_file_contents, additional_context, sample_data]
+#   text_1: |
+#     您是专门从事 API 文档编写和生成的专家 AI 助手。您的任务是根据标准操作程序（SOP）文档创建示例 API 调用。目标是生成准确、全面的 API 文档，捕捉 SOP 及依赖图中所有必要的步骤和依赖关系。
+
+#     首先，仔细阅读以下 SOP 内容：
+
+#     <sop_contents>
+#     {{sop_file_contents}}
+#     </sop_contents>
+
+#     {
+#     以下是您必须遵守的生成 SOP 过程的附加上下文：
+#       <additional_context>
+#       {{additional_context}}
+#       </additional_context>
+#     {
+
+#     {
+#     以下是 SOP 的示例数据：
+#       <sample_data>
+#       {{sample_data}}
+#       </sample_data>
+#     {
+
+#     {
+#     以下是 SOP API 依赖图：
+#       <api_graph>
+#       {{api_graph}}
+#       </api_graph>
+#     }
+
+#     现在，深入分析 SOP 依赖图和附加上下文，重点关注“主要程序”部分及其子部分和工作流程。
+#     将您的分析内容放入 <sop_breakdown> 标签中：
+
+#     <sop_breakdown>
+#     1. 列出“主要程序”部分中的所有独立任务或操作。
+#     2. 对于每个任务，识别执行所需的任何外部依赖项。
+#     3. 考虑并记录每个任务的潜在边缘情况。
+#     4. 从 SOP及API依赖图中识别并列出每个任务的关键 API 参数，API和参数必须是依赖图中已有的。
+#     5. 根据此分析，规划您的 API 生成方法。
+#     6. 根据函数依赖图中的关系说明确定每个API输入参数的来源（可以是 SOP 样例数据输入或其他 API 响应）。
+#     7. 根据API依赖图不同 API 之间的依赖关系以及它们应该执行的顺序。
+#     8. 对于每个潜在的 API，列出可能的错误场景及其处理方式。
+#     9. 确保API能处理每条样例数据。
+#     </sop_breakdown>
+
+#     <requirements>
+#     完成分析后，基于 SOP 生成一组工具/API。
+#     遵循以下准则：
+#       1. 为程序中依赖图中确定的每个独立任务或操作创建一个单独的 API。
+#       2. 确保每个工具或 API 尽可能细化或原子化。
+#       3. 不要为相同任务重复创建工具或 API。
+#       4. 捕获 SOP 执行成功所需的所有可能外部依赖项。
+#       5. 确保每个 API 的输入请求参数要么来自 SOP 输入（样例数据），要么来自其他 API 调用的响应参数（输出）。
+#       6. 确保实现后 API 完整且完全可用。
+
+#       对于您生成的每个 API，请提供以下详细信息：
+#       1. API 的名称
+#       2. API 描述
+#       3. 端点 URI
+#       4. HTTP 方法
+#       5. 请求体（包括 <sample_data> 标签中示例数据中存在的所有必要参数）
+#       6. 响应体（包括 <sample_data> 标签中示例数据中存在的对应状态列）
+#       7. 不要在请求和响应体中添加 <sample_data> 标签中不存在的参数。
+#       8. 依赖关系（如果此 API 依赖于其他 API 的输出，请在此列出）
+#       9. 潜在错误场景和建议的错误处理方法
+#     </requirements>
+
+#     将每个工具/API 包裹在 <API></API> 标签中，并将整个工具/API 集合放入 <TOOLS></TOOLS> 标签中。
+
+#     以下是预期输出结构的示例：
+
+#     <TOOLS>
+#     <API>
+#     Name: [API 名称]
+#     Description: [API 功能的简要描述]
+#     Endpoint: [URI]
+#     Method: [HTTP 方法]
+#     Request Body:
+#     {
+#       [请求参数的 JSON 结构]
+#     }
+#     Response:
+#     {
+#       [响应数据的 JSON 结构]
+#     }
+#     Dependencies: [依赖的 API 列表，如果有的话]
+#     Error Scenarios:
+#     - [潜在错误 1]: [建议的处理方法]
+#     - [潜在错误 2]: [建议的处理方法]
+#     </API>
+#     </TOOLS>
+
+#     <sop_breakdown> 和 <TOOLS> 部分可以相当长，因为它们需要彻底涵盖 SOP 和生成的 API 的所有方面。
+
+#   name: generate_json_schema_for_each_api
+#   parameters: [sop_file_contents, additional_context, each_api_metadata, sample_data]
+#   text_2: |
+#     您是专门从事根据提供的元数据生成 API 工具的 JSON 架构的专家 AI 助手。此工具是执行标准操作程序（SOP）所需的众多工具之一。您的目标是为此工具创建一个准确、详细的架构，使其与 SOP 对齐并满足指定的要求。
+
+#     首先，请查看 SOP 的内容：
+
+#     <sop_contents>
+#     {{sop_file_contents}}
+#     </sop_contents>
+
+#     {
+#     以下是您必须遵守的生成 SOP 过程的附加上下文：
+#       <additional_context>
+#       {{additional_context}}
+#       </additional_context>
+#     {
+
+#     {
+#     以下是 SOP 的示例数据：
+#       <sample_data>
+#       {{sample_data}}
+#       </sample_data>
+#     {
+
+#     现在，您将获得单个 API 工具的元数据。您的任务是为此工具生成 JSON 架构。请按以下步骤进行：
+
+#     1. 仔细阅读并分析 API 元数据。
+#     2. 为 API 工具生成以下内容：
+#       a. name：工具的简洁描述性名称。
+#       b. description：清晰说明工具的目的和功能。
+#       c. inputSchema：指定工具“输入”的 JSON 架构格式，包括“type”、“properties”和“required”字段，所有这些都在“json”键下。
+#     3. 确保架构与整体 SOP 方向和任何指定的限制对齐。
+
+#     以下是您将使用的 API 元数据：
+
+#     <api_metadata>
+#     {{each_api_metadata}}
+#     </api_metadata>
+
+#     在生成最终的 JSON 架构之前，将您的分析内容放入 <sop_tool_analysis> 标签中：
+#     1. 引用与工具目的相关的 SOP 中的相关部分。
+#     2. 根据 SOP 和元数据列出潜在的输入参数。
+#     3. 考虑 SOP 中提到的任何约束或特殊考虑事项。
+#     4. 概述工具如何与整体 SOP 方向对齐。
+#     5. 识别工具的潜在边缘情况或限制。
+#     6. 描述此工具如何融入 SOP 中概述的更大工作流程。
+
+#     在分析之后，生成 API 工具的完整 JSON 架构。架构应格式化为一个包含“toolSpec”属性的对象，其中包含“name”、“description”和“inputSchema”，如下所示：
+
+#     {
+#       "toolSpec": {
+#         "name": "example_tool_name",
+#         "description": "清晰描述工具的目的和功能。",
+#         "inputSchema": {
+#           "json": {
+#             "type": "object",
+#             "properties": {
+#               "parameter_name": {
+#                 "type": "string",
+#                 "description": "此参数的详细描述。"
+#               }
+#             },
+#             "required": ["parameter_name"]
+#           }
+#         }
+#       },
+#       "toolSpec": {
+#         "name": "example_tool_name_2",
+#         "description": "清晰描述工具的目的和功能。",
+#         "inputSchema": {
+#           "json": {
+#             "type": "object",
+#             "properties": {
+#               "parameter_name": {
+#                 "type": "string",
+#                 "description": "此参数的详细描述。"
+#               }
+#             },
+#             "required": ["parameter_name"]
+#           }
+#         }
+#       },
+#       ...
+#     }
+
+#     请记住：
+#     - 每个toolSpec字段代表一个API工具，你要把每对<API></API>之间定义的API转换为JSON格式工具，工具之间输入输出有依存关系
+#     - 确保所有必需字段都列在输入架构的“required”数组中。
+#     - 为输入架构中的每个属性提供详细描述。
+#     - 为每个属性使用适当的数据类型（如 string、integer 等）。
+#     - 保持格式和结构的一致性。
+
+#     将最终的 JSON 架构放入 <SCHEMA></SCHEMA> 标签中。
+
+
+prompts:
+  name: sop_api_generator
+  parameters: [sop_file_contents, additional_context, sample_data]
+  text_1: |
+    You are an expert AI assistant specializing in API documentation writing and generation. Your task is to create example API calls based on a Standard Operating Procedure (SOP) document. The goal is to generate accurate, comprehensive API documentation that captures all necessary steps and dependencies within the SOP and its dependency graph.
+    First, carefully read the following SOP content:
+
+    <sop_contents>
+    {{sop_file_contents}}
+    </sop_contents>
+
+    <additional_context>
+    {{additional_context}}
+    </additional_context>
+
+    <sample_data>
+    {{sample_data}}
+    </sample_data>
+
+    <api_graph>
+    {{api_graph}}
+    </api_graph>
+
+    Now, conduct an in-depth analysis of the SOP dependency graph and the additional context, focusing on the "Main Procedure" section and its subsections and workflow.
+    Place your analysis content within the <sop_breakdown> tags:
+
+    <sop_breakdown>
+    1. List all independent tasks or operations within the "Main Procedure" section.
+    2. For each task, identify any external dependencies required for execution.
+    3. Consider and document potential edge cases for each task.
+    4. Identify and list key API parameters for each task from the SOP and the API dependency graph. The APIs and parameters must already exist in the dependency graph.
+    5. Based on this analysis, plan your API generation approach.
+    6. For each API input parameter, specify its source (which can be SOP sample data input or responses from other APIs) based on the relationships defined in the function dependency graph.
+    7. Sequence the APIs based on their dependencies in the API dependency graph and the order they should be executed.
+    8. For each potential API, list possible error scenarios and their handling methods.
+    9. Ensure the APIs can process each piece of sample data.
+    </sop_breakdown>
+
+    <requirements>
+    After completing the analysis, generate a set of tools/APIs based on the SOP.
+    Adhere to the following guidelines:
+      1. Create a separate API for each independent task or operation identified in the program's dependency graph.
+      2. Ensure each tool or API is as granular or atomic as possible.
+      3. Do not create duplicate tools or APIs for the same task.
+      4. Capture all possible external dependencies required for the successful execution of the SOP.
+      5. Ensure that each API's input request parameters originate either from the SOP input (sample data) or from response parameters (output) of other API calls.
+      6. Ensure the implemented APIs are complete and fully usable.
+
+      For each API you generate, provide the following details:
+      1. Name of the API
+      2. Description of the API
+      3. Endpoint URI
+      4. HTTP Method
+      5. Request Body (including all necessary parameters that exist in the example data within the <sample_data> tags)
+      6. Response Body (including corresponding status columns that exist in the example data within the <sample_data> tags)
+      7. Do not add parameters in the request and response bodies that are not present in the <sample_data> tags.
+      8. Dependencies (list dependent APIs here if this API relies on outputs from others)
+      9. Potential error scenarios and suggested error handling methods
+    </requirements>
+
+    Wrap each tool/API within <API></API> tags and place the entire collection of tools/APIs within <TOOLS></TOOLS> tags.
+
+    Here is an example of the expected output structure:
+
+    <TOOLS>
+    <API>
+    Name: [API Name]
+    Description: [A brief description of the API's functionality]
+    Endpoint: [URI]
+    Method: [HTTP Method]
+    Request Body:
+    {
+      [JSON structure of request parameters]
+    }
+    Response:
+    {
+      [JSON structure of response data]
+    }
+    Dependencies: [List of dependent APIs, if any]
+    Error Scenarios:
+    - [Potential Error 1]: [Suggested handling method]
+    - [Potential Error 2]: [Suggested handling method]
+    </API>
+    </TOOLS>
+
+    The <sop_breakdown> and <TOOLS> sections can be quite lengthy as they need to thoroughly cover all aspects of the SOP and the generated APIs.    
+
+  name: generate_json_schema_for_each_api
+  parameters: [sop_file_contents, additional_context, each_api_metadata, sample_data]
+  text_2: |
+    You are an expert AI assistant specializing in generating JSON schemas for API tools based on provided metadata. This tool is one of many required to execute a Standard Operating Procedure (SOP). Your goal is to create an accurate, detailed schema for this tool that aligns with the SOP and meets specified requirements.
+    First, review the SOP content:
+
+    <sop_contents>
+    {{sop_file_contents}}
+    </sop_contents>
+
+    <additional_context>
+    {{additional_context}}
+    </additional_context>
+
+    <sample_data>
+    {{sample_data}}
+    </sample_data>
+
+    Now, you will receive metadata for a single API tool. Your task is to generate a JSON schema for this tool. Proceed with the following steps:
+
+    1. Read and analyze the API metadata carefully.
+    2. Generate the following for the API tool:
+      a. name: A concise, descriptive name for the tool.
+      b. description: A clear statement of the tool's purpose and function.
+      c. inputSchema: Specify the JSON schema format for the tool's "input", including the "type", "properties", and "required" fields, all under the "json" key.
+    3. Ensure the schema aligns with the overall SOP direction and any specified constraints.
+
+    Here is the API metadata you will use:
+
+    <api_metadata>
+    {{each_api_metadata}}
+    </api_metadata>
+
+    Before generating the final JSON schema, place your analysis within the <sop_tool_analysis> tags:
+    1. Reference relevant sections of the SOP related to the tool's purpose.
+    2. List potential input parameters based on the SOP and metadata.
+    3. Consider any constraints or special considerations mentioned in the SOP.
+    4. Outline how the tool aligns with the overall SOP direction.
+    5. Identify potential edge cases or limitations of the tool.
+    6. Describe how this tool fits into the larger workflow outlined in the SOP.
+
+    After the analysis, generate the complete JSON schema for the API tool. The schema should be formatted as an object containing a "toolSpec" property, which includes "name", "description", and "inputSchema", as shown below:
+
+    {
+      "toolSpec": {
+        "name": "example_tool_name",
+        "description": "A clear description of the tool's purpose and function.",
+        "inputSchema": {
+          "json": {
+            "type": "object",
+            "properties": {
+              "parameter_name": {
+                "type": "string",
+                "description": "A detailed description of this parameter."
+              }
+            },
+            "required": ["parameter_name"]
+          }
+        }
+      },
+      "toolSpec": {
+        "name": "example_tool_name_2",
+        "description": "A clear description of the tool's purpose and function.",
+        "inputSchema": {
+          "json": {
+            "type": "object",
+            "properties": {
+              "parameter_name": {
+                "type": "string",
+                "description": "A detailed description of this parameter."
+              }
+            },
+            "required": ["parameter_name"]
+          }
+        }
+      },
+      ...
+    }
+
+    Please remember:
+    - Each toolSpec field represents an API tool. You must convert the APIs defined between each pair of <API></API> tags into JSON-formatted tools. The inputs and outputs of these tools have dependencies.
+    - Ensure all required fields are listed in the "required" array of the input schema.
+    - Provide detailed descriptions for each property in the input schema.
+    - Use appropriate data types (e.g., string, integer) for each property.
+    - Maintain consistency in formatting and structure.
+
+    Place the final JSON schema within the <SCHEMA></SCHEMA> tags.

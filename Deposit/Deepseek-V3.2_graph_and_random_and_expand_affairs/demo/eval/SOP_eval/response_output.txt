@@ -1,0 +1,451 @@
+### Dependency Analysis
+
+Based on a comprehensive analysis of the banking deposit business processes and API implementations, I've identified the following key dependency relationships:
+
+<dependency_analysis>
+1. **Business Process Deconstruction**
+   - Retail Deposit: KYC → AML Screening → Compliance Aggregation → Account Creation → Funding → Access Setup → Receipt
+   - Term Deposit: Rate Lock → Funds Check → Contract Generation → Compliance → Ledger Posting → Receipt
+   - Cash Operations: Currency Validation → CTR Evaluation → Fraud Detection → Ledger Posting → Receipt
+
+2. **Data Flow Analysis**
+   - Core entities: Customer, Account, Transaction, Compliance
+   - Parameter sources:
+     - Customer data: KYC outputs → AML/Fraud inputs
+     - Transaction data: Currency/CTR outputs → Ledger inputs
+     - Compliance flags: Aggregation output → Ledger prerequisite
+   - Output destinations:
+     - Account numbers: Ledger → Receipt/Audit
+     - Compliance results: Aggregation → Audit/Ledger
+
+3. **Dependency Relationships**
+   - Direct data dependencies: AML requires KYC output, Ledger requires Compliance output
+   - State dependencies: Supervisor Approval requires Fraud/AML completion
+   - Temporal dependencies: Audit must execute after all operations
+   - Key dependencies:
+     - Currency Validation → CTR (cash amount data)
+     - Term Processing → Ledger (certificate data)
+     - Compliance Aggregation → Ledger (approval flag)
+
+4. **Complexity Assessment**
+   - High complexity: Compliance Aggregation (multiple inputs)
+   - Cyclic risk: None identified
+   - Longest chain: KYC → AML → Fraud → Supervisor → Compliance → Ledger (6 nodes)
+   - Error paths: Alternate flows for approval rejection
+
+5. **Verification & Optimization**
+   - Parallelizable: Currency Validation & CTR Evaluation
+   - Optimization: Combine KYC/AML where permissible
+   - Redundancy: Removed 87 non-deposit APIs
+   - Validation: All dependencies verified against SOP sequences
+</dependency_analysis>
+
+### API Dependency Graph
+<api_dependency_graph>
+apis:
+  - api_name: "KYC_Verification_API"
+    description: "Executes comprehensive Know Your Customer identity verification workflows"
+    purpose: "Initial customer identity verification for all deposit types"
+    input_parameters:
+      - name: "customer_id"
+        data_type: "str"
+        source: "user_input"
+        required: true
+      - name: "customer_id_number"
+        data_type: "str"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "kyc_verification_status"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "AML_Sanctions_Screening_API"
+    description: "Performs automated Anti-Money Laundering screening"
+    purpose: "Sanctions screening for regulatory compliance"
+    input_parameters:
+      - name: "kyc_verification_status"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "aml_risk_score"
+        data_type: "int"
+        destination: "other_api"
+      - name: "aml_screening_result"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires KYC status verification result"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "Currency_Validation_API"
+    description: "Interfaces with certified currency discriminator hardware"
+    purpose: "Physical cash validation for counter deposits"
+    input_parameters:
+      - name: "cash_denomination_breakdown"
+        data_type: "dict"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "counterfeit_detection_result"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "CTR_Evaluation_API"
+    description: "Executes real-time Currency Transaction Report filing obligation evaluation"
+    purpose: "Regulatory reporting for large cash transactions"
+    input_parameters:
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "ctr_threshold_amount"
+        data_type: "float"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "ctr_filing_required"
+        data_type: "bool"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "Currency_Validation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses cash amount data from validation"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "Fraud_Detection_Scoring_API"
+    description: "Executes real-time behavioral analytics fraud detection"
+    purpose: "Transaction risk scoring for all deposit types"
+    input_parameters:
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "customer_id"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "fraud_detection_score"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires validated customer identity"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "Term_Deposit_Processing_API"
+    description: "Executes specialized term deposit product processing logic"
+    purpose: "Handles fixed-term investment processing"
+    input_parameters:
+      - name: "deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "term_length_months"
+        data_type: "int"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "cd_certificate_number"
+        data_type: "str"
+        destination: "other_api"
+      - name: "maturity_date"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires completed customer verification"
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "Supervisor_Approval_Routing_API"
+    description: "Evaluates multiple conditional criteria for supervisor approval"
+    purpose: "Routing for elevated approval requirements"
+    input_parameters:
+      - name: "aml_risk_score"
+        data_type: "int"
+        source: "other_api"
+        required: true
+      - name: "fraud_detection_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "supervisor_approval_required"
+        data_type: "bool"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "AML_Sanctions_Screening_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses AML risk score"
+      - dependent_api: "Fraud_Detection_Scoring_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires fraud detection score"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "Compliance_Aggregation_API"
+    description: "Performs comprehensive compliance verification aggregation"
+    purpose: "Final compliance clearance before transaction posting"
+    input_parameters:
+      - name: "kyc_verification_status"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "aml_screening_result"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "supervisor_approval_required"
+        data_type: "bool"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "compliance_check_passed"
+        data_type: "bool"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires KYC status"
+      - dependent_api: "AML_Sanctions_Screening_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires AML screening result"
+      - dependent_api: "Supervisor_Approval_Routing_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires approval routing decision"
+    complexity_level: "high"
+    business_criticality: "critical"
+
+  - api_name: "Account_Ledger_Posting_API"
+    description: "Executes atomic transaction commit operation"
+    purpose: "Core banking system transaction posting"
+    input_parameters:
+      - name: "compliance_check_passed"
+        data_type: "bool"
+        source: "other_api"
+        required: true
+      - name: "cd_certificate_number"
+        data_type: "str"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "new_account_balance"
+        data_type: "float"
+        destination: "other_api"
+      - name: "account_status"
+        data_type: "str"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "Compliance_Aggregation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires compliance clearance flag"
+      - dependent_api: "Term_Deposit_Processing_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires certificate data for term deposits"
+    complexity_level: "high"
+    business_criticality: "critical"
+
+  - api_name: "Receipt_Generation_API"
+    description: "Generates comprehensive transaction documentation"
+    purpose: "Customer-facing transaction confirmation"
+    input_parameters:
+      - name: "new_account_balance"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "cd_certificate_number"
+        data_type: "str"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "transaction_reference_id"
+        data_type: "str"
+        destination: "ui_display"
+    direct_dependencies:
+      - dependent_api: "Account_Ledger_Posting_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires updated account balance"
+      - dependent_api: "Term_Deposit_Processing_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires term deposit certificate details"
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "Audit_Trail_Recording_API"
+    description: "Creates comprehensive immutable audit trail documentation"
+    purpose: "Regulatory audit trail generation"
+    input_parameters:
+      - name: "kyc_verification_status"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "aml_screening_result"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "compliance_check_passed"
+        data_type: "bool"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "audit_record_id"
+        data_type: "str"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "KYC_Verification_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires KYC verification data"
+      - dependent_api: "AML_Sanctions_Screening_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires AML screening results"
+      - dependent_api: "Compliance_Aggregation_API"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires final compliance status"
+    complexity_level: "high"
+    business_criticality: "high"
+</api_dependency_graph>
+
+### Class Encapsulation
+<class>
+from pydantic import BaseModel, Field
+from typing import Dict, Any, Optional, List
+
+class Tool_KYC_Verification_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    customer_id: str = Field(..., description="Bank's internal customer ID")
+    customer_id_number: str = Field(..., description="Government-issued ID number")
+
+class Tool_AML_Sanctions_Screening_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    kyc_verification_status: str = Field(..., description="Output from KYC verification")
+    deposit_amount: float = Field(..., description="Amount being deposited")
+
+class Tool_Currency_Validation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    cash_denomination_breakdown: Dict[str, int] = Field(..., description="Bill denomination counts")
+
+class Tool_CTR_Evaluation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    deposit_amount: float = Field(..., description="Amount being deposited")
+    ctr_threshold_amount: float = Field(..., description="Regulatory reporting threshold")
+
+class Tool_Fraud_Detection_Scoring_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    customer_id: str = Field(..., description="Bank's internal customer ID")
+    deposit_amount: float = Field(..., description="Amount being deposited")
+
+class Tool_Term_Deposit_Processing_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    deposit_amount: float = Field(..., description="Principal investment amount")
+    term_length_months: int = Field(..., description="Deposit duration in months")
+
+class Tool_Supervisor_Approval_Routing_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    aml_risk_score: int = Field(..., description="Risk score from AML screening")
+    fraud_detection_score: float = Field(..., description="Fraud probability score")
+
+class Tool_Compliance_Aggregation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    kyc_verification_status: str = Field(..., description="KYC verification result")
+    aml_screening_result: str = Field(..., description="AML screening outcome")
+    supervisor_approval_required: bool = Field(..., description="Approval routing decision")
+
+class Tool_Account_Ledger_Posting_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    compliance_check_passed: bool = Field(..., description="Final compliance status")
+    cd_certificate_number: Optional[str] = Field(None, description="Term deposit certificate ID")
+
+class Tool_Receipt_Generation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    new_account_balance: float = Field(..., description="Posted account balance")
+    cd_certificate_number: Optional[str] = Field(None, description="Term deposit certificate ID")
+
+class Tool_Audit_Trail_Recording_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique transaction identifier")
+    kyc_verification_status: str = Field(..., description="KYC verification result")
+    aml_screening_result: str = Field(..., description="AML screening outcome")
+    compliance_check_passed: bool = Field(..., description="Final compliance status")
+</class>
+
+### Tools List Encapsulation
+<tools>
+from langchain.tools import StructuredTool
+
+deposit_tools = [
+    StructuredTool.from_function(
+        func=KYC_Verification_API,
+        name="KYC_Verification_API",
+        description="Executes comprehensive Know Your Customer identity verification workflows",
+        args_schema=Tool_KYC_Verification_API
+    ),
+    StructuredTool.from_function(
+        func=AML_Sanctions_Screening_API,
+        name="AML_Sanctions_Screening_API",
+        description="Performs automated Anti-Money Laundering screening against regulatory databases",
+        args_schema=Tool_AML_Sanctions_Screening_API
+    ),
+    StructuredTool.from_function(
+        func=Currency_Validation_API,
+        name="Currency_Validation_API",
+        description="Interfaces with certified currency discriminator hardware for cash validation",
+        args_schema=Tool_Currency_Validation_API
+    ),
+    StructuredTool.from_function(
+        func=CTR_Evaluation_API,
+        name="CTR_Evaluation_API",
+        description="Evaluates Currency Transaction Report filing requirements based on deposit amount",
+        args_schema=Tool_CTR_Evaluation_API
+    ),
+    StructuredTool.from_function(
+        func=Fraud_Detection_Scoring_API,
+        name="Fraud_Detection_Scoring_API",
+        description="Executes real-time behavioral analytics for transaction fraud detection",
+        args_schema=Tool_Fraud_Detection_Scoring_API
+    ),
+    StructuredTool.from_function(
+        func=Term_Deposit_Processing_API,
+        name="Term_Deposit_Processing_API",
+        description="Handles fixed-term deposit contract generation and certificate issuance",
+        args_schema=Tool_Term_Deposit_Processing_API
+    ),
+    StructuredTool.from_function(
+        func=Supervisor_Approval_Routing_API,
+        name="Supervisor_Approval_Routing_API",
+        description="Determines need for supervisor approval based on risk indicators",
+        args_schema=Tool_Supervisor_Approval_Routing_API
+    ),
+    StructuredTool.from_function(
+        func=Compliance_Aggregation_API,
+        name="Compliance_Aggregation_API",
+        description="Consolidates compliance checks for final transaction approval decision",
+        args_schema=Tool_Compliance_Aggregation_API
+    ),
+    StructuredTool.from_function(
+        func=Account_Ledger_Posting_API,
+        name="Account_Ledger_Posting_API",
+        description="Executes core banking system transaction posting after compliance clearance",
+        args_schema=Tool_Account_Ledger_Posting_API
+    ),
+    StructuredTool.from_function(
+        func=Receipt_Generation_API,
+        name="Receipt_

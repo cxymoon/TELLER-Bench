@@ -1,0 +1,507 @@
+```python
+# 冗余API函数定义
+# Redundant API function definitions
+def DocumentImageResolutionValidation(application_id: str, submitted_documents: List[str]) -> Dict[str, Any]:
+    """Document image resolution validation API"""
+    return {"application_id": application_id, "resolution_check_passed": len(submitted_documents) > 0}
+
+def MaterialIntegrityScoreCalculation(application_id: str, submitted_documents: List[str], 
+                                      image_clarity_scores: Dict[str, float], 
+                                      text_recognition_accuracy: Dict[str, float],
+                                      loan_type: str, customer_occupation_type: str) -> Dict[str, Any]:
+    """Material integrity score calculation API"""
+    return {"application_id": application_id, "integrity_score": len(submitted_documents) * 10.0}
+
+def IdentityAuthenticationAndFaceMatching(application_id: str, customer_id: str,
+                                         id_card_number: str, id_card_name: str,
+                                         id_card_images: Dict[str, str], 
+                                         face_photo: str) -> Dict[str, Any]:
+    """Identity authentication and face matching API"""
+    return {"application_id": application_id, "authentication_passed": len(id_card_number) == 18}
+
+def FraudPreventionValidation(application_id: str, customer_id: str, application_source: str,
+                              identity_authentication_result: bool, face_matching_passed: bool,
+                              device_id: Optional[str] = None, ip_location: Optional[str] = None,
+                              gps_location: Optional[str] = None) -> Dict[str, Any]:
+    """Fraud prevention validation API"""
+    return {"application_id": application_id, "fraud_check_passed": identity_authentication_result and face_matching_passed}
+
+def ApplicationDataConsistencyCheck(application_id: str, material_integrity_score: float,
+                                   requested_amount: float, requested_term: int,
+                                   loan_type: str, customer_age_years: int, 
+                                   customer_occupation_type: str, customer_monthly_salary: float,
+                                   purpose_receipt_amount: Optional[float] = None) -> Dict[str, Any]:
+    """Application data consistency check API"""
+    return {"application_id": application_id, "consistency_passed": material_integrity_score > 60.0}
+
+def CreditReportRetrievalAndAnalysis(application_id: str, customer_id: str,
+                                    identity_authentication_result: bool, fraud_prevention_passed: bool,
+                                    credit_authorization_confirmed: bool,
+                                    customer_id_number: str, customer_full_name: str) -> Dict[str, Any]:
+    """Credit report retrieval and analysis API"""
+    return {"application_id": application_id, "credit_report_retrieved": identity_authentication_result}
+
+def InternalExternalDataCrossValidation(application_id: str, customer_id: str,
+                                       customer_occupation_type: str, customer_monthly_salary: float,
+                                       customer_current_debt: float, internal_account_balance: float,
+                                       internal_history_months: int,
+                                       total_loan_outstanding: float,
+                                       total_creditcard_balance: float) -> Dict[str, Any]:
+    """Internal and external data cross-validation API"""
+    return {"application_id": application_id, "validation_passed": customer_monthly_salary > customer_current_debt}
+
+def DebtIncomeRatioPreciseCalculation(application_id: str, verified_monthly_salary: float,
+                                     verified_current_debt: float, total_loan_outstanding: float,
+                                     total_creditcard_balance: float, requested_amount: float,
+                                     requested_term: int, 
+                                     estimated_rate: Optional[float] = None) -> Dict[str, Any]:
+    """Debt-to-income ratio precise calculation API"""
+    total_debt = verified_current_debt + total_loan_outstanding + total_creditcard_balance
+    return {"application_id": application_id, "debt_income_ratio": total_debt / verified_monthly_salary if verified_monthly_salary > 0 else 999.0}
+
+def CreditScoreAndRiskGradeAssessment(application_id: str, customer_age_years: int,
+                                     customer_occupation_type: str, credit_history_length: int,
+                                     past_overdue_count: int, active_credit_accounts: int,
+                                     credit_query_count_6m: int, debt_income_ratio: float,
+                                     internal_account_balance: float, 
+                                     internal_history_months: int,
+                                     has_negative_records: bool, overdue_status: str,
+                                     policy_version: str) -> Dict[str, Any]:
+    """Credit score and risk grade assessment API"""
+    base_score = 700 - past_overdue_count * 20
+    return {"application_id": application_id, "credit_score": max(300, base_score), "risk_grade": "LOW"}
+
+def TelephoneVerificationRecording(application_id: str, assigned_reviewer_id: str, customer_id: str,
+                                  verification_timestamp: str, verification_result: bool,
+                                  customer_phone: Optional[str] = None,
+                                  questions_asked: Optional[List[str]] = None,
+                                  responses_consistent: Optional[bool] = None,
+                                  employer_verification_done: Optional[bool] = None,
+                                  employer_phone: Optional[str] = None,
+                                  employer_confirmation: Optional[bool] = None,
+                                  notes: Optional[str] = None,
+                                  recording_id: Optional[str] = None) -> Dict[str, Any]:
+    """Telephone verification recording API"""
+    return {"application_id": application_id, "verification_recorded": verification_result}
+
+def ReviewReportDocumentGeneration(application_id: str, assigned_reviewer_id: str,
+                                  material_integrity_score: float, identity_authentication_result: bool,
+                                  fraud_prevention_passed: bool, credit_score_value: int, risk_grade: str,
+                                  debt_income_ratio: float, salary_verification_result: bool,
+                                  verification_result: bool, reviewer_suggestion: str,
+                                  suggested_amount: Optional[float] = None,
+                                  suggestion_rationale: Optional[str] = None) -> Dict[str, Any]:
+    """Review report document generation API"""
+    return {"application_id": application_id, "report_generated": True, "report_id": f"RPT{application_id}"}
+
+def ApprovalWorkflowRouting(application_id: str, requested_amount: float, credit_score_value: int,
+                           risk_grade: str, debt_income_ratio: float, past_overdue_count: int,
+                           fraud_prevention_passed: bool, reviewer_suggestion: str) -> Dict[str, Any]:
+    """Approval workflow routing API"""
+    queue = "auto_approval" if credit_score_value > 650 else "manual_approval"
+    return {"application_id": application_id, "routing_queue": queue}
+
+def RiskOrientedPricingCalculation(application_id: str, credit_score_value: int, risk_grade: str,
+                                  internal_account_balance: float, internal_history_months: int,
+                                  current_benchmark_rate: float, requested_term: int) -> Dict[str, Any]:
+    """Risk-oriented pricing calculation API"""
+    rate_adjustment = 0.02 if credit_score_value < 600 else 0.0
+    return {"application_id": application_id, "suggested_rate": current_benchmark_rate + rate_adjustment}
+
+def ApprovalDecisionImplementation(application_id: str, assigned_approver_id: str, auto_decision_flag: bool,
+                                  suggested_rate: float, requested_amount: float,
+                                  requested_term: int, decision: str,
+                                  approved_amount: Optional[float] = None,
+                                  approved_rate: Optional[float] = None,
+                                  approved_term: Optional[int] = None,
+                                  payment_method: Optional[str] = None,
+                                  decision_conditions: Optional[List[str]] = None,
+                                  decision_reason: str = "") -> Dict[str, Any]:
+    """Approval decision implementation API"""
+    return {"application_id": application_id, "decision": decision, "approved_amount": approved_amount or requested_amount}
+
+def MonthlyPaymentAmountCalculation(application_id: str, approved_amount: float,
+                                   approved_rate: float, approved_term: int,
+                                   payment_method: str) -> Dict[str, Any]:
+    """Monthly payment amount calculation API"""
+    monthly_payment = approved_amount / approved_term
+    return {"application_id": application_id, "monthly_payment": monthly_payment}
+
+def DigitalContractCreation(application_id: str, customer_id: str, approved_amount: float,
+                           approved_rate: float, approved_term: int,
+                           payment_method: str, monthly_payment: float,
+                           payment_schedule: List[Dict], loan_type: str,
+                           customer_full_name: str, customer_id_number: str,
+                           customer_residence: str, customer_phone: str) -> Dict[str, Any]:
+    """Digital contract creation API"""
+    return {"application_id": application_id, "contract_id": f"CTR{application_id}", "contract_generated": True}
+
+def ContractSignatureValidation(application_id: str, contract_id: str,
+                                signing_timestamp: str, signing_method: str,
+                                contract_hash: str, digital_certificate: Optional[str] = None,
+                                customer_signature: Optional[str] = None,
+                                video_recording_id: Optional[str] = None) -> Dict[str, Any]:
+    """Contract signature validation API"""
+    return {"application_id": application_id, "signature_valid": len(contract_hash) > 0}
+
+def PreDisbursementFinalCheck(application_id: str, customer_id: str, contract_id: str,
+                             signature_verified: bool, approved_amount: float,
+                             target_account: str, disbursement_type: Optional[str] = None,
+                             payee_info: Optional[Dict] = None) -> Dict[str, Any]:
+    """Pre-disbursement final check API"""
+    return {"application_id": application_id, "final_check_passed": signature_verified}
+
+def FundTransferExecution(application_id: str, contract_id: str, compliance_verified: bool,
+                         approved_amount: float, target_account: str,
+                         transfer_timestamp: str, transfer_method: str,
+                         operator_user_id: str) -> Dict[str, Any]:
+    """Fund transfer execution API"""
+    return {"application_id": application_id, "transfer_id": f"TXN{application_id}", "transfer_successful": compliance_verified}
+
+def ApplicationStatusUpdateAndAlert(application_id: str, submission_timestamp: str,
+                                   decision: str, decision_timestamp: str,
+                                   review_begin_timestamp: str,
+                                   transfer_timestamp: Optional[str] = None,
+                                   transfer_status: Optional[str] = None) -> Dict[str, Any]:
+    """Application status update and alert API"""
+    return {"application_id": application_id, "status_updated": True, "notification_sent": True}
+
+
+# 类封装
+class Tool_DocumentImageResolutionValidation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    submitted_documents: List[str] = Field(..., description="List of document keys or URLs uploaded by the customer (e.g., ID card, proof of income).")
+
+class Tool_MaterialIntegrityScoreCalculation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    submitted_documents: List[str] = Field(..., description="List of document keys or URLs to be evaluated.")
+    image_clarity_scores: Dict[str, float] = Field(..., description="Dictionary mapping document key to its image clarity score (0.0 to 1.0).")
+    text_recognition_accuracy: Dict[str, float] = Field(..., description="Dictionary mapping document key to its OCR text recognition accuracy score (0.0 to 1.0).")
+    loan_type: str = Field(..., description="Type of loan (e.g., 'personal', 'mortgage', 'auto').")
+    customer_occupation_type: str = Field(..., description="Category of the customer's occupation (e.g., 'SALARIED', 'SELF_EMPLOYED').")
+
+class Tool_IdentityAuthenticationAndFaceMatching(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    customer_id: str = Field(..., description="Internal system identifier for the customer profile.")
+    id_card_number: str = Field(..., description="Official identification number from the ID document.")
+    id_card_name: str = Field(..., description="Full name as printed on the ID document.")
+    id_card_images: Dict[str, str] = Field(..., description="Dictionary containing 'front' and 'back' image keys/URLs of the ID card.")
+    face_photo: str = Field(..., description="Key or URL of the customer's selfie or live capture photo for face matching.")
+
+class Tool_FraudPreventionValidation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    customer_id: str = Field(..., description="Internal system identifier for the customer profile.")
+    application_source: str = Field(..., description="Channel through which the application was submitted (e.g., 'MOBILE_APP', 'WEB_PORTAL', 'BRANCH').")
+    identity_authentication_result: bool = Field(..., description="Result from the identity verification step (True if passed).")
+    face_matching_passed: bool = Field(..., description="Result from the face matching step (True if passed).")
+    device_id: Optional[str] = Field(None, description="Unique identifier of the device used for application, if available.")
+    ip_location: Optional[str] = Field(None, description="Geographic location derived from the application's IP address.")
+    gps_location: Optional[str] = Field(None, description="GPS coordinates from the mobile device, if provided and consented.")
+
+class Tool_ApplicationDataConsistencyCheck(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    material_integrity_score: float = Field(..., description="Overall quality score of submitted documents.")
+    requested_amount: float = Field(..., description="Loan amount requested by the customer.")
+    requested_term: int = Field(..., description="Loan repayment term requested by the customer (in months).")
+    loan_type: str = Field(..., description="Type of loan applied for.")
+    customer_age_years: int = Field(..., description="Age of the customer in years.")
+    customer_occupation_type: str = Field(..., description="Category of the customer's occupation.")
+    customer_monthly_salary: float = Field(..., description="Monthly income declared by the customer.")
+    purpose_receipt_amount: Optional[float] = Field(None, description="Amount shown on the receipt for the loan purpose (e.g., invoice for a car), if applicable.")
+
+class Tool_CreditReportRetrievalAndAnalysis(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    customer_id: str = Field(..., description="Internal system identifier for the customer profile.")
+    identity_authentication_result: bool = Field(..., description="Result from the identity verification step.")
+    fraud_prevention_passed: bool = Field(..., description="Result from the fraud prevention check.")
+    credit_authorization_confirmed: bool = Field(..., description="Confirmation that the customer has consented to a credit bureau inquiry.")
+    customer_id_number: str = Field(..., description="Official government-issued ID number of the customer for bureau query.")
+    customer_full_name: str = Field(..., description="Full legal name of the customer for bureau query.")
+
+class Tool_InternalExternalDataCrossValidation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    customer_id: str = Field(..., description="Internal system identifier for the customer profile.")
+    customer_occupation_type: str = Field(..., description="Category of the customer's occupation.")
+    customer_monthly_salary: float = Field(..., description="Monthly income declared by the customer.")
+    customer_current_debt: float = Field(..., description="Total existing debt obligations reported by the customer.")
+    internal_account_balance: float = Field(..., description="Average balance in the customer's accounts at this bank.")
+    internal_history_months: int = Field(..., description="Length of the customer's banking relationship (in months).")
+    total_loan_outstanding: float = Field(..., description="Total outstanding balance of all active loans, sourced from credit bureau.")
+    total_creditcard_balance: float = Field(..., description="Total outstanding balance across all credit cards, sourced from credit bureau.")
+
+class Tool_DebtIncomeRatioPreciseCalculation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    verified_monthly_salary: float = Field(..., description="Customer's monthly income after cross-validation with internal/external data.")
+    verified_current_debt: float = Field(..., description="Customer's existing monthly debt obligations after validation.")
+    total_loan_outstanding: float = Field(..., description="Total outstanding balance of all active loans from credit bureau.")
+    total_creditcard_balance: float = Field(..., description="Total outstanding balance across all credit cards from credit bureau.")
+    requested_amount: float = Field(..., description="Loan amount requested by the customer.")
+    requested_term: int = Field(..., description="Loan repayment term requested by the customer (in months).")
+    estimated_rate: Optional[float] = Field(None, description="Preliminary interest rate estimate used for DTI calculation, if available.")
+
+class Tool_CreditScoreAndRiskGradeAssessment(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    customer_age_years: int = Field(..., description="Age of the customer in years.")
+    customer_occupation_type: str = Field(..., description="Category of the customer's occupation.")
+    credit_history_length: int = Field(..., description="Length of the customer's credit history in months.")
+    past_overdue_count: int = Field(..., description="Number of past overdue incidents on credit record.")
+    active_credit_accounts: int = Field(..., description="Number of currently active credit accounts.")
+    credit_query_count_6m: int = Field(..., description="Number of hard inquiries on the credit report in the last 6 months.")
+    debt_income_ratio: float = Field(..., description="Calculated Debt-to-Income ratio.")
+    internal_account_balance: float = Field(..., description="Average balance in the customer's accounts at this bank.")
+    internal_history_months: int = Field(..., description="Length of the customer's banking relationship (in months).")
+    has_negative_records: bool = Field(..., description="Flag indicating presence of any severe negative records (e.g., bankruptcy).")
+    overdue_status: str = Field(..., description="Current overdue status code from the credit bureau.")
+    policy_version: str = Field(..., description="Version identifier of the risk assessment policy/ruleset being applied.")
+
+class Tool_TelephoneVerificationRecording(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    assigned_reviewer_id: str = Field(..., description="ID of the underwriter or agent performing the verification.")
+    customer_id: str = Field(..., description="Internal system identifier for the customer profile.")
+    verification_timestamp: str = Field(..., description="ISO timestamp when the phone verification was conducted.")
+    verification_result: bool = Field(..., description="Overall result of the telephone verification process.")
+    customer_phone: Optional[str] = Field(None, description="Phone number used to contact the customer.")
+    questions_asked: Optional[List[str]] = Field(None, description="List of security or application-related questions asked.")
+    responses_consistent: Optional[bool] = Field(None, description="Indicates if the customer's responses matched the application data.")
+    employer_verification_done: Optional[bool] = Field(None, description="Flag if employer contact was attempted or completed.")
+    employer_phone: Optional[str] = Field(None, description="Phone number used for employer verification.")
+    employer_confirmation: Optional[bool] = Field(None, description="Result of employer contact regarding employment status.")
+    notes: Optional[str] = Field(None, description="Free-text notes from the reviewer about the call.")
+    recording_id: Optional[str] = Field(None, description="System ID linking to the encrypted call recording, if consent was given.")
+
+class Tool_ReviewReportDocumentGeneration(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    assigned_reviewer_id: str = Field(..., description="ID of the underwriter who prepared the report.")
+    material_integrity_score: float = Field(..., description="Overall quality score of submitted documents.")
+    identity_authentication_result: bool = Field(..., description="Result from the identity verification step.")
+    fraud_prevention_passed: bool = Field(..., description="Result from the fraud prevention check.")
+    credit_score_value: int = Field(..., description="Final credit score assigned to the application.")
+    risk_grade: str = Field(..., description="Final risk grade assigned (e.g., 'A', 'B', 'C').")
+    debt_income_ratio: float = Field(..., description="Calculated Debt-to-Income ratio.")
+    salary_verification_result: bool = Field(..., description="Result of income verification through cross-checks or employer contact.")
+    verification_result: bool = Field(..., description="Result of the telephone verification step.")
+    reviewer_suggestion: str = Field(..., description="Underwriter's final recommendation (e.g., 'APPROVE', 'DECLINE', 'REFER').")
+    suggested_amount: Optional[float] = Field(None, description="Recommended loan amount if different from request, typically lower.")
+    suggestion_rationale: Optional[str] = Field(None, description="Detailed justification for the recommendation or suggested amount.")
+
+class Tool_ApprovalWorkflowRouting(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    requested_amount: float = Field(..., description="Loan amount requested by the customer.")
+    credit_score_value: int = Field(..., description="Final credit score assigned to the application.")
+    risk_grade: str = Field(..., description="Final risk grade assigned.")
+    debt_income_ratio: float = Field(..., description="Calculated Debt-to-Income ratio.")
+    past_overdue_count: int = Field(..., description="Number of past overdue incidents on credit record.")
+    fraud_prevention_passed: bool = Field(..., description="Result from the fraud prevention check.")
+    reviewer_suggestion: str = Field(..., description="Underwriter's final recommendation.")
+
+class Tool_RiskOrientedPricingCalculation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    credit_score_value: int = Field(..., description="Final credit score assigned to the application.")
+    risk_grade: str = Field(..., description="Final risk grade assigned.")
+    internal_account_balance: float = Field(..., description="Average balance in the customer's accounts at this bank.")
+    internal_history_months: int = Field(..., description="Length of the customer's banking relationship (in months).")
+    current_benchmark_rate: float = Field(..., description="Base interest rate (e.g., prime rate) applicable at the time of approval.")
+    requested_term: int = Field(..., description="Loan repayment term requested by the customer (in months).")
+
+class Tool_ApprovalDecisionImplementation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    assigned_approver_id: str = Field(..., description="ID of the final approver or committee making the decision.")
+    auto_decision_flag: bool = Field(..., description="Indicates if the decision was made automatically by system policy.")
+    suggested_rate: float = Field(..., description="Risk-based interest rate calculated by the pricing engine.")
+    requested_amount: float = Field(..., description="Loan amount requested by the customer.")
+    requested_term: int = Field(..., description="Loan repayment term requested by the customer (in months).")
+    decision: str = Field(..., description="Final decision on the application (e.g., 'APPROVED', 'DECLINED', 'PENDING_MORE_INFO').")
+    approved_amount: Optional[float] = Field(None, description="Final approved loan amount. May be less than the requested amount.")
+    approved_rate: Optional[float] = Field(None, description="Final approved annual interest rate.")
+    approved_term: Optional[int] = Field(None, description="Final approved loan term in months.")
+    payment_method: Optional[str] = Field(None, description="Agreed repayment method (e.g., 'AUTO_DEBIT', 'MANUAL_TRANSFER').")
+    decision_conditions: Optional[List[str]] = Field(None, description="List of specific conditions attached to the approval (e.g., require guarantor).")
+    decision_reason: str = Field("", description="Mandatory field detailing the primary reason for the decision.")
+
+class Tool_MonthlyPaymentAmountCalculation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    approved_amount: float = Field(..., description="Final approved loan amount.")
+    approved_rate: float = Field(..., description="Final approved annual interest rate.")
+    approved_term: int = Field(..., description="Final approved loan term in months.")
+    payment_method: str = Field(..., description="Agreed repayment method.")
+
+class Tool_DigitalContractCreation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    customer_id: str = Field(..., description="Internal system identifier for the customer profile.")
+    approved_amount: float = Field(..., description="Final approved loan amount.")
+    approved_rate: float = Field(..., description="Final approved annual interest rate.")
+    approved_term: int = Field(..., description="Final approved loan term in months.")
+    payment_method: str = Field(..., description="Agreed repayment method.")
+    monthly_payment: float = Field(..., description="Calculated fixed monthly payment amount.")
+    payment_schedule: List[Dict[str, Any]] = Field(..., description="Detailed amortization schedule listing each payment's principal, interest, and balance.")
+    loan_type: str = Field(..., description="Type of loan.")
+    customer_full_name: str = Field(..., description="Full legal name of the customer for the contract.")
+    customer_id_number: str = Field(..., description="Official government-issued ID number of the customer.")
+    customer_residence: str = Field(..., description="Legal residential address of the customer.")
+    customer_phone: str = Field(..., description="Primary contact phone number of the customer.")
+
+class Tool_ContractSignatureValidation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    contract_id: str = Field(..., description="Unique identifier for the generated digital loan contract.")
+    signing_timestamp: str = Field(..., description="ISO timestamp when the contract was signed.")
+    signing_method: str = Field(..., description="Method used for signing (e.g., 'DIGITAL_CERTIFICATE', 'BANK_ESIGN_PLATFORM', 'IN_PERSON_VIDEO').")
+    contract_hash: str = Field(..., description="Cryptographic hash of the final signed contract document for integrity.")
+    digital_certificate: Optional[str] = Field(None, description="Identifier of the digital certificate used, if applicable.")
+    customer_signature: Optional[str] = Field(None, description="Encoded representation of the customer's signature image or data.")
+    video_recording_id: Optional[str] = Field(None, description="System ID linking to the video recording of the in-person signing session, if applicable.")
+
+class Tool_PreDisbursementFinalCheck(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    customer_id: str = Field(..., description="Internal system identifier for the customer profile.")
+    contract_id: str = Field(..., description="Unique identifier for the signed loan contract.")
+    signature_verified: bool = Field(..., description="Confirmation that the contract signatures have been validated.")
+    approved_amount: float = Field(..., description="Final approved loan amount to be disbursed.")
+    target_account: str = Field(..., description="Bank account number (or loan account number) where funds will be deposited.")
+    disbursement_type: Optional[str] = Field(None, description="Type of disbursement (e.g., 'DIRECT_TO_CUSTOMER', 'TO_MERCHANT', 'PAY_OFF_EXISTING').")
+    payee_info: Optional[Dict[str, Any]] = Field(None, description="Information about a third-party payee if disbursement is not to the customer directly.")
+
+class Tool_FundTransferExecution(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    contract_id: str = Field(..., description="Unique identifier for the signed loan contract.")
+    compliance_verified: bool = Field(..., description="Final confirmation that all compliance and regulatory checks passed.")
+    approved_amount: float = Field(..., description="Final approved loan amount to be disbursed.")
+    target_account: str = Field(..., description="Bank account number where funds will be deposited.")
+    transfer_timestamp: str = Field(..., description="ISO timestamp when the funds transfer was initiated.")
+    transfer_method: str = Field(..., description="Method used for the transfer (e.g., 'RTGS', 'NEFT', 'INTERNAL_TRANSFER').")
+    operator_user_id: str = Field(..., description="ID of the back-office operator or system process that executed the transfer.")
+
+class Tool_ApplicationStatusUpdateAndAlert(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the loan application.")
+    submission_timestamp: str = Field(..., description="ISO timestamp when the application was originally submitted.")
+    decision: str = Field(..., description="Final decision on the application.")
+    decision_timestamp: str = Field(..., description="ISO timestamp when the final decision was recorded.")
+    review_begin_timestamp: str = Field(..., description="ISO timestamp when the manual/automated review process began.")
+    transfer_timestamp: Optional[str] = Field(None, description="ISO timestamp when the funds were successfully transferred, if applicable.")
+    transfer_status: Optional[str] = Field(None, description="Status of the disbursement transfer (e.g., 'SUCCESS', 'FAILED', 'PENDING').")
+
+
+# 列表封装
+tools = [
+    StructuredTool.from_function(
+        func=DocumentImageResolutionValidation,
+        name="DocumentImageResolutionValidation",
+        description="Validates the image clarity and resolution of documents uploaded for a loan application. Ensures uploaded images are clear, legible, and suitable for automated text recognition and manual review. This step is crucial for downstream document integrity assessment.",
+        args_schema=Tool_DocumentImageResolutionValidation
+    ),
+    StructuredTool.from_function(
+        func=MaterialIntegrityScoreCalculation,
+        name="MaterialIntegrityScoreCalculation",
+        description="Calculates a comprehensive integrity score for all application documents based on image clarity and text recognition accuracy. The score reflects the overall quality and trustworthiness of the submitted evidence, forming a key input for risk assessment.",
+        args_schema=Tool_MaterialIntegrityScoreCalculation
+    ),
+    StructuredTool.from_function(
+        func=IdentityAuthenticationAndFaceMatching,
+        name="IdentityAuthenticationAndFaceMatching",
+        description="Performs identity proofing by verifying government ID details and conducting a facial comparison between the ID photo and a live selfie. This is a primary step in Know Your Customer (KYC) and fraud prevention.",
+        args_schema=Tool_IdentityAuthenticationAndFaceMatching
+    ),
+    StructuredTool.from_function(
+        func=FraudPreventionValidation,
+        name="FraudPreventionValidation",
+        description="Conducts a multi-dimensional fraud risk check by analyzing application metadata (source, location, device) alongside identity and face match results. Aims to detect suspicious patterns indicative of identity theft or synthetic fraud.",
+        args_schema=Tool_FraudPreventionValidation
+    ),
+    StructuredTool.from_function(
+        func=ApplicationDataConsistencyCheck,
+        name="ApplicationDataConsistencyCheck",
+        description="Reviews key application data (age, occupation, income, loan details) for internal consistency and logical coherence. Flags discrepancies, such as mismatched loan purpose amounts or unrealistic income for an occupation type.",
+        args_schema=Tool_ApplicationDataConsistencyCheck
+    ),
+    StructuredTool.from_function(
+        func=CreditReportRetrievalAndAnalysis,
+        name="CreditReportRetrievalAndAnalysis",
+        description="Initiates a request to a credit bureau to retrieve the applicant's detailed credit report. This step requires prior identity verification, fraud check, and customer consent.",
+        args_schema=Tool_CreditReportRetrievalAndAnalysis
+    ),
+    StructuredTool.from_function(
+        func=InternalExternalDataCrossValidation,
+        name="InternalExternalDataCrossValidation",
+        description="Cross-references customer-declared information (e.g., income, debts) with internal bank records and external credit bureau data. Aims to verify the accuracy of applicant statements and uncover undisclosed liabilities.",
+        args_schema=Tool_InternalExternalDataCrossValidation
+    ),
+    StructuredTool.from_function(
+        func=DebtIncomeRatioPreciseCalculation,
+        name="DebtIncomeRatioPreciseCalculation",
+        description="Calculates the applicant's Debt-to-Income (DTI) ratio using verified income and comprehensive debt obligations (including the requested loan). DTI is a critical metric for assessing repayment capacity and overall risk.",
+        args_schema=Tool_DebtIncomeRatioPreciseCalculation
+    ),
+    StructuredTool.from_function(
+        func=CreditScoreAndRiskGradeAssessment,
+        name="CreditScoreAndRiskGradeAssessment",
+        description="Applies a scoring model to generate a numeric credit score and an alphanumeric risk grade based on the applicant's profile, credit history, and DTI. This step formalizes the application's risk classification for decisioning.",
+        args_schema=Tool_CreditScoreAndRiskGradeAssessment
+    ),
+    StructuredTool.from_function(
+        func=TelephoneVerificationRecording,
+        name="TelephoneVerificationRecording",
+        description="Executes and records a phone verification call with the applicant (and optionally their employer) to confirm application details, employment, and overall intent. Results and call metadata are stored securely.",
+        args_schema=Tool_TelephoneVerificationRecording
+    ),
+    StructuredTool.from_function(
+        func=ReviewReportDocumentGeneration,
+        name="ReviewReportDocumentGeneration",
+        name="ReviewReportDocumentGeneration",
+        description="Compiles all verification and assessment results into a structured underwriting review report. Summarizes key findings and provides the reviewer's recommendation for approval or denial.",
+        args_schema=Tool_ReviewReportDocumentGeneration
+    ),
+    StructuredTool.from_function(
+        func=ApprovalWorkflowRouting,
+        name="ApprovalWorkflowRouting",
+        description="Determines the appropriate approval path (e.g., auto-approval, junior officer, senior committee) based on risk grade, loan amount, and reviewer suggestion. Ensures applications are handled according to predefined authority limits.",
+        args_schema=Tool_ApprovalWorkflowRouting
+    ),
+    StructuredTool.from_function(
+        func=RiskOrientedPricingCalculation,
+        name="RiskOrientedPricingCalculation",
+        description="Calculates a risk-based interest rate for the loan. The rate is derived from the applicant's risk grade, credit score, relationship with the bank, and current market benchmark rates.",
+        args_schema=Tool_RiskOrientedPricingCalculation
+    ),
+    StructuredTool.from_function(
+        func=ApprovalDecisionImplementation,
+        name="ApprovalDecisionImplementation",
+        description="Records the final decision (approve/decline) on the loan application. For approvals, it captures the final approved loan amount, term, interest rate, and any special conditions.",
+        args_schema=Tool_ApprovalDecisionImplementation
+    ),
+    StructuredTool.from_function(
+        func=MonthlyPaymentAmountCalculation,
+        name="MonthlyPaymentAmountCalculation",
+        description="Calculates the fixed monthly repayment amount based on the approved loan amount, interest rate, and term, using standard amortization formulas.",
+        args_schema=Tool_MonthlyPaymentAmountCalculation
+    ),
+    StructuredTool.from_function(
+        func=DigitalContractCreation,
+        name="DigitalContractCreation",
+        description="Generates a legally binding digital loan contract document by populating a standard template with the approved terms, applicant details, and generated payment schedule.",
+        args_schema=Tool_DigitalContractCreation
+    ),
+    StructuredTool.from_function(
+        func=ContractSignatureValidation,
+        name="ContractSignatureValidation",
+        description="Manages the digital signing process for the loan contract, records the method and timestamp, and verifies the cryptographic integrity of the signed document.",
+        args_schema=Tool_ContractSignatureValidation
+    ),
+    StructuredTool.from_function(
+        func=PreDisbursementFinalCheck,
+        name="PreDisbursementFinalCheck",
+        description="Performs a final compliance and operational check before releasing funds. Verifies that the signed contract is valid and all pre-disbursement conditions are met.",
+        args_schema=Tool_PreDisbursementFinalCheck
+    ),
+    StructuredTool.from_function(
+        func=FundTransferExecution,
+        name="FundTransferExecution",
+        description="Executes the electronic funds transfer to disburse the approved loan amount to the designated borrower or merchant account, recording the transaction details.",
+        args_schema=Tool_FundTransferExecution
+    ),
+    StructuredTool.from_function(
+        func=ApplicationStatusUpdateAndAlert,
+        name="ApplicationStatusUpdateAndAlert",
+        description="Updates the central application tracking system with the final status and key timestamps. Triggers notifications to the customer regarding the decision and, if approved, the disbursement.",
+        args_schema=Tool_ApplicationStatusUpdateAndAlert
+    )
+]
+```

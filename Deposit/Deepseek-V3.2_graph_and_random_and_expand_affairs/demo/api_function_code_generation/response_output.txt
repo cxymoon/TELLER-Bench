@@ -1,0 +1,1228 @@
+```python
+<code>
+import json
+from typing import Dict, Any, List, Optional
+from datetime import datetime, timedelta
+from decimal import Decimal
+from pydantic import BaseModel, Field
+from langchain.tools import StructuredTool
+
+# Global data storage for maintaining transaction records
+TRANSACTION_DATA = []
+
+def parse_data_entry(entry_str: str) -> Dict[str, Any]:
+    """Parse a data entry string into a dictionary"""
+    data_dict = {}
+    pairs = entry_str.strip("[]").split("', '")
+    for pair in pairs:
+        pair = pair.strip("'")
+        if ':' in pair:
+            key, value = pair.split(':', 1)
+            data_dict[key] = value
+    return data_dict
+
+def initialize_data():
+    """Initialize the global transaction data from sample data"""
+    global TRANSACTION_DATA
+    sample_data = [
+        ['transaction_id:TXN_DEP_20250418_001234', 'customer_id:CIF_789456123', 'account_number:4532100012345678', 'transaction_timestamp:2025-04-18T10:23:45Z', 'deposit_type:CASH_COUNTER', 'account_type:SAVINGS', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_NY_5012', 'teller_id:EMP_45823', 'customer_name:John Michael Smith', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:D1234567', 'customer_address:123 Main Street, New York, NY 10001', 'customer_tax_id:123-45-6789', 'customer_phone:+1-212-555-0123', 'customer_email:john.smith@email.com', 'deposit_amount:5000.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 50, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:2.50', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:500.00', 'monthly_maintenance_fee:5.00', 'previous_account_balance:1234.56', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T10:15:32Z', 'aml_screening_result:CLEAR', 'aml_risk_score:15', 'sanctions_screening_timestamp:2025-04-18T10:16:05Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR5012_01', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-1234', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["CREDIT_CARD", "PERSONAL_LOAN"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:Customer requested expedited card delivery', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_002156', 'customer_id:CIF_445789321', 'account_number:4532100098765432', 'transaction_timestamp:2025-04-18T11:45:23Z', 'deposit_type:TERM_DEPOSIT', 'account_type:CD_1Y', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_CA_3045', 'teller_id:EMP_67234', 'customer_name:Sarah Elizabeth Johnson', 'customer_id_type:PASSPORT', 'customer_id_number:P87654321', 'customer_address:456 Oak Avenue, Los Angeles, CA 90001', 'customer_tax_id:987-65-4321', 'customer_phone:+1-310-555-7890', 'customer_email:sarah.johnson@email.com', 'deposit_amount:25000.00', 'deposit_currency:USD', 'funding_source_type:INTERNAL_TRANSFER', 'funding_source_account:4532100087654321', 'cash_denomination_breakdown:', 'term_length_months:12', 'interest_rate_apy:4.25', 'maturity_date:', 'early_withdrawal_penalty_rate:0.5', 'minimum_balance_requirement:1000.00', 'monthly_maintenance_fee:0.00', 'previous_account_balance:0.00', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T11:38:12Z', 'aml_screening_result:CLEAR', 'aml_risk_score:22', 'sanctions_screening_timestamp:2025-04-18T11:39:45Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:True', 'supervisor_id:EMP_12034', 'supervisor_approval_timestamp:2025-04-18T11:47:56Z', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:False', 'debit_card_number:', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["WEALTH_MANAGEMENT", "INVESTMENT_ADVISORY"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:EMAIL', 'transaction_notes:Customer interested in CD laddering strategy', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_003789', 'customer_id:CIF_223344556', 'account_number:4532100055667788', 'transaction_timestamp:2025-04-18T14:32:18Z', 'deposit_type:CASH_COUNTER', 'account_type:CHECKING', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_TX_7823', 'teller_id:EMP_89234', 'customer_name:Michael Robert Davis', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:TX9876543', 'customer_address:789 Pine Street, Houston, TX 77001', 'customer_tax_id:456-78-9012', 'customer_phone:+1-713-555-4567', 'customer_email:michael.davis@email.com', 'deposit_amount:15000.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 150, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:0.25', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:1000.00', 'monthly_maintenance_fee:10.00', 'previous_account_balance:3456.78', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T14:28:45Z', 'aml_screening_result:CLEAR', 'aml_risk_score:45', 'sanctions_screening_timestamp:2025-04-18T14:29:12Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR7823_02', 'supervisor_approval_required:True', 'supervisor_id:EMP_34567', 'supervisor_approval_timestamp:2025-04-18T14:35:23Z', 'ctr_filing_required:True', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-7788', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:True', 'cross_sell_products_offered:["MORTGAGE", "AUTO_LOAN"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:Large cash deposit - CTR filed per regulatory requirements', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_004523', 'customer_id:CIF_998877665', 'account_number:4532100044332211', 'transaction_timestamp:2025-04-18T09:15:34Z', 'deposit_type:RETAIL_DEMAND', 'account_type:SAVINGS', 'deposit_channel:ATM', 'branch_code:BR_FL_4512', 'teller_id:', 'customer_name:Jennifer Anne Wilson', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:F8765432', 'customer_address:321 Beach Boulevard, Miami, FL 33101', 'customer_tax_id:321-54-9876', 'customer_phone:+1-305-555-8901', 'customer_email:jennifer.wilson@email.com', 'deposit_amount:750.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 7, "20": 2, "10": 1, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:2.75', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:500.00', 'monthly_maintenance_fee:5.00', 'previous_account_balance:2345.67', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T09:12:23Z', 'aml_screening_result:CLEAR', 'aml_risk_score:8', 'sanctions_screening_timestamp:2025-04-18T09:13:01Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-2211', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:[]', 'customer_signature_captured:False', 'signature_capture_method:NOT_CAPTURED', 'receipt_delivery_method:PRINTED', 'transaction_notes:ATM deposit processed successfully', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_005678', 'customer_id:CIF_556677889', 'account_number:4532100099887766', 'transaction_timestamp:2025-04-18T15:48:22Z', 'deposit_type:CORPORATE_DEPOSIT', 'account_type:BUSINESS_CHECKING', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_IL_6789', 'teller_id:EMP_23456', 'customer_name:TechCorp Solutions LLC', 'customer_id_type:NATIONAL_ID', 'customer_id_number:EIN36-7894523', 'customer_address:1000 Corporate Drive, Chicago, IL 60601', 'customer_tax_id:36-7894523', 'customer_phone:+1-312-555-2345', 'customer_email:finance@techcorp.com', 'deposit_amount:125000.00', 'deposit_currency:USD', 'funding_source_type:CHECK', 'funding_source_account:', 'cash_denomination_breakdown:', 'term_length_months:', 'interest_rate_apy:1.50', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:5000.00', 'monthly_maintenance_fee:25.00', 'previous_account_balance:87654.32', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T15:42:11Z', 'aml_screening_result:CLEAR', 'aml_risk_score:35', 'sanctions_screening_timestamp:2025-04-18T15:43:56Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:True', 'supervisor_id:EMP_78901', 'supervisor_approval_timestamp:2025-04-18T15:52:45Z', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-7766', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:True', 'cross_sell_products_offered:["BUSINESS_LINE_OF_CREDIT", "MERCHANT_SERVICES"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:EMAIL', 'transaction_notes:Large corporate check deposit - payroll funding', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_006234', 'customer_id:CIF_112233445', 'account_number:4532100012121212', 'transaction_timestamp:2025-04-18T13:22:11Z', 'deposit_type:CASH_COUNTER', 'account_type:CHECKING', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_WA_8901', 'teller_id:EMP_56789', 'customer_name:David Lee Anderson', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:WA1234567', 'customer_address:555 Market Street, Seattle, WA 98101', 'customer_tax_id:789-01-2345', 'customer_phone:+1-206-555-6789', 'customer_email:david.anderson@email.com', 'deposit_amount:9800.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 98, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:0.15', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:1000.00', 'monthly_maintenance_fee:12.00', 'previous_account_balance:456.89', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T13:18:34Z', 'aml_screening_result:CLEAR', 'aml_risk_score:52', 'sanctions_screening_timestamp:2025-04-18T13:19:23Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR8901_01', 'supervisor_approval_required:True', 'supervisor_id:EMP_45678', 'supervisor_approval_timestamp:2025-04-18T13:26:45Z', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-1212', 'online_banking_enabled:True', 'mobile_app_enabled:False', 'checkbook_ordered:True', 'cross_sell_products_offered:["SAVINGS_ACCOUNT"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:Cash deposit just below CTR threshold - monitoring for structuring', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_007890', 'customer_id:CIF_667788990', 'account_number:4532100033445566', 'transaction_timestamp:2025-04-18T10:55:47Z', 'deposit_type:TERM_DEPOSIT', 'account_type:CD_6M', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_MA_2341', 'teller_id:EMP_12345', 'customer_name:Patricia Marie Thompson', 'customer_id_type:PASSPORT', 'customer_id_number:P12345678', 'customer_address:777 Commonwealth Avenue, Boston, MA 02215', 'customer_tax_id:234-56-7890', 'customer_phone:+1-617-555-3456', 'customer_email:patricia.thompson@email.com', 'deposit_amount:10000.00', 'deposit_currency:USD', 'funding_source_type:INTERNAL_TRANSFER', 'funding_source_account:4532100099998888', 'cash_denomination_breakdown:', 'term_length_months:6', 'interest_rate_apy:3.50', 'maturity_date:', 'early_withdrawal_penalty_rate:0.5', 'minimum_balance_requirement:1000.00', 'monthly_maintenance_fee:0.00', 'previous_account_balance:0.00', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T10:52:12Z', 'aml_screening_result:CLEAR', 'aml_risk_score:18', 'sanctions_screening_timestamp:2025-04-18T10:52:56Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:False', 'debit_card_number:', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["IRA_ACCOUNT", "RETIREMENT_PLANNING"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:EMAIL', 'transaction_notes:6-month CD opening for short-term savings goal', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_008456', 'customer_id:CIF_334455667', 'account_number:4532100055443322', 'transaction_timestamp:2025-04-18T16:12:33Z', 'deposit_type:CASH_COUNTER', 'account_type:SAVINGS', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_AZ_5678', 'teller_id:EMP_67890', 'customer_name:Robert James Martinez', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:AZ7654321', 'customer_address:888 Desert Road, Phoenix, AZ 85001', 'customer_tax_id:567-89-0123', 'customer_phone:+1-602-555-7890', 'customer_email:robert.martinez@email.com', 'deposit_amount:3200.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 32, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:2.85', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:500.00', 'monthly_maintenance_fee:5.00', 'previous_account_balance:8765.43', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T16:08:45Z', 'aml_screening_result:CLEAR', 'aml_risk_score:12', 'sanctions_screening_timestamp:2025-04-18T16:09:34Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR5678_01', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-3322', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["CREDIT_CARD"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:Regular savings deposit', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_009123', 'customer_id:CIF_889900112', 'account_number:4532100077665544', 'transaction_timestamp:2025-04-18T12:34:56Z', 'deposit_type:MOBILE_DEPOSIT', 'account_type:CHECKING', 'deposit_channel:MOBILE_APP', 'branch_code:BR_NC_3456', 'teller_id:', 'customer_name:Emily Grace Thompson', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:NC5432109', 'customer_address:123 University Drive, Charlotte, NC 28202', 'customer_tax_id:890-12-3456', 'customer_phone:+1-704-555-0123', 'customer_email:emily.thompson@email.com', 'deposit_amount:1250.00', 'deposit_currency:USD', 'funding_source_type:CHECK', 'funding_source_account:', 'cash_denomination_breakdown:', 'term_length_months:', 'interest_rate_apy:0.10', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:100.00', 'monthly_maintenance_fee:0.00', 'previous_account_balance:345.67', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T12:32:11Z', 'aml_screening_result:CLEAR', 'aml_risk_score:6', 'sanctions_screening_timestamp:2025-04-18T12:32:45Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-5544', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["STUDENT_LOAN"]', 'customer_signature_captured:False', 'signature_capture_method:NOT_CAPTURED', 'receipt_delivery_method:MOBILE_APP', 'transaction_notes:Mobile check deposit - paycheck', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_010789', 'customer_id:CIF_445566778', 'account_number:4532100011223344', 'transaction_timestamp:2025-04-18T08:45:12Z', 'deposit_type:TERM_DEPOSIT', 'account_type:CD_5Y', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_PA_7890', 'teller_id:EMP_34567', 'customer_name:William Charles Brown', 'customer_id_type:SSN', 'customer_id_number:901-23-4567', 'customer_address:999 Liberty Street, Philadelphia, PA 19101', 'customer_tax_id:901-23-4567', 'customer_phone:+1-215-555-4567', 'customer_email:william.brown@email.com', 'deposit_amount:75000.00', 'deposit_currency:USD', 'funding_source_type:WIRE', 'funding_source_account:', 'cash_denomination_breakdown:', 'term_length_months:60', 'interest_rate_apy:5.00', 'maturity_date:', 'early_withdrawal_penalty_rate:0.5', 'minimum_balance_requirement:1000.00', 'monthly_maintenance_fee:0.00', 'previous_account_balance:0.00', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T08:40:23Z', 'aml_screening_result:CLEAR', 'aml_risk_score:28', 'sanctions_screening_timestamp:2025-04-18T08:41:12Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:True', 'supervisor_id:EMP_90123', 'supervisor_approval_timestamp:2025-04-18T08:48:34Z', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:False', 'debit_card_number:', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["WEALTH_MANAGEMENT", "TRUST_SERVICES"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:EMAIL', 'transaction_notes:5-year CD for retirement planning - maximum rate', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_011456', 'customer_id:CIF_778899001', 'account_number:4532100066778899', 'transaction_timestamp:2025-04-18T14:08:27Z', 'deposit_type:CASH_COUNTER', 'account_type:MONEY_MARKET', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_CO_4567', 'teller_id:EMP_78901', 'customer_name:Amanda Nicole Garcia', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:CO8765432', 'customer_address:456 Mountain View, Denver, CO 80202', 'customer_tax_id:012-34-5678', 'customer_phone:+1-303-555-2345', 'customer_email:amanda.garcia@email.com', 'deposit_amount:18500.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 185, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:3.25', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:2500.00', 'monthly_maintenance_fee:15.00', 'previous_account_balance:12345.67', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T14:04:15Z', 'aml_screening_result:WATCHLIST_HIT', 'aml_risk_score:78', 'sanctions_screening_timestamp:2025-04-18T14:05:23Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR4567_01', 'supervisor_approval_required:True', 'supervisor_id:EMP_23456', 'supervisor_approval_timestamp:2025-04-18T14:15:45Z', 'ctr_filing_required:True', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-8899', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:True', 'cross_sell_products_offered:[]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:AML watchlist hit - false positive confirmed after manual review - compliance override approved', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_012234', 'customer_id:CIF_223344556', 'account_number:4532100022334455', 'transaction_timestamp:2025-04-18T11:20:45Z', 'deposit_type:RETAIL_DEMAND', 'account_type:CHECKING', 'deposit_channel:ONLINE_BANKING', 'branch_code:BR_MI_8901', 'teller_id:', 'customer_name:Christopher Alan White', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:MI3456789', 'customer_address:222 Lake Shore Drive, Detroit, MI 48201', 'customer_tax_id:345-67-8901', 'customer_phone:+1-313-555-6789', 'customer_email:christopher.white@email.com', 'deposit_amount:500.00', 'deposit_currency:USD', 'funding_source_type:ACH', 'funding_source_account:', 'cash_denomination_breakdown:', 'term_length_months:', 'interest_rate_apy:0.05', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:25.00', 'monthly_maintenance_fee:0.00', 'previous_account_balance:125.34', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T11:18:56Z', 'aml_screening_result:CLEAR', 'aml_risk_score:5', 'sanctions_screening_timestamp:2025-04-18T11:19:23Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-4455', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:[]', 'customer_signature_captured:False', 'signature_capture_method:NOT_CAPTURED', 'receipt_delivery_method:EMAIL', 'transaction_notes:ACH transfer from external bank account', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_013789', 'customer_id:CIF_556677889', 'account_number:4532100055667788', 'transaction_timestamp:2025-04-18T09:42:18Z', 'deposit_type:CASH_COUNTER', 'account_type:CHECKING', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_OR_1234', 'teller_id:EMP_45678', 'customer_name:Michelle Lauren Harris', 'customer_id_type:PASSPORT', 'customer_id_number:P98765432', 'customer_address:111 Pioneer Square, Portland, OR 97201', 'customer_tax_id:678-90-1234', 'customer_phone:+1-503-555-8901', 'customer_email:michelle.harris@email.com', 'deposit_amount:4500.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 40, "50": 10, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:0.20', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:500.00', 'monthly_maintenance_fee:8.00', 'previous_account_balance:234.56', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T09:38:34Z', 'aml_screening_result:CLEAR', 'aml_risk_score:25', 'sanctions_screening_timestamp:2025-04-18T09:39:12Z', 'counterfeit_detection_result:FAIL', 'cash_counter_machine_id:CCM_BR1234_01', 'supervisor_approval_required:True', 'supervisor_id:EMP_67890', 'supervisor_approval_timestamp:2025-04-18T09:50:23Z', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-7788', 'online_banking_enabled:True', 'mobile_app_enabled:False', 'checkbook_ordered:True', 'cross_sell_products_offered:[]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:Counterfeit detection failed - two $100 bills rejected after secondary validation - bills returned to customer - transaction processed with verified amount only', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_014567', 'customer_id:CIF_998877665', 'account_number:4532100099887766', 'transaction_timestamp:2025-04-18T15:33:42Z', 'deposit_type:CASH_COUNTER', 'account_type:SAVINGS', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_NV_5678', 'teller_id:EMP_89012', 'customer_name:Daniel Joseph Clark', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:NV6543210', 'customer_address:333 Strip Boulevard, Las Vegas, NV 89101', 'customer_tax_id:789-01-2345', 'customer_phone:+1-702-555-0123', 'customer_email:daniel.clark@email.com', 'deposit_amount:22000.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 220, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:2.90', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:500.00', 'monthly_maintenance_fee:5.00', 'previous_account_balance:5678.90', 'kyc_verification_status:REQUIRES_REVIEW', 'kyc_verification_timestamp:2025-04-18T15:29:45Z', 'aml_screening_result:MANUAL_REVIEW_REQUIRED', 'aml_risk_score:85', 'sanctions_screening_timestamp:2025-04-18T15:30:23Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR5678_02', 'supervisor_approval_required:True', 'supervisor_id:EMP_12345', 'supervisor_approval_timestamp:', 'ctr_filing_required:True', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-7766', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:[]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:High-risk transaction - KYC requires review - AML manual review required - multiple red flags detected', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_015890', 'customer_id:CIF_334455667', 'account_number:4532100033445566', 'transaction_timestamp:2025-04-18T13:45:28Z', 'deposit_type:TERM_DEPOSIT', 'account_type:CD_1Y', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_GA_2345', 'teller_id:EMP_23456', 'customer_name:Jessica Lynn Robinson', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:GA9876543', 'customer_address:444 Peachtree Street, Atlanta, GA 30303', 'customer_tax_id:456-78-9012', 'customer_phone:+1-404-555-3456', 'customer_email:jessica.robinson@email.com', 'deposit_amount:50000.00', 'deposit_currency:USD', 'funding_source_type:INTERNAL_TRANSFER', 'funding_source_account:4532100077889900', 'cash_denomination_breakdown:', 'term_length_months:12', 'interest_rate_apy:4.50', 'maturity_date:', 'early_withdrawal_penalty_rate:0.5', 'minimum_balance_requirement:1000.00', 'monthly_maintenance_fee:0.00', 'previous_account_balance:0.00', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T13:41:12Z', 'aml_screening_result:CLEAR', 'aml_risk_score:20', 'sanctions_screening_timestamp:2025-04-18T13:41:56Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:True', 'supervisor_id:EMP_56789', 'supervisor_approval_timestamp:2025-04-18T13:49:34Z', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:False', 'debit_card_number:', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["INVESTMENT_ACCOUNT", "FINANCIAL_PLANNING"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:EMAIL', 'transaction_notes:High-balance CD - premium rate tier applied', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_016234', 'customer_id:CIF_112233445', 'account_number:4532100011223344', 'transaction_timestamp:2025-04-18T10:18:55Z', 'deposit_type:RETAIL_DEMAND', 'account_type:CHECKING', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_TN_6789', 'teller_id:EMP_34567', 'customer_name:Brandon Keith Walker', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:TN2345678', 'customer_address:666 Music Row, Nashville, TN 37203', 'customer_tax_id:123-45-6789', 'customer_phone:+1-615-555-7890', 'customer_email:brandon.walker@email.com', 'deposit_amount:2800.00', 'deposit_currency:USD', 'funding_source_type:CHECK', 'funding_source_account:', 'cash_denomination_breakdown:', 'term_length_months:', 'interest_rate_apy:0.15', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:100.00', 'monthly_maintenance_fee:5.00', 'previous_account_balance:567.89', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T10:15:23Z', 'aml_screening_result:CLEAR', 'aml_risk_score:10', 'sanctions_screening_timestamp:2025-04-18T10:16:01Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-3344', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:True', 'cross_sell_products_offered:["CREDIT_CARD"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:Payroll check deposit', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_017678', 'customer_id:CIF_889900112', 'account_number:4532100088990011', 'transaction_timestamp:2025-04-18T14:52:16Z', 'deposit_type:CASH_COUNTER', 'account_type:MONEY_MARKET', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_VA_3456', 'teller_id:EMP_78901', 'customer_name:Stephanie Rose Miller', 'customer_id_type:PASSPORT', 'customer_id_number:P23456789', 'customer_address:777 Capitol Avenue, Richmond, VA 23219', 'customer_tax_id:234-56-7890', 'customer_phone:+1-804-555-2345', 'customer_email:stephanie.miller@email.com', 'deposit_amount:35000.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 350, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:3.40', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:2500.00', 'monthly_maintenance_fee:15.00', 'previous_account_balance:45678.12', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T14:47:34Z', 'aml_screening_result:CLEAR', 'aml_risk_score:68', 'sanctions_screening_timestamp:2025-04-18T14:48:23Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR3456_01', 'supervisor_approval_required:True', 'supervisor_id:EMP_90123', 'supervisor_approval_timestamp:2025-04-18T14:58:45Z', 'ctr_filing_required:True', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-0011', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:True', 'cross_sell_products_offered:["PRIVATE_BANKING", "INVESTMENT_MANAGEMENT"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:EMAIL', 'transaction_notes:Large cash deposit - business proceeds - CTR filed - elevated AML risk score but cleared after enhanced due diligence', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_018901', 'customer_id:CIF_667788990', 'account_number:4532100066778899', 'transaction_timestamp:2025-04-18T11:07:39Z', 'deposit_type:RETAIL_DEMAND', 'account_type:SAVINGS', 'deposit_channel:ATM', 'branch_code:BR_MN_4567', 'teller_id:', 'customer_name:Kevin Michael Taylor', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:MN8765432', 'customer_address:888 Lakeview Drive, Minneapolis, MN 55401', 'customer_tax_id:567-89-0123', 'customer_phone:+1-612-555-6789', 'customer_email:kevin.taylor@email.com', 'deposit_amount:1500.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 15, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:2.65', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:500.00', 'monthly_maintenance_fee:5.00', 'previous_account_balance:3456.78', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T11:05:12Z', 'aml_screening_result:CLEAR', 'aml_risk_score:9', 'sanctions_screening_timestamp:2025-04-18T11:05:56Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-8899', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:[]', 'customer_signature_captured:False', 'signature_capture_method:NOT_CAPTURED', 'receipt_delivery_method:PRINTED', 'transaction_notes:ATM cash deposit - standard transaction', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_019567', 'customer_id:CIF_445566778', 'account_number:4532100044556677', 'transaction_timestamp:2025-04-18T16:23:47Z', 'deposit_type:TERM_DEPOSIT', 'account_type:CD_1Y', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_OH_5678', 'teller_id:EMP_12345', 'customer_name:Rachel Anne Martinez', 'customer_id_type:DRIVERS_LICENSE', 'customer_id_number:OH5432109', 'customer_address:555 River Road, Cincinnati, OH 45201', 'customer_tax_id:890-12-3456', 'customer_phone:+1-513-555-8901', 'customer_email:rachel.martinez@email.com', 'deposit_amount:15000.00', 'deposit_currency:USD', 'funding_source_type:INTERNAL_TRANSFER', 'funding_source_account:4532100099887766', 'cash_denomination_breakdown:', 'term_length_months:12', 'interest_rate_apy:4.00', 'maturity_date:', 'early_withdrawal_penalty_rate:0.5', 'minimum_balance_requirement:1000.00', 'monthly_maintenance_fee:0.00', 'previous_account_balance:0.00', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T16:20:23Z', 'aml_screening_result:CLEAR', 'aml_risk_score:16', 'sanctions_screening_timestamp:2025-04-18T16:21:01Z', 'counterfeit_detection_result:NOT_APPLICABLE', 'cash_counter_machine_id:', 'supervisor_approval_required:False', 'supervisor_id:', 'supervisor_approval_timestamp:', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:False', 'debit_card_number:', 'online_banking_enabled:True', 'mobile_app_enabled:True', 'checkbook_ordered:False', 'cross_sell_products_offered:["HOME_EQUITY_LOAN"]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:EMAIL', 'transaction_notes:1-year CD for emergency fund - standard rate', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:'],
+        ['transaction_id:TXN_DEP_20250418_020234', 'customer_id:CIF_223344556', 'account_number:4532100022334455', 'transaction_timestamp:2025-04-18T12:56:32Z', 'deposit_type:CASH_COUNTER', 'account_type:CHECKING', 'deposit_channel:BRANCH_TELLER', 'branch_code:BR_WI_7890', 'teller_id:EMP_67890', 'customer_name:Anthony James Lewis', 'customer_id_type:SSN', 'customer_id_number:678-90-1234', 'customer_address:333 Wisconsin Avenue, Milwaukee, WI 53202', 'customer_tax_id:678-90-1234', 'customer_phone:+1-414-555-0123', 'customer_email:anthony.lewis@email.com', 'deposit_amount:8750.00', 'deposit_currency:USD', 'funding_source_type:CASH', 'funding_source_account:', 'cash_denomination_breakdown:{"100": 87, "50": 1, "20": 0, "10": 0, "5": 0, "1": 0}', 'term_length_months:', 'interest_rate_apy:0.10', 'maturity_date:', 'early_withdrawal_penalty_rate:', 'minimum_balance_requirement:500.00', 'monthly_maintenance_fee:8.00', 'previous_account_balance:1234.56', 'kyc_verification_status:VERIFIED', 'kyc_verification_timestamp:2025-04-18T12:52:45Z', 'aml_screening_result:CLEAR', 'aml_risk_score:38', 'sanctions_screening_timestamp:2025-04-18T12:53:34Z', 'counterfeit_detection_result:PASS', 'cash_counter_machine_id:CCM_BR7890_01', 'supervisor_approval_required:True', 'supervisor_id:EMP_45678', 'supervisor_approval_timestamp:2025-04-18T13:01:12Z', 'ctr_filing_required:False', 'ctr_threshold_amount:10000.00', 'debit_card_issued:True', 'debit_card_number:****-****-****-4455', 'online_banking_enabled:True', 'mobile_app_enabled:False', 'checkbook_ordered:True', 'cross_sell_products_offered:[]', 'customer_signature_captured:True', 'signature_capture_method:ELECTRONIC_PAD', 'receipt_delivery_method:PRINTED', 'transaction_notes:Cash deposit near CTR threshold - monitoring for potential structuring patterns', 'transaction_approved:', 'approval_rejection_reason:', 'new_account_balance:', 'transaction_reference_id:', 'cd_certificate_number:', 'calculated_interest_at_maturity:', 'account_status:', 'processing_time_seconds:', 'cash_drawer_total_after_transaction:', 'fraud_detection_score:', 'compliance_check_passed:', 'final_transaction_fee:', 'receipt_number:']
+    ]
+    
+    for entry_list in sample_data:
+        entry_str = "', '".join(entry_list)
+        data_dict = parse_data_entry(entry_str)
+        TRANSACTION_DATA.append(data_dict)
+
+# Initialize data on module load
+initialize_data()
+
+def get_transaction_data(transaction_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieve transaction data by transaction_id"""
+    for data in TRANSACTION_DATA:
+        if data.get('transaction_id') == transaction_id:
+            return data
+    return None
+
+def update_transaction_data(transaction_id: str, updates: Dict[str, Any]) -> bool:
+    """Update transaction data for a given transaction_id"""
+    for data in TRANSACTION_DATA:
+        if data.get('transaction_id') == transaction_id:
+            data.update(updates)
+            return True
+    return False
+
+def KYC_Verification_API(
+    transaction_id: str,
+    customer_id: str,
+    customer_name: str,
+    customer_id_type: str,
+    customer_id_number: str,
+    customer_address: str,
+    customer_tax_id: str,
+    customer_phone: str,
+    customer_email: str
+) -> Dict[str, Any]:
+    """
+    Executes comprehensive Know Your Customer identity verification workflows
+    """
+    # Retrieve transaction data
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Identity confidence score calculation
+    confidence_score = 0.0
+    
+    # Name validation
+    if customer_name and len(customer_name) > 0:
+        confidence_score += 0.20
+    
+    # ID type and number validation
+    if customer_id_type in ["PASSPORT", "DRIVERS_LICENSE", "NATIONAL_ID", "SSN"]:
+        confidence_score += 0.20
+        if customer_id_number and len(customer_id_number) > 0:
+            confidence_score += 0.15
+    
+    # Address validation
+    if customer_address and len(customer_address) > 10:
+        confidence_score += 0.15
+    
+    # Tax ID validation
+    if customer_tax_id and '-' in customer_tax_id:
+        confidence_score += 0.15
+    
+    # Phone validation
+    if customer_phone and customer_phone.startswith('+'):
+        confidence_score += 0.075
+    
+    # Email validation
+    if customer_email and '@' in customer_email and '.' in customer_email:
+        confidence_score += 0.075
+    
+    # Determine verification status
+    if confidence_score >= 0.85:
+        kyc_status = "VERIFIED"
+    elif confidence_score >= 0.60:
+        kyc_status = "PENDING"
+    else:
+        kyc_status = "REQUIRES_REVIEW"
+    
+    # Generate timestamp
+    kyc_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    
+    result = {
+        "transaction_id": transaction_id,
+        "kyc_verification_status": kyc_status,
+        "identity_confidence_score": round(confidence_score, 2),
+        "kyc_verification_timestamp": kyc_timestamp,
+        "verification_method": "MULTI_SOURCE_VALIDATION"
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "kyc_verification_status": kyc_status,
+        "kyc_verification_timestamp": kyc_timestamp
+    })
+    
+    return result
+
+def AML_Sanctions_Screening_API(
+    transaction_id: str,
+    customer_id: str,
+    customer_name: str,
+    customer_address: str,
+    customer_tax_id: str,
+    kyc_verification_status: str,
+    deposit_amount: float,
+    deposit_channel: str,
+    branch_code: str,
+    funding_source_type: str
+) -> Dict[str, Any]:
+    """
+    Performs automated Anti-Money Laundering screening
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Initialize AML risk score
+    aml_risk_score = 0
+    
+    # KYC prerequisite check
+    if kyc_verification_status != "VERIFIED":
+        aml_risk_score += 25
+    
+    # Deposit amount risk assessment
+    if deposit_amount >= 10000:
+        aml_risk_score += 20
+    elif deposit_amount >= 5000:
+        aml_risk_score += 10
+    
+    # Funding source risk
+    if funding_source_type == "CASH":
+        aml_risk_score += 15
+    
+    # Channel risk assessment
+    if deposit_channel == "MOBILE_APP":
+        aml_risk_score += 5
+    elif deposit_channel == "ATM":
+        aml_risk_score += 3
+    
+    # Name-based watchlist screening (simplified fuzzy matching)
+    watchlist_names = ["BLOCKED", "SANCTIONED", "PROHIBITED"]
+    watchlist_hit = any(name.upper() in customer_name.upper() for name in watchlist_names)
+    
+    # Determine screening result
+    if watchlist_hit:
+        screening_result = "WATCHLIST_HIT"
+        aml_risk_score += 40
+    elif aml_risk_score > 75:
+        screening_result = "MANUAL_REVIEW_REQUIRED"
+    else:
+        screening_result = "CLEAR"
+    
+    # Cap risk score at 100
+    aml_risk_score = min(aml_risk_score, 100)
+    
+    # Generate timestamp
+    screening_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    
+    result = {
+        "transaction_id": transaction_id,
+        "aml_screening_result": screening_result,
+        "aml_risk_score": aml_risk_score,
+        "sanctions_screening_timestamp": screening_timestamp,
+        "watchlist_matches": 1 if watchlist_hit else 0
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "aml_screening_result": screening_result,
+        "aml_risk_score": aml_risk_score,
+        "sanctions_screening_timestamp": screening_timestamp
+    })
+    
+    return result
+
+def CTR_Evaluation_API(
+    transaction_id: str,
+    customer_id: str,
+    deposit_amount: float,
+    funding_source_type: str,
+    transaction_timestamp: str,
+    ctr_threshold_amount: float
+) -> Dict[str, Any]:
+    """
+    Executes real-time Currency Transaction Report filing obligation evaluation
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # CTR filing determination
+    ctr_filing_required = False
+    
+    # Check if CASH and amount >= threshold
+    if funding_source_type == "CASH" and deposit_amount >= ctr_threshold_amount:
+        ctr_filing_required = True
+    
+    # Structuring detection (simplified)
+    structuring_detected = False
+    if funding_source_type == "CASH" and 9000 <= deposit_amount < ctr_threshold_amount:
+        structuring_detected = True
+    
+    result = {
+        "transaction_id": transaction_id,
+        "ctr_filing_required": ctr_filing_required,
+        "ctr_threshold_amount": ctr_threshold_amount,
+        "structuring_pattern_detected": structuring_detected,
+        "evaluation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "ctr_filing_required": str(ctr_filing_required)
+    })
+    
+    return result
+
+def Currency_Validation_API(
+    transaction_id: str,
+    funding_source_type: str,
+    deposit_amount: float,
+    cash_denomination_breakdown: dict,
+    cash_counter_machine_id: str
+) -> Dict[str, Any]:
+    """
+    Interfaces with certified currency discriminator hardware
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Only execute for CASH transactions
+    if funding_source_type != "CASH":
+        result = {
+            "transaction_id": transaction_id,
+            "counterfeit_detection_result": "NOT_APPLICABLE",
+            "denomination_reconciliation_status": "NOT_APPLICABLE"
+        }
+        update_transaction_data(transaction_id, {
+            "counterfeit_detection_result": "NOT_APPLICABLE"
+        })
+        return result
+    
+    # Parse denomination breakdown if string
+    if isinstance(cash_denomination_breakdown, str):
+        import json
+        cash_denomination_breakdown = json.loads(cash_denomination_breakdown)
+    
+    # Calculate total from denominations
+    calculated_total = 0.0
+    for denom, count in cash_denomination_breakdown.items():
+        calculated_total += float(denom) * int(count)
+    
+    # Reconciliation check
+    reconciliation_status = "PASS" if abs(calculated_total - deposit_amount) < 0.01 else "FAIL"
+    
+    # Counterfeit detection (based on existing data)
+    counterfeit_result = txn_data.get('counterfeit_detection_result', 'PASS')
+    
+    # Calculate cash drawer total
+    previous_drawer_total = float(txn_data.get('previous_account_balance', 0))
+    cash_drawer_total_after = previous_drawer_total + deposit_amount
+    
+    result = {
+        "transaction_id": transaction_id,
+        "counterfeit_detection_result": counterfeit_result,
+        "denomination_reconciliation_status": reconciliation_status,
+        "machine_counted_total": calculated_total,
+        "cash_drawer_total_after_transaction": round(cash_drawer_total_after, 2),
+        "cash_counter_machine_id": cash_counter_machine_id
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "cash_drawer_total_after_transaction": str(round(cash_drawer_total_after, 2))
+    })
+    
+    return result
+
+def Fraud_Detection_Scoring_API(
+    transaction_id: str,
+    customer_id: str,
+    account_number: str,
+    deposit_amount: float,
+    deposit_channel: str,
+    deposit_type: str,
+    branch_code: str,
+    transaction_timestamp: str
+) -> Dict[str, Any]:
+    """
+    Executes real-time behavioral analytics fraud detection
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Initialize fraud score
+    fraud_score = 0.0
+    
+    # Amount deviation analysis (simplified baseline)
+    # Assume average deposit is $5000
+    avg_deposit = 5000.0
+    z_score = abs(deposit_amount - avg_deposit) / (avg_deposit * 0.5)
+    
+    if z_score > 3.0:
+        fraud_score += 0.25
+    elif z_score > 2.0:
+        fraud_score += 0.15
+    
+    # Channel switching risk
+    if deposit_channel == "MOBILE_APP":
+        fraud_score += 0.10
+    elif deposit_channel == "ATM":
+        fraud_score += 0.05
+    
+    # Unusual deposit type
+    if deposit_type == "CORPORATE_DEPOSIT" and deposit_amount < 1000:
+        fraud_score += 0.15
+    
+    # Time-based analysis
+    try:
+        txn_time = datetime.fromisoformat(transaction_timestamp.replace('Z', '+00:00'))
+        hour = txn_time.hour
+        # Unusual hours (late night)
+        if hour < 6 or hour > 22:
+            fraud_score += 0.10
+    except:
+        pass
+    
+    # Cap at 1.0
+    fraud_score = min(fraud_score, 1.0)
+    
+    result = {
+        "transaction_id": transaction_id,
+        "fraud_detection_score": round(fraud_score, 3),
+        "risk_level": "HIGH" if fraud_score >= 0.70 else "MEDIUM" if fraud_score >= 0.40 else "LOW",
+        "behavioral_deviation_score": round(z_score, 2),
+        "scoring_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "fraud_detection_score": str(round(fraud_score, 3))
+    })
+    
+    return result
+
+def Supervisor_Approval_Routing_API(
+    transaction_id: str,
+    deposit_amount: float,
+    teller_id: str,
+    kyc_verification_status: str,
+    aml_screening_result: str,
+    aml_risk_score: int,
+    fraud_detection_score: float,
+    counterfeit_detection_result: str,
+    ctr_filing_required: bool,
+    transaction_notes: str
+) -> Dict[str, Any]:
+    """
+    Evaluates multiple conditional criteria for supervisor approval
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    supervisor_approval_required = False
+    approval_reasons = []
+    
+    # Amount threshold check (standard teller limit: $5000)
+    teller_limit = 5000.0
+    if deposit_amount > teller_limit:
+        supervisor_approval_required = True
+        approval_reasons.append("Amount exceeds teller authority limit")
+    
+    # KYC status check
+    if kyc_verification_status == "REQUIRES_REVIEW":
+        supervisor_approval_required = True
+        approval_reasons.append("KYC verification requires review")
+    
+    # AML screening check
+    if aml_screening_result in ["WATCHLIST_HIT", "MANUAL_REVIEW_REQUIRED"]:
+        supervisor_approval_required = True
+        approval_reasons.append("AML screening requires manual review")
+    
+    # AML risk score threshold
+    if aml_risk_score > 75:
+        supervisor_approval_required = True
+        approval_reasons.append("AML risk score exceeds threshold")
+    
+    # Fraud score threshold
+    if fraud_detection_score > 0.70:
+        supervisor_approval_required = True
+        approval_reasons.append("Fraud detection score exceeds threshold")
+    
+    # Counterfeit detection
+    if counterfeit_detection_result == "FAIL":
+        supervisor_approval_required = True
+        approval_reasons.append("Counterfeit currency detected")
+    
+    # CTR with suspicious keywords
+    suspicious_keywords = ['unusual', 'suspicious', 'multiple parties']
+    if ctr_filing_required and any(keyword in transaction_notes.lower() for keyword in suspicious_keywords):
+        supervisor_approval_required = True
+        approval_reasons.append("CTR filing with suspicious activity indicators")
+    
+    result = {
+        "transaction_id": transaction_id,
+        "supervisor_approval_required": supervisor_approval_required,
+        "approval_reasons": approval_reasons,
+        "routing_tier": "BRANCH_MANAGER" if supervisor_approval_required else "NONE"
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "supervisor_approval_required": str(supervisor_approval_required)
+    })
+    
+    return result
+
+def Term_Deposit_Processing_API(
+    transaction_id: str,
+    deposit_type: str,
+    deposit_amount: float,
+    term_length_months: int,
+    transaction_timestamp: str,
+    interest_rate_apy: float,
+    early_withdrawal_penalty_rate: float
+) -> Dict[str, Any]:
+    """
+    Executes specialized term deposit product processing logic
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Only execute for TERM_DEPOSIT
+    if deposit_type != "TERM_DEPOSIT":
+        return {
+            "transaction_id": transaction_id,
+            "message": "Not a term deposit transaction"
+        }
+    
+    # Calculate maturity date
+    try:
+        txn_time = datetime.fromisoformat(transaction_timestamp.replace('Z', '+00:00'))
+        maturity_date = txn_time + timedelta(days=term_length_months * 30)
+        maturity_date_str = maturity_date.strftime("%Y-%m-%d")
+    except:
+        maturity_date_str = ""
+    
+    # Calculate interest at maturity using compound interest formula
+    # A = P(1 + r/n)^(nt) where n=12 (monthly compounding), t=term_length_months/12
+    principal = Decimal(str(deposit_amount))
+    rate = Decimal(str(interest_rate_apy)) / Decimal('100')
+    n = Decimal('12')
+    t = Decimal(str(term_length_months)) / Decimal('12')
+    
+    final_amount = principal * ((Decimal('1') + rate / n) ** (n * t))
+    interest_earned = final_amount - principal
+    
+    # Generate CD certificate number
+    year = transaction_timestamp[:4]
+    cert_seq = transaction_id.split('_')[-1]
+    cd_certificate_number = f"CD_CERT_{year}_{cert_seq}"
+    
+    result = {
+        "transaction_id": transaction_id,
+        "cd_certificate_number": cd_certificate_number,
+        "maturity_date": maturity_date_str,
+        "interest_rate_apy": interest_rate_apy,
+        "calculated_interest_at_maturity": round(float(interest_earned), 2),
+        "maturity_value": round(float(final_amount), 2),
+        "early_withdrawal_penalty_rate": early_withdrawal_penalty_rate
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "cd_certificate_number": cd_certificate_number,
+        "maturity_date": maturity_date_str,
+        "calculated_interest_at_maturity": str(round(float(interest_earned), 2))
+    })
+    
+    return result
+
+def Compliance_Aggregation_API(
+    transaction_id: str,
+    kyc_verification_status: str,
+    aml_screening_result: str,
+    aml_risk_score: int,
+    counterfeit_detection_result: str,
+    fraud_detection_score: float,
+    supervisor_approval_required: bool,
+    supervisor_id: str,
+    supervisor_approval_timestamp: str,
+    ctr_filing_required: bool
+) -> Dict[str, Any]:
+    """
+    Performs comprehensive compliance verification aggregation
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    compliance_check_passed = True
+    approval_rejection_reason = ""
+    
+    # KYC check
+    if kyc_verification_status != "VERIFIED":
+        compliance_check_passed = False
+        approval_rejection_reason = "KYC verification incomplete - customer documentation insufficient"
+    
+    # AML screening check
+    elif aml_screening_result in ["WATCHLIST_HIT", "MANUAL_REVIEW_REQUIRED"]:
+        # Check if there's override approval (simplified - assume approved if supervisor approved)
+        if not (supervisor_id and supervisor_approval_timestamp):
+            compliance_check_passed = False
+            approval_rejection_reason = f"Failed AML screening - {aml_screening_result} without override approval"
+    
+    # Counterfeit detection check
+    elif counterfeit_detection_result == "FAIL":
+        compliance_check_passed = False
+        approval_rejection_reason = "Counterfeit currency detected during validation"
+    
+    # Fraud score check
+    elif fraud_detection_score >= 0.70:
+        # Check if there's analyst override
+        if not (supervisor_id and supervisor_approval_timestamp):
+            compliance_check_passed = False
+            approval_rejection_reason = "Fraud score exceeds threshold without analyst approval"
+    
+    # Supervisor approval check
+    elif supervisor_approval_required:
+        if not supervisor_id or not supervisor_approval_timestamp:
+            compliance_check_passed = False
+            approval_rejection_reason = "Required supervisor approval not obtained"
+    
+    transaction_approved = compliance_check_passed
+    
+    result = {
+        "transaction_id": transaction_id,
+        "compliance_check_passed": compliance_check_passed,
+        "transaction_approved": transaction_approved,
+        "approval_rejection_reason": approval_rejection_reason,
+        "aggregation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "compliance_check_passed": str(compliance_check_passed),
+        "transaction_approved": str(transaction_approved),
+        "approval_rejection_reason": approval_rejection_reason
+    })
+    
+    return result
+
+def Account_Ledger_Posting_API(
+    transaction_id: str,
+    account_number: str,
+    deposit_amount: float,
+    previous_account_balance: float,
+    funding_source_type: str,
+    funding_source_account: str,
+    branch_code: str,
+    account_type: str,
+    transaction_timestamp: str,
+    compliance_check_passed: bool,
+    transaction_approved: bool,
+    cd_certificate_number: str,
+    debit_card_issued: bool,
+    online_banking_enabled: bool,
+    mobile_app_enabled: bool,
+    checkbook_ordered: bool
+) -> Dict[str, Any]:
+    """
+    Executes atomic transaction commit operation
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Prerequisite checks
+    if not compliance_check_passed or not transaction_approved:
+        return {
+            "error": "HTTP 412 Precondition Failed",
+            "message": "Compliance check must pass before ledger posting"
+        }
+    
+    # Calculate new balance using Decimal precision
+    new_balance = Decimal(str(previous_account_balance)) + Decimal(str(deposit_amount))
+    new_account_balance = round(float(new_balance), 2)
+    
+    # Generate transaction reference ID
+    timestamp_part = transaction_timestamp.replace('-', '').replace(':', '').replace('T', '').replace('Z', '')[:14]
+    seq_part = transaction_id.split('_')[-1]
+    transaction_reference_id = f"REF_{timestamp_part}{seq_part}"
+    
+    # Calculate processing time (simplified)
+    processing_time_seconds = 120
+    
+    # Set account status
+    account_status = "ACTIVE"
+    
+    result = {
+        "transaction_id": transaction_id,
+        "new_account_balance": new_account_balance,
+        "transaction_reference_id": transaction_reference_id,
+        "account_status": account_status,
+        "processing_time_seconds": processing_time_seconds,
+        "posting_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "general_ledger_codes": {
+            "debit_account": f"{branch_code}_CASH_VAULT" if funding_source_type == "CASH" else "CLEARING",
+            "credit_account": f"{account_type}_DEPOSITS"
+        }
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "new_account_balance": str(new_account_balance),
+        "transaction_reference_id": transaction_reference_id,
+        "account_status": account_status,
+        "processing_time_seconds": str(processing_time_seconds)
+    })
+    
+    return result
+
+def Receipt_Generation_API(
+    transaction_id: str,
+    customer_name: str,
+    account_number: str,
+    deposit_amount: float,
+    new_account_balance: float,
+    transaction_reference_id: str,
+    transaction_timestamp: str,
+    branch_code: str,
+    receipt_delivery_method: str,
+    customer_email: str,
+    customer_phone: str,
+    cd_certificate_number: str,
+    maturity_date: str,
+    interest_rate_apy: float,
+    calculated_interest_at_maturity: float,
+    transaction_notes: str,
+    transaction_approved: bool,
+    minimum_balance_requirement: float,
+    monthly_maintenance_fee: float,
+    early_withdrawal_penalty_rate: float,
+    final_transaction_fee: float
+) -> Dict[str, Any]:
+    """
+    Generates comprehensive transaction documentation
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Prerequisite check
+    if not transaction_approved:
+        return {
+            "error": "HTTP 400 Bad Request",
+            "message": "Receipt cannot be generated for rejected transactions"
+        }
+    
+    # Generate receipt number
+    date_part = transaction_timestamp[:10].replace('-', '')
+    branch_part = branch_code.replace('BR_', '').replace('_', '')
+    seq_part = transaction_id.split('_')[-1][-3:]
+    receipt_number = f"RCPT_{date_part}_{branch_part}_{seq_part}"
+    
+    # Format timestamp for receipt
+    try:
+        txn_time = datetime.fromisoformat(transaction_timestamp.replace('Z', '+00:00'))
+        receipt_timestamp = txn_time.strftime("%B %d, %Y %I:%M:%S %p EDT")
+    except:
+        receipt_timestamp = transaction_timestamp
+    
+    # Format maturity date if applicable
+    formatted_maturity_date = ""
+    if maturity_date:
+        try:
+            mat_date = datetime.fromisoformat(maturity_date)
+            formatted_maturity_date = mat_date.strftime("%B %d, %Y")
+        except:
+            formatted_maturity_date = maturity_date
+    
+    # Mask account number
+    masked_account = f"****-****-****-{account_number[-4:]}"
+    
+    result = {
+        "transaction_id": transaction_id,
+        "receipt_number": receipt_number,
+        "receipt_timestamp": receipt_timestamp,
+        "customer_name": customer_name,
+        "masked_account_number": masked_account,
+        "deposit_amount_formatted": f"${deposit_amount:,.2f}",
+        "new_account_balance_formatted": f"${new_account_balance:,.2f}",
+        "transaction_reference_id": transaction_reference_id,
+        "receipt_delivery_method": receipt_delivery_method,
+        "cd_certificate_number": cd_certificate_number,
+        "maturity_date_formatted": formatted_maturity_date,
+        "interest_rate_apy_formatted": f"{interest_rate_apy:.2f}%" if interest_rate_apy > 0 else "N/A",
+        "calculated_interest_formatted": f"${calculated_interest_at_maturity:,.2f}" if calculated_interest_at_maturity > 0 else "N/A",
+        "minimum_balance_requirement_formatted": f"${minimum_balance_requirement:,.2f}",
+        "monthly_maintenance_fee_formatted": f"${monthly_maintenance_fee:,.2f}",
+        "transaction_notes": transaction_notes
+    }
+    
+    # Update transaction data
+    update_transaction_data(transaction_id, {
+        "receipt_number": receipt_number,
+        "final_transaction_fee": str(final_transaction_fee)
+    })
+    
+    return result
+
+def Audit_Trail_Recording_API(
+    transaction_id: str,
+    customer_id: str,
+    account_number: str,
+    transaction_timestamp: str,
+    deposit_type: str,
+    deposit_amount: float,
+    teller_id: str,
+    branch_code: str,
+    kyc_verification_status: str,
+    kyc_verification_timestamp: str,
+    aml_screening_result: str,
+    aml_risk_score: int,
+    sanctions_screening_timestamp: str,
+    fraud_detection_score: float,
+    counterfeit_detection_result: str,
+    supervisor_approval_required: bool,
+    supervisor_id: str,
+    supervisor_approval_timestamp: str,
+    compliance_check_passed: bool,
+    transaction_approved: bool,
+    approval_rejection_reason: str,
+    new_account_balance: float,
+    transaction_reference_id: str,
+    account_status: str,
+    processing_time_seconds: int,
+    receipt_number: str,
+    previous_account_balance: float,
+    ctr_filing_required: bool,
+    cash_drawer_total_after_transaction: float
+) -> Dict[str, Any]:
+    """
+    Creates comprehensive immutable audit trail documentation
+    """
+    txn_data = get_transaction_data(transaction_id)
+    if not txn_data:
+        return {"error": "Transaction not found"}
+    
+    # Generate cryptographic hash for data integrity
+    import hashlib
+    audit_data = f"{transaction_id}{customer_id}{transaction_timestamp}{deposit_amount}{transaction_approved}"
+    audit_hash = hashlib.sha256(audit_data.encode()).hexdigest()
+    
+    # Create comprehensive audit trail record
+    audit_trail_record = {
+        "transaction_id": transaction_id,
+        "customer_id": customer_id,
+        "account_number": account_number,
+        "transaction_timestamp": transaction_timestamp,
+        "deposit_type": deposit_type,
+        "deposit_amount": deposit_amount,
+        "teller_id": teller_id,
+        "branch_code": branch_code,
+        "kyc_verification_status": kyc_verification_status,
+        "kyc_verification_timestamp": kyc_verification_timestamp,
+        "aml_screening_result": aml_screening_result,
+        "aml_risk_score": aml_risk_score,
+        "sanctions_screening_timestamp": sanctions_screening_timestamp,
+        "fraud_detection_score": fraud_detection_score,
+        "counterfeit_detection_result": counterfeit_detection_result,
+        "supervisor_approval_required": supervisor_approval_required,
+        "supervisor_id": supervisor_id,
+        "supervisor_approval_timestamp": supervisor_approval_timestamp,
+        "compliance_check_passed": compliance_check_passed,
+        "transaction_approved": transaction_approved,
+        "approval_rejection_reason": approval_rejection_reason,
+        "new_account_balance": new_account_balance,
+        "transaction_reference_id": transaction_reference_id,
+        "account_status": account_status,
+        "processing_time_seconds": processing_time_seconds,
+        "receipt_number": receipt_number,
+        "previous_account_balance": previous_account_balance,
+        "ctr_filing_required": ctr_filing_required,
+        "cash_drawer_total_after_transaction": cash_drawer_total_after_transaction,
+        "audit_hash": audit_hash,
+        "audit_trail_created_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "retention_tier": "HOT_STORAGE",
+        "regulatory_retention_years": 7
+    }
+    
+    result = {
+        "transaction_id": transaction_id,
+        "audit_trail_record_id": f"AUDIT_{transaction_id}",
+        "audit_hash": audit_hash,
+        "audit_trail_status": "RECORDED",
+        "storage_tier": "HOT_STORAGE",
+        "retention_expiration_date": (datetime.utcnow() + timedelta(days=365*7)).strftime("%Y-%m-%d")
+    }
+    
+    return result
+
+# Test cases
+def test_kyc_verification():
+    print("Testing KYC_Verification_API...")
+    result = KYC_Verification_API(
+        transaction_id="TXN_DEP_20250418_001234",
+        customer_id="CIF_789456123",
+        customer_name="John Michael Smith",
+        customer_id_type="DRIVERS_LICENSE",
+        customer_id_number="D1234567",
+        customer_address="123 Main Street, New York, NY 10001",
+        customer_tax_id="123-45-6789",
+        customer_phone="+1-212-555-0123",
+        customer_email="john.smith@email.com"
+    )
+    print(f"KYC Result: {result}\n")
+
+def test_aml_screening():
+    print("Testing AML_Sanctions_Screening_API...")
+    result = AML_Sanctions_Screening_API(
+        transaction_id="TXN_DEP_20250418_001234",
+        customer_id="CIF_789456123",
+        customer_name="John Michael Smith",
+        customer_address="123 Main Street, New York, NY 10001",
+        customer_tax_id="123-45-6789",
+        kyc_verification_status="VERIFIED",
+        deposit_amount=5000.00,
+        deposit_channel="BRANCH_TELLER",
+        branch_code="BR_NY_5012",
+        funding_source_type="CASH"
+    )
+    print(f"AML Result: {result}\n")
+
+def test_ctr_evaluation():
+    print("Testing CTR_Evaluation_API...")
+    result = CTR_Evaluation_API(
+        transaction_id="TXN_DEP_20250418_003789",
+        customer_id="CIF_223344556",
+        deposit_amount=15000.00,
+        funding_source_type="CASH",
+        transaction_timestamp="2025-04-18T14:32:18Z",
+        ctr_threshold_amount=10000.00
+    )
+    print(f"CTR Result: {result}\n")
+
+def test_fraud_detection():
+    print("Testing Fraud_Detection_Scoring_API...")
+    result = Fraud_Detection_Scoring_API(
+        transaction_id="TXN_DEP_20250418_001234",
+        customer_id="CIF_789456123",
+        account_number="4532100012345678",
+        deposit_amount=5000.00,
+        deposit_channel="BRANCH_TELLER",
+        deposit_type="CASH_COUNTER",
+        branch_code="BR_NY_5012",
+        transaction_timestamp="2025-04-18T10:23:45Z"
+    )
+    print(f"Fraud Detection Result: {result}\n")
+
+def test_term_deposit():
+    print("Testing Term_Deposit_Processing_API...")
+    result = Term_Deposit_Processing_API(
+        transaction_id="TXN_DEP_20250418_002156",
+        deposit_type="TERM_DEPOSIT",
+        deposit_amount=25000.00,
+        term_length_months=12,
+        transaction_timestamp="2025-04-18T11:45:23Z",
+        interest_rate_apy=4.25,
+        early_withdrawal_penalty_rate=0.5
+    )
+    print(f"Term Deposit Result: {result}\n")
+
+def test_compliance_aggregation():
+    print("Testing Compliance_Aggregation_API...")
+    result = Compliance_Aggregation_API(
+        transaction_id="TXN_DEP_20250418_001234",
+        kyc_verification_status="VERIFIED",
+        aml_screening_result="CLEAR",
+        aml_risk_score=15,
+        counterfeit_detection_result="PASS",
+        fraud_detection_score=0.15,
+        supervisor_approval_required=False,
+        supervisor_id="",
+        supervisor_approval_timestamp="",
+        ctr_filing_required=False
+    )
+    print(f"Compliance Aggregation Result: {result}\n")
+
+def test_account_ledger_posting():
+    print("Testing Account_Ledger_Posting_API...")
+    result = Account_Ledger_Posting_API(
+        transaction_id="TXN_DEP_20250418_001234",
+        account_number="4532100012345678",
+        deposit_amount=5000.00,
+        previous_account_balance=1234.56,
+        funding_source_type="CASH",
+        funding_source_account="",
+        branch_code="BR_NY_5012",
+        account_type="SAVINGS",
+        transaction_timestamp="2025-04-18T10:23:45Z",
+        compliance_check_passed=True,
+        transaction_approved=True,
+        cd_certificate_number="",
+        debit_card_issued=True,
+        online_banking_enabled=True,
+        mobile_app_enabled=True,
+        checkbook_ordered=False
+    )
+    print(f"Account Ledger Posting Result: {result}\n")
+
+# Run tests
+if __name__ == "__main__":
+    print("=== Running API Tests ===\n")
+    test_kyc_verification()
+    test_aml_screening()
+    test_ctr_evaluation()
+    test_fraud_detection()
+    test_term_deposit()
+    test_compliance_aggregation()
+    test_account_ledger_posting()
+    print("=== Tests Complete ===")
+
+</code>
+
+<class>
+class Tool_KYC_Verification_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    customer_id: str = Field(..., description="Customer Information File identifier")
+    customer_name: str = Field(..., description="Full legal name of the customer")
+    customer_id_type: str = Field(..., description="Enumerated type of identification document")
+    customer_id_number: str = Field(..., description="Unique identifier number from the presented identification document")
+    customer_address: str = Field(..., description="Complete residential or business address")
+    customer_tax_id: str = Field(..., description="Tax identification number")
+    customer_phone: str = Field(..., description="Primary contact telephone number")
+    customer_email: str = Field(..., description="Primary email address")
+
+class Tool_AML_Sanctions_Screening_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    customer_id: str = Field(..., description="Customer Information File identifier")
+    customer_name: str = Field(..., description="Full legal name of the customer")
+    customer_address: str = Field(..., description="Complete address")
+    customer_tax_id: str = Field(..., description="Tax identification number")
+    kyc_verification_status: str = Field(..., description="Current status of Know Your Customer verification process")
+    deposit_amount: float = Field(..., description="Numeric value of the deposit amount")
+    deposit_channel: str = Field(..., description="Channel through which the deposit transaction is being processed")
+    branch_code: str = Field(..., description="Unique identifier for the branch location")
+    funding_source_type: str = Field(..., description="Type of funding mechanism for the deposit")
+
+class Tool_CTR_Evaluation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    customer_id: str = Field(..., description="Customer Information File identifier")
+    deposit_amount: float = Field(..., description="Numeric value of the current deposit transaction amount")
+    funding_source_type: str = Field(..., description="Type of funding mechanism for the deposit")
+    transaction_timestamp: str = Field(..., description="ISO 8601 formatted datetime")
+    ctr_threshold_amount: float = Field(..., description="Statutory threshold amount above which CTR must be filed")
+
+class Tool_Currency_Validation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    funding_source_type: str = Field(..., description="Type of funding mechanism for the deposit")
+    deposit_amount: float = Field(..., description="Total numeric value of the cash deposit")
+    cash_denomination_breakdown: dict = Field(..., description="JSON object structure detailing the count of bills per denomination")
+    cash_counter_machine_id: str = Field(..., description="Unique identifier for the currency discriminator hardware device")
+
+class Tool_Fraud_Detection_Scoring_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    customer_id: str = Field(..., description="Customer Information File identifier")
+    account_number: str = Field(..., description="Account number receiving the deposit")
+    deposit_amount: float = Field(..., description="Numeric value of the deposit amount")
+    deposit_channel: str = Field(..., description="Channel through which the deposit transaction is being processed")
+    deposit_type: str = Field(..., description="Type of deposit transaction being processed")
+    branch_code: str = Field(..., description="Unique identifier for the branch location")
+    transaction_timestamp: str = Field(..., description="ISO 8601 formatted datetime")
+
+class Tool_Supervisor_Approval_Routing_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    deposit_amount: float = Field(..., description="Numeric value of the deposit amount")
+    teller_id: str = Field(..., description="Employee identifier for the teller or banker")
+    kyc_verification_status: str = Field(..., description="Status of Know Your Customer verification process")
+    aml_screening_result: str = Field(..., description="Result of Anti-Money Laundering sanctions screening")
+    aml_risk_score: int = Field(..., description="Integer value on 0-100 scale representing AML risk assessment")
+    fraud_detection_score: float = Field(..., description="Floating-point value on 0.0-1.0 scale representing fraud risk")
+    counterfeit_detection_result: str = Field(..., description="Result of physical currency validation")
+    ctr_filing_required: bool = Field(..., description="Boolean flag indicating whether CTR filing is required")
+    transaction_notes: str = Field(..., description="Free-text field containing teller observations")
+
+class Tool_Term_Deposit_Processing_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    deposit_type: str = Field(..., description="Type of deposit transaction being processed")
+    deposit_amount: float = Field(..., description="Principal amount of the term deposit")
+    term_length_months: int = Field(..., description="Duration of the term deposit in calendar months")
+    transaction_timestamp: str = Field(..., description="ISO 8601 formatted datetime")
+    interest_rate_apy: float = Field(..., description="Annual Percentage Yield")
+    early_withdrawal_penalty_rate: float = Field(..., description="Penalty rate for early withdrawal")
+
+class Tool_Compliance_Aggregation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    kyc_verification_status: str = Field(..., description="Status of Know Your Customer verification process")
+    aml_screening_result: str = Field(..., description="Result of Anti-Money Laundering sanctions screening")
+    aml_risk_score: int = Field(..., description="Integer value on 0-100 scale representing AML risk assessment")
+    counterfeit_detection_result: str = Field(..., description="Result of physical currency validation")
+    fraud_detection_score: float = Field(..., description="Floating-point value on 0.0-1.0 scale representing fraud risk")
+    supervisor_approval_required: bool = Field(..., description="Boolean flag indicating whether supervisory approval is required")
+    supervisor_id: str = Field(..., description="Employee identifier for the supervisor who approved the transaction")
+    supervisor_approval_timestamp: str = Field(..., description="ISO 8601 formatted datetime marking supervisor approval")
+    ctr_filing_required: bool = Field(..., description="Boolean flag indicating whether CTR filing is required")
+
+class Tool_Account_Ledger_Posting_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    account_number: str = Field(..., description="Account number receiving the deposit")
+    deposit_amount: float = Field(..., description="Numeric value of the deposit amount")
+    previous_account_balance: float = Field(..., description="Baseline ledger balance")
+    funding_source_type: str = Field(..., description="Type of funding mechanism")
+    funding_source_account: str = Field(..., description="Source account number for INTERNAL_TRANSFER")
+    branch_code: str = Field(..., description="Unique identifier for the branch location")
+    account_type: str = Field(..., description="Product classification of the account")
+    transaction_timestamp: str = Field(..., description="ISO 8601 formatted datetime")
+    compliance_check_passed: bool = Field(..., description="Boolean flag indicating all control checkpoints passed")
+    transaction_approved: bool = Field(..., description="Boolean flag indicating final approval determination")
+    cd_certificate_number: str = Field(..., description="Certificate number for term deposit transactions")
+    debit_card_issued: bool = Field(..., description="Boolean flag for debit card provisioning")
+    online_banking_enabled: bool = Field(..., description="Boolean flag for online banking provisioning")
+    mobile_app_enabled: bool = Field(..., description="Boolean flag for mobile app provisioning")
+    checkbook_ordered: bool = Field(..., description="Boolean flag for checkbook printing order")
+
+class Tool_Receipt_Generation_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    customer_name: str = Field(..., description="Full legal name of the customer")
+    account_number: str = Field(..., description="Account number receiving the deposit")
+    deposit_amount: float = Field(..., description="Numeric value of the deposit amount")
+    new_account_balance: float = Field(..., description="Post-transaction ledger balance")
+    transaction_reference_id: str = Field(..., description="Globally unique transaction reference identifier")
+    transaction_timestamp: str = Field(..., description="ISO 8601 formatted datetime")
+    branch_code: str = Field(..., description="Unique identifier for the branch location")
+    receipt_delivery_method: str = Field(..., description="Delivery mechanism for receipt transmission")
+    customer_email: str = Field(..., description="Primary email address")
+    customer_phone: str = Field(..., description="Primary contact telephone number")
+    cd_certificate_number: str = Field(..., description="Certificate number for term deposit transactions")
+    maturity_date: str = Field(..., description="ISO 8601 formatted date for term deposit maturity")
+    interest_rate_apy: float = Field(..., description="Annual Percentage Yield")
+    calculated_interest_at_maturity: float = Field(..., description="Total interest earnings")
+    transaction_notes: str = Field(..., description="Free-text field containing observations")
+    transaction_approved: bool = Field(..., description="Boolean flag indicating final approval determination")
+    minimum_balance_requirement: float = Field(..., description="Minimum balance threshold")
+    monthly_maintenance_fee: float = Field(..., description="Monthly account maintenance fee")
+    early_withdrawal_penalty_rate: float = Field(..., description="Penalty rate for term deposit early withdrawal")
+    final_transaction_fee: float = Field(..., description="Any charges assessed to customer")
+
+class Tool_Audit_Trail_Recording_API(BaseModel):
+    transaction_id: str = Field(..., description="Unique alphanumeric identifier for the deposit transaction")
+    customer_id: str = Field(..., description="Customer Information File identifier")
+    account_number: str = Field(..., description="Account number receiving deposit")
+    transaction_timestamp: str = Field(..., description="ISO 8601 formatted datetime")
+    deposit_type: str = Field(..., description="Type of deposit transaction processed")
+    deposit_amount: float = Field(..., description="Numeric value of deposit amount")
+    teller_id: str = Field(..., description="Employee identifier for teller/banker")
+    branch_code: str = Field(..., description="Unique identifier for branch location")
+    kyc_verification_status: str = Field(..., description="Final status of KYC verification")
+    kyc_verification_timestamp: str = Field(..., description="ISO 8601 formatted datetime marking KYC completion")
+    aml_screening_result: str = Field(..., description="Final result of AML sanctions screening")
+    aml_risk_score: int = Field(..., description="Composite AML risk score")
+    sanctions_screening_timestamp: str = Field(..., description="ISO 8601 formatted datetime marking screening completion")
+    fraud_detection_score: float = Field(..., description="Probabilistic fraud risk score")
+    counterfeit_detection_result: str = Field(..., description="Result of physical currency validation")
+    supervisor_approval_required: bool = Field(..., description="Boolean flag indicating supervisory approval requirement")
+    supervisor_id: str = Field(..., description="Employee identifier for supervisor")
+    supervisor_approval_timestamp: str = Field(..., description="ISO 8601 formatted datetime marking approval")
+    compliance_check_passed: bool = Field(..., description="Aggregated compliance status")
+    transaction_approved: bool = Field(..., description="Final approval determination")
+    approval_rejection_reason: str = Field(..., description="Structured text identifying rejection reason")
+    new_account_balance: float = Field(..., description="Post-transaction ledger balance")
+    transaction_reference_id: str = Field(..., description="Globally unique transaction reference identifier")
+    account_status: str = Field(..., description="Account status after transaction posting")
+    processing_time_seconds: int = Field(..., description="Elapsed duration in seconds")
+    receipt_number: str = Field(..., description="Unique receipt identifier")
+    previous_account_balance: float = Field(..., description="Pre-transaction ledger balance")
+    ctr_filing_required: bool = Field(..., description="Boolean flag indicating CTR filing obligation")
+    cash_drawer_total_after_transaction: float = Field(..., description="Teller cash drawer balance after transaction")
+</class>
+
+<tools>
+tools = [
+    StructuredTool.from_function(
+        func=KYC_Verification_API,
+        name="KYC_Verification_API",
+        description="Executes comprehensive Know Your Customer identity verification workflows including multi-source identity validation, confidence scoring algorithms, third-party data aggregator queries, and documentation completeness assessment to satisfy Customer Identification Program regulatory requirements under 31 CFR 1020.220",
+        args_schema=Tool_KYC_Verification_API
+    ),
+    StructuredTool.from_function(
+        func=AML_Sanctions_Screening_API,
+        name="AML_Sanctions_Screening_API",
+        description="Performs automated Anti-Money Laundering screening through fuzzy matching algorithms against consolidated sanctions databases including OFAC SDN list, UN Security Council sanctions, and proprietary watchlists",
+        args_schema=Tool_AML_Sanctions_Screening_API
+    ),
+    StructuredTool.from_function(
+        func=CTR_Evaluation_API,
+        name="CTR_Evaluation_API",
+        description="Executes real-time Currency Transaction Report filing obligation evaluation by comparing deposit amounts against statutory thresholds codified in 31 USC 5313",
+        args_schema=Tool_CTR_Evaluation_API
+    ),
+    StructuredTool.from_function(
+        func=Currency_Validation_API,
+        name="Currency_Validation_API",
+        description="Interfaces with certified currency discriminator hardware to execute multi-spectral imaging analysis including ultraviolet fluorescence detection, infrared absorption spectroscopy, magnetic sensing, and dimensional measurement for physical currency authentication",
+        args_schema=Tool_Currency_Validation_API
+    ),
+    StructuredTool.from_function(
+        func=Fraud_Detection_Scoring_API,
+        name="Fraud_Detection_Scoring_API",
+        description="Executes real-time behavioral analytics fraud detection through machine learning models trained on historical fraud incident patterns",
+        args_schema=Tool_Fraud_Detection_Scoring_API
+    ),
+    StructuredTool.from_function(
+        func=Supervisor_Approval_Routing_API,
+        name="Supervisor_Approval_Routing_API",
+        description="Evaluates multiple conditional criteria against employee authorization matrices to determine supervisor_approval_required flag status",
+        args_schema=Tool_Supervisor_Approval_Routing_API
+    ),
+    StructuredTool.from_function(
+        func=Term_Deposit_Processing_API,
+        name="Term_Deposit_Processing_API",
+        description="Executes specialized term deposit product processing logic including retrieval of treasury-approved interest_rate_apy from rate matrix tables",
+        args_schema=Tool_Term_Deposit_Processing_API
+    ),
+    StructuredTool.from_function(
+        func=Compliance_Aggregation_API,
+        name="Compliance_Aggregation_API",
+        description="Performs comprehensive compliance verification aggregation by implementing logical AND operation across all mandatory control checkpoint boolean states",
+        args_schema=Tool_Compliance_Aggregation_API
+    ),
+    StructuredTool.from_function(
+        func=Account_Ledger_Posting_API,
+        name="Account_Ledger_Posting_API",
+        description="Executes atomic transaction commit operation implementing double-entry accounting principles by simultaneously debiting appropriate asset accounts based on funding_source_type and crediting customer deposit account general ledger",
+        args_schema=Tool_Account_Ledger_Posting_API
+    ),
+    StructuredTool.from_function(
+        func=Receipt_Generation_API,
+        name="Receipt_Generation_API",
+        description="Generates comprehensive transaction documentation for customer delivery including receipt_number formatted with branch and date identifiers",
+        args_schema=Tool_Receipt_Generation_API
+    ),
+    StructuredTool.from_function(
+        func=Audit_Trail_Recording_API,
+        name="Audit_Trail_Recording_API",
+        description="Creates comprehensive immutable audit trail documentation capturing complete transaction lifecycle from initiation through final approval and posting",
+        args_schema=Tool_Audit_Trail_Recording_API
+    )
+]
+</tools>
+
+def process_tool_call(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Process tool calls dynamically based on tool name
+    """
+    tool_map = {
+        "KYC_Verification_API": KYC_Verification_API,
+        "AML_Sanctions_Screening_API": AML_Sanctions_Screening_API,
+        "CTR_Evaluation_API": CTR_Evaluation_API,
+        "Currency_Validation_API": Currency_Validation_API,
+        "Fraud_Detection_Scoring_API": Fraud_Detection_Scoring_API,
+        "Supervisor_Approval_Routing_API": Supervisor_Approval_Routing_API,
+        "Term_Deposit_Processing_API": Term_Deposit_Processing_API,
+        "Compliance_Aggregation_API": Compliance_Aggregation_API,
+        "Account_Ledger_Posting_API": Account_Ledger_Posting_API,
+        "Receipt_Generation_API": Receipt_Generation_API,
+        "Audit_Trail_Recording_API": Audit_Trail_Recording_API
+    }
+    
+    if tool_name in tool_map:
+        return tool_map[tool_name](**tool_input)
+    else:
+        return {"error": f"Tool {tool_name} not found"}
+```

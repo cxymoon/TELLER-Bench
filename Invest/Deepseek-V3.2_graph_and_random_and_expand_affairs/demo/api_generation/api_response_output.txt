@@ -1,0 +1,1265 @@
+<sop_breakdown>
+
+## 1. Independent Tasks/Operations within "Main Procedure"
+
+Based on the SOP Main Procedure (Section 5) and API dependency graph analysis, the independent tasks are:
+
+### Phase 5.1: Client Risk Profile Assessment and Establishment
+- **Task 5.1.1**: Validate existing risk profile and determine if new assessment required
+- **Task 5.1.2**: Administer Risk Tolerance Questionnaire and collect responses
+- **Task 5.1.3**: Calculate risk profile from questionnaire score
+- **Task 5.1.4**: Obtain client authorization for calculated risk profile
+- **Task 5.1.5**: Set risk profile expiry date and activate investable status
+
+### Phase 5.2: Investment Product Selection and Suitability Validation
+- **Task 5.2.1**: Recommend suitable products based on risk profile
+- **Task 5.2.2**: Create investment order with product selection
+- **Task 5.2.3**: Validate product suitability against client risk profile
+- **Task 5.2.4**: Handle suitability mismatch scenarios (if applicable)
+
+### Phase 5.3: Pre-Trade Compliance and Financial Validation
+- **Task 5.3.1**: Execute AML sanctions screening
+- **Task 5.3.2**: Validate transaction threshold and SOW documentation
+- **Task 5.3.3**: Verify funds availability in settlement account
+- **Task 5.3.4**: Aggregate all compliance checks
+- **Task 5.3.5**: Calculate transaction financials (fees, units, net amounts)
+
+### Phase 5.4: Client Authorization and Transaction Execution
+- **Task 5.4.1**: Manage cooling-off period requirements
+- **Task 5.4.2**: Execute investment transaction (order routing and settlement)
+- **Task 5.4.3**: Calculate STP flag for operational metrics
+
+### Phase 5.5: Post-Execution Compliance Review and Documentation
+- **Task 5.5.1**: Execute post-trade compliance review
+- **Task 5.5.2**: Calculate processing metrics
+
+## 2. External Dependencies for Each Task
+
+### Task 5.1.1 - ValidateExistingRiskProfile
+- **Dependencies**: CRM system for client master data, current timestamp from system clock
+
+### Task 5.1.2 - AdministerRiskQuestionnaire
+- **Dependencies**: Client demographic data (age, income, experience) from CRM, questionnaire scoring algorithm configuration
+
+### Task 5.1.3 - CalculateRiskProfile
+- **Dependencies**: Risk score to profile mapping configuration (Conservative: 0-35, Balanced: 36-65, Aggressive: 66-100)
+
+### Task 5.1.4 - AuthorizeAndActivateRiskProfile
+- **Dependencies**: Client authorization infrastructure (OTP system, biometric devices, signature capture), CRM update capability
+
+### Task 5.2.1 - RecommendSuitableProducts
+- **Dependencies**: Product master database, suitability matrix configuration
+
+### Task 5.2.2 - CreateInvestmentOrder
+- **Dependencies**: Transaction ID generator, product master database, compliance officer assignment rules
+
+### Task 5.2.3 - ValidateProductSuitability
+- **Dependencies**: Suitability matching matrix, risk hierarchy configuration
+
+### Task 5.3.1 - ExecuteAMLSanctionsScreening
+- **Dependencies**: Enterprise AML platform, sanctions lists (OFAC, EU, UN)
+
+### Task 5.3.2 - ValidateThresholdAndSOW
+- **Dependencies**: Monitoring threshold configuration, SOW documentation repository
+
+### Task 5.3.3 - VerifyFundsAvailability
+- **Dependencies**: Core Banking System real-time balance inquiry
+
+### Task 5.3.4 - AggregateComplianceChecks
+- **Dependencies**: Results from all prior compliance validations
+
+### Task 5.3.5 - CalculateTransactionFinancials
+- **Dependencies**: Fee calculation algorithms, NAV data, mathematical precision standards
+
+### Task 5.4.1 - ManageCoolingOffPeriod
+- **Dependencies**: Product category configuration, cooling-off period rules, system clock
+
+### Task 5.4.2 - ExecuteInvestmentTransaction
+- **Dependencies**: Fund house order routing gateway, Treasury desk systems, Core Banking System debit capability
+
+### Task 5.4.3 - CalculateSTPFlag
+- **Dependencies**: Transaction lifecycle audit trail
+
+### Task 5.5.1 - ExecutePostTradeComplianceReview
+- **Dependencies**: Compliance checklist, audio/video recording playback system, compliance officer review queue
+
+### Task 5.5.2 - CalculateProcessingMetrics
+- **Dependencies**: Transaction timestamp data, execution timestamp data
+
+## 3. Edge Cases for Each Task
+
+### Task 5.1.1 - ValidateExistingRiskProfile
+- **Edge Case 1**: previous_risk_profile is NULL (new client)
+- **Edge Case 2**: previous_risk_profile_expiry_date is exactly equal to current timestamp (boundary condition)
+- **Edge Case 3**: Client disputes existing risk profile and requests re-assessment
+
+### Task 5.1.2 - AdministerRiskQuestionnaire
+- **Edge Case 1**: Client age exactly at bracket boundary (e.g., 30 years old)
+- **Edge Case 2**: Client provides inconsistent responses across related questions
+- **Edge Case 3**: Questionnaire partially completed then abandoned
+
+### Task 5.1.3 - CalculateRiskProfile
+- **Edge Case 1**: Risk score exactly at classification boundary (35, 65)
+- **Edge Case 2**: Invalid risk score outside 0-100 range
+
+### Task 5.1.4 - AuthorizeAndActivateRiskProfile
+- **Edge Case 1**: Authorization method fails (OTP not received, biometric scan fails)
+- **Edge Case 2**: Client refuses to authorize calculated risk profile
+- **Edge Case 3**: System timeout during authorization process
+
+### Task 5.2.1 - RecommendSuitableProducts
+- **Edge Case 1**: No products available for client's risk profile
+- **Edge Case 2**: Client has "Conservative" profile but requests "Aggressive" products
+- **Edge Case 3**: Product master database temporarily unavailable
+
+### Task 5.2.2 - CreateInvestmentOrder
+- **Edge Case 1**: Duplicate transaction_id generation (extremely rare)
+- **Edge Case 2**: Product code not found in product master
+- **Edge Case 3**: Settlement account number invalid or closed
+
+### Task 5.2.3 - ValidateProductSuitability
+- **Edge Case 1**: Product risk rating exactly matches client risk profile (boundary)
+- **Edge Case 2**: Product has multiple risk ratings based on investment amount tiers
+- **Edge Case 3**: Client risk profile expired during transaction processing
+
+### Task 5.3.1 - ExecuteAMLSanctionsScreening
+- **Edge Case 1**: Partial name match requiring manual review
+- **Edge Case 2**: AML platform timeout or unavailability
+- **Edge Case 3**: Client recently added to sanctions list (timing issue)
+
+### Task 5.3.2 - ValidateThresholdAndSOW
+- **Edge Case 1**: Subscription amount exactly equals monitoring threshold
+- **Edge Case 2**: SOW documentation expired or requires update
+- **Edge Case 3**: Multiple transactions aggregating to exceed threshold
+
+### Task 5.3.3 - VerifyFundsAvailability
+- **Edge Case 1**: Available balance exactly equals subscription amount (no buffer)
+- **Edge Case 2**: Concurrent transactions depleting available balance
+- **Edge Case 3**: Currency conversion required for foreign currency accounts
+
+### Task 5.3.4 - AggregateComplianceChecks
+- **Edge Case 1**: One validation pending while others complete
+- **Edge Case 2**: Conflicting validation results requiring prioritization
+- **Edge Case 3**: Time-based validation expiry during aggregation
+
+### Task 5.3.5 - CalculateTransactionFinancials
+- **Edge Case 1**: NAV = 0 or negative (invalid data)
+- **Edge Case 2**: Front-end load exceeds subscription amount (misconfiguration)
+- **Edge Case 3**: Rounding differences causing unit allocation discrepancies
+
+### Task 5.4.1 - ManageCoolingOffPeriod
+- **Edge Case 1**: Client requests cancellation exactly at cooling-off expiry
+- **Edge Case 2**: Cooling-off period spans non-business days (weekends/holidays)
+- **Edge Case 3**: System clock discrepancy affecting expiry calculation
+
+### Task 5.4.2 - ExecuteInvestmentTransaction
+- **Edge Case 1**: Fund house order gateway timeout or rejection
+- **Edge Case 2**: Core Banking System debit fails after order submitted
+- **Edge Case 3**: Settlement account frozen or restricted during execution
+
+### Task 5.4.3 - CalculateSTPFlag
+- **Edge Case 1**: Borderline scenario where minimal intervention occurred
+- **Edge Case 2**: Automated system corrections not considered manual intervention
+
+### Task 5.5.1 - ExecutePostTradeComplianceReview
+- **Edge Case 1**: Audio/video recording file corrupted or inaccessible
+- **Edge Case 2**: Compliance officer unavailable for review
+- **Edge Case 3**: Retroactive identification of miss-selling after settlement
+
+### Task 5.5.2 - CalculateProcessingMetrics
+- **Edge Case 1**: Transaction spans midnight (date boundary)
+- **Edge Case 2**: System clock adjustment during transaction processing
+- **Edge Case 3**: Timezone conversion issues for cross-region transactions
+
+## 4. Key API Parameters from SOP and Dependency Graph
+
+### ValidateExistingRiskProfile
+- **Input**: client_id, transaction_timestamp, previous_risk_profile, previous_risk_profile_expiry_date
+- **Output**: previous_risk_profile, previous_risk_profile_expiry_date, requires_new_assessment
+
+### AdministerRiskQuestionnaire
+- **Input**: client_id, client_age, client_annual_income, client_investment_experience_years, client_liquidity_needs
+- **Output**: risk_questionnaire_responses, risk_questionnaire_total_score
+
+### CalculateRiskProfile
+- **Input**: risk_questionnaire_total_score
+- **Output**: calculated_risk_profile
+
+### AuthorizeAndActivateRiskProfile
+- **Input**: client_id, calculated_risk_profile, client_authorization_method, transaction_timestamp
+- **Output**: client_authorization_timestamp, risk_profile_expiry_date, investable_status
+
+### RecommendSuitableProducts
+- **Input**: client_id, calculated_risk_profile, investable_status
+- **Output**: suitable_products_list
+
+### CreateInvestmentOrder
+- **Input**: client_id, relationship_manager_id, product_code, subscription_amount, settlement_account_number, transaction_timestamp, branch_code, channel, region
+- **Output**: transaction_id, transaction_type, product_name, product_risk_rating, product_category, current_nav, front_end_load_percentage, annual_management_fee_percentage, compliance_officer_id
+
+### ValidateProductSuitability
+- **Input**: transaction_id, calculated_risk_profile, product_risk_rating
+- **Output**: suitability_check_passed, suitability_mismatch_flag, mismatch_waiver_required, supervisor_approval_required
+
+### ExecuteAMLSanctionsScreening
+- **Input**: client_id, client_name, transaction_id
+- **Output**: aml_sanctions_screening_status
+
+### ValidateThresholdAndSOW
+- **Input**: subscription_amount, monitoring_threshold_amount, source_of_wealth_documented
+- **Output**: transaction_threshold_exceeded
+
+### VerifyFundsAvailability
+- **Input**: settlement_account_number, subscription_amount
+- **Output**: available_balance, funds_availability_verified
+
+### AggregateComplianceChecks
+- **Input**: suitability_check_passed, aml_sanctions_screening_status, transaction_threshold_exceeded, source_of_wealth_documented, funds_availability_verified
+- **Output**: pre_trade_compliance_passed
+
+### CalculateTransactionFinancials
+- **Input**: subscription_amount, front_end_load_percentage, annual_management_fee_percentage, current_nav, product_category, pre_trade_compliance_passed
+- **Output**: front_end_load_amount, net_investment_amount, estimated_units, annual_management_fee_amount
+
+### ManageCoolingOffPeriod
+- **Input**: transaction_id, product_category, cooling_off_period_required, cooling_off_period_hours, client_authorization_timestamp
+- **Output**: transaction_status
+
+### ExecuteInvestmentTransaction
+- **Input**: transaction_id, product_category, product_code, net_investment_amount, settlement_account_number, client_id, transaction_status, subscription_amount
+- **Output**: trade_reference_number, contract_note_number, execution_timestamp, settlement_date, transaction_status
+
+### CalculateSTPFlag
+- **Input**: transaction_id, suitability_mismatch_flag, supervisor_approval_required, aml_sanctions_screening_status
+- **Output**: straight_through_processing_flag
+
+### ExecutePostTradeComplianceReview
+- **Input**: transaction_id, audio_video_recording_id, suitability_mismatch_flag, transaction_threshold_exceeded, disclosure_documents_presented
+- **Output**: compliance_defect_flag, compliance_review_notes
+
+### CalculateProcessingMetrics
+- **Input**: transaction_timestamp, execution_timestamp
+- **Output**: total_processing_time_minutes
+
+## 5. API Generation Approach
+
+The API generation will follow a **sequential dependency-based approach**:
+
+1. **Layer 1 (Foundation)**: Risk profiling APIs that establish client eligibility
+2. **Layer 2 (Order Creation)**: APIs that create and validate investment orders
+3. **Layer 3 (Compliance Validation)**: Parallel compliance checks that can execute concurrently
+4. **Layer 4 (Financial Calculation)**: Fee and unit calculation APIs
+5. **Layer 5 (Execution)**: Transaction execution and settlement APIs
+6. **Layer 6 (Post-Processing)**: Metrics calculation and compliance review APIs
+
+Each API will:
+- Accept only parameters available from sample data or previous API responses
+- Return comprehensive response objects including status indicators
+- Include error handling for all identified edge cases
+- Support idempotency where applicable
+- Maintain audit trail through transaction_id
+
+## 6. Parameter Source Specification
+
+### ValidateExistingRiskProfile
+- client_id: **Sample data input**
+- transaction_timestamp: **Sample data input**
+- previous_risk_profile: **Sample data input**
+- previous_risk_profile_expiry_date: **Sample data input**
+
+### AdministerRiskQuestionnaire
+- client_id: **ValidateExistingRiskProfile response** (conditional)
+- client_age: **Sample data input**
+- client_annual_income: **Sample data input**
+- client_investment_experience_years: **Sample data input**
+- client_liquidity_needs: **Sample data input**
+
+### CalculateRiskProfile
+- risk_questionnaire_total_score: **AdministerRiskQuestionnaire response** OR **Sample data input** (if pre-existing)
+
+### AuthorizeAndActivateRiskProfile
+- client_id: **Sample data input**
+- calculated_risk_profile: **CalculateRiskProfile response**
+- client_authorization_method: **Sample data input**
+- transaction_timestamp: **Sample data input**
+
+### RecommendSuitableProducts
+- client_id: **Sample data input**
+- calculated_risk_profile: **CalculateRiskProfile response** OR **Sample data input** (if using existing)
+- investable_status: **AuthorizeAndActivateRiskProfile response**
+
+### CreateInvestmentOrder
+- client_id: **Sample data input**
+- relationship_manager_id: **Sample data input**
+- product_code: **Sample data input**
+- subscription_amount: **Sample data input**
+- settlement_account_number: **Sample data input**
+- transaction_timestamp: **Sample data input**
+- branch_code: **Sample data input**
+- channel: **Sample data input**
+- region: **Sample data input**
+
+### ValidateProductSuitability
+- transaction_id: **CreateInvestmentOrder response**
+- calculated_risk_profile: **CalculateRiskProfile response** OR **Sample data input**
+- product_risk_rating: **CreateInvestmentOrder response**
+
+### ExecuteAMLSanctionsScreening
+- client_id: **Sample data input**
+- client_name: **Sample data input**
+- transaction_id: **CreateInvestmentOrder response**
+
+### ValidateThresholdAndSOW
+- subscription_amount: **CreateInvestmentOrder response** (echoed) OR **Sample data input**
+- monitoring_threshold_amount: **Sample data input**
+- source_of_wealth_documented: **Sample data input**
+
+### VerifyFundsAvailability
+- settlement_account_number: **CreateInvestmentOrder response** (echoed) OR **Sample data input**
+- subscription_amount: **Sample data input**
+
+### AggregateComplianceChecks
+- suitability_check_passed: **ValidateProductSuitability response**
+- aml_sanctions_screening_status: **ExecuteAMLSanctionsScreening response**
+- transaction_threshold_exceeded: **ValidateThresholdAndSOW response**
+- source_of_wealth_documented: **Sample data input**
+- funds_availability_verified: **VerifyFundsAvailability response**
+
+### CalculateTransactionFinancials
+- subscription_amount: **Sample data input**
+- front_end_load_percentage: **CreateInvestmentOrder response**
+- annual_management_fee_percentage: **CreateInvestmentOrder response**
+- current_nav: **CreateInvestmentOrder response**
+- product_category: **CreateInvestmentOrder response**
+- pre_trade_compliance_passed: **AggregateComplianceChecks response**
+
+### ManageCoolingOffPeriod
+- transaction_id: **CreateInvestmentOrder response**
+- product_category: **CreateInvestmentOrder response**
+- cooling_off_period_required: **Sample data input**
+- cooling_off_period_hours: **Sample data input**
+- client_authorization_timestamp: **Sample data input**
+
+### ExecuteInvestmentTransaction
+- transaction_id: **CreateInvestmentOrder response**
+- product_category: **CreateInvestmentOrder response**
+- product_code: **Sample data input**
+- net_investment_amount: **CalculateTransactionFinancials response**
+- settlement_account_number: **Sample data input**
+- client_id: **Sample data input**
+- transaction_status: **ManageCoolingOffPeriod response**
+- subscription_amount: **Sample data input**
+
+### CalculateSTPFlag
+- transaction_id: **CreateInvestmentOrder response**
+- suitability_mismatch_flag: **ValidateProductSuitability response**
+- supervisor_approval_required: **Sample data input**
+- aml_sanctions_screening_status: **ExecuteAMLSanctionsScreening response**
+
+### ExecutePostTradeComplianceReview
+- transaction_id: **CreateInvestmentOrder response**
+- audio_video_recording_id: **Sample data input**
+- suitability_mismatch_flag: **ValidateProductSuitability response**
+- transaction_threshold_exceeded: **ValidateThresholdAndSOW response**
+- disclosure_documents_presented: **Sample data input**
+
+### CalculateProcessingMetrics
+- transaction_timestamp: **Sample data input**
+- execution_timestamp: **ExecuteInvestmentTransaction response**
+
+## 7. API Execution Sequence
+
+**Sequence 1: Risk Profiling Pathway (for new or expired profiles)**
+1. ValidateExistingRiskProfile
+2. AdministerRiskQuestionnaire (conditional: if requires_new_assessment = TRUE)
+3. CalculateRiskProfile
+4. AuthorizeAndActivateRiskProfile
+5. RecommendSuitableProducts (optional informational)
+
+**Sequence 2: Transaction Processing Pathway**
+6. CreateInvestmentOrder
+7. **Parallel execution** (can run concurrently):
+   - ValidateProductSuitability
+   - ExecuteAMLSanctionsScreening
+   - ValidateThresholdAndSOW
+   - VerifyFundsAvailability
+8. AggregateComplianceChecks (waits for all parallel checks)
+9. CalculateTransactionFinancials
+10. ManageCoolingOffPeriod
+11. ExecuteInvestmentTransaction
+
+**Sequence 3: Post-Processing Pathway**
+12. **Parallel execution**:
+    - CalculateSTPFlag
+    - ExecutePostTradeComplianceReview
+13. CalculateProcessingMetrics
+
+**Total API Count: 16 APIs**
+
+## 8. Error Scenarios and Handling
+
+### ValidateExistingRiskProfile
+- **Error 1**: Client not found in CRM
+  - **Handling**: Return 404 error with message "Client ID not found"
+- **Error 2**: System timestamp unavailable
+  - **Handling**: Return 500 error, retry with system clock service
+
+### AdministerRiskQuestionnaire
+- **Error 1**: Invalid client_age (negative or > 120)
+  - **Handling**: Return 400 error with validation message
+- **Error 2**: Missing required questionnaire responses
+  - **Handling**: Return 422 error requesting complete responses
+- **Error 3**: Scoring algorithm failure
+  - **Handling**: Return 500 error, log for technical review
+
+### CalculateRiskProfile
+- **Error 1**: Risk score outside 0-100 range
+  - **Handling**: Return 400 error with range validation message
+- **Error 2**: Invalid score at exact boundary (edge case)
+  - **Handling**: Apply inclusive lower bound rule, proceed with classification
+
+### AuthorizeAndActivateRiskProfile
+- **Error 1**: Authorization method failure (OTP timeout)
+  - **Handling**: Return 408 timeout error, allow retry
+- **Error 2**: Client refuses authorization
+  - **Handling**: Return 403 error, terminate workflow
+- **Error 3**: CRM update failure
+  - **Handling**: Return 500 error, implement compensating transaction
+
+### RecommendSuitableProducts
+- **Error 1**: No suitable products available
+  - **Handling**: Return 200 with empty array, provide informational message
+- **Error 2**: Product master database unavailable
+  - **Handling**: Return 503 service unavailable, implement retry logic
+
+### CreateInvestmentOrder
+- **Error 1**: Product code not found
+  - **Handling**: Return 404 error with product validation message
+- **Error 2**: Invalid settlement account
+  - **Handling**: Return 400 error with account validation message
+- **Error 3**: Transaction ID generation conflict
+  - **Handling**: Retry with incremented sequence, implement idempotency key
+
+### ValidateProductSuitability
+- **Error 1**: Suitability mismatch detected
+  - **Handling**: Return 200 with suitability_check_passed = FALSE, trigger waiver workflow
+- **Error 2**: Risk profile expired during validation
+  - **Handling**: Return 409 conflict, require profile refresh
+
+### ExecuteAMLSanctionsScreening
+- **Error 1**: AML platform timeout
+  - **Handling**: Return 504 gateway timeout, implement exponential backoff retry
+- **Error 2**: Sanctions match flagged
+  - **Handling**: Return 200 with status = "Flagged", block transaction
+- **Error 3**: AML platform unavailable
+  - **Handling**: Return 503 error, route to manual review queue
+
+### ValidateThresholdAndSOW
+- **Error 1**: SOW documentation missing for threshold-exceeding transaction
+  - **Handling**: Return 200 with compliance failure flag, block execution
+- **Error 2**: SOW documentation expired
+  - **Handling**: Return 428 precondition required, request updated documentation
+
+### VerifyFundsAvailability
+- **Error 1**: Insufficient funds
+  - **Handling**: Return 200 with funds_availability_verified = FALSE
+- **Error 2**: Core Banking System unavailable
+  - **Handling**: Return 503 error, implement circuit breaker pattern
+- **Error 3**: Account frozen or restricted
+  - **Handling**: Return 423 locked error, notify relationship manager
+
+### AggregateComplianceChecks
+- **Error 1**: One or more validations still pending
+  - **Handling**: Return 202 accepted, wait for completion with timeout
+- **Error 2**: Conflicting validation results
+  - **Handling**: Apply most restrictive rule, block if any critical check fails
+
+### CalculateTransactionFinancials
+- **Error 1**: Invalid NAV (zero or negative)
+  - **Handling**: Return 400 error, request NAV refresh
+- **Error 2**: Front-end load exceeds subscription amount
+  - **Handling**: Return 400 error with configuration validation message
+- **Error 3**: Rounding precision loss
+  - **Handling**: Apply banker's rounding, log discrepancy for reconciliation
+
+### ManageCoolingOffPeriod
+- **Error 1**: Client cancellation during cooling-off period
+  - **Handling**: Return 200 with status = "Cancelled", initiate refund workflow
+- **Error 2**: Cooling-off expiry calculation error
+  - **Handling**: Return 500 error, use conservative longer period
+
+### ExecuteInvestmentTransaction
+- **Error 1**: Fund house order rejection
+  - **Handling**: Return 502 bad gateway, set status = "Failed", initiate reversal
+- **Error 2**: Core Banking debit failure after order submitted
+  - **Handling**: Return 500 error, initiate compensating reversal with fund house
+- **Error 3**: Settlement account insufficient funds at execution time
+  - **Handling**: Return 402 payment required, cancel order
+
+### CalculateSTPFlag
+- **Error 1**: Transaction audit trail incomplete
+  - **Handling**: Return 200 with STP flag = FALSE (conservative approach)
+
+### ExecutePostTradeComplianceReview
+- **Error 1**: Audio/video recording file corrupted
+  - **Handling**: Return 200 with compliance_defect_flag = TRUE, escalate for manual review
+- **Error 2**: Compliance officer unavailable
+  - **Handling**: Queue for next available officer, return 202 accepted
+
+### CalculateProcessingMetrics
+- **Error 1**: Timestamp data missing
+  - **Handling**: Return 400 error, cannot calculate without complete data
+- **Error 2**: Negative time calculation (clock skew)
+  - **Handling**: Return 500 error, log for system time synchronization review
+
+## 9. Sample Data Processing Verification
+
+All 20 sample data records can be processed through the API sequence:
+
+**Risk Profiling Transactions (transaction_type = "Risk_Profiling")**:
+- INV_2025041801235 (Maria Elena Rodriguez): Requires full risk profiling sequence
+- INV_2025041801245 (Nina Petrov): Requires full risk profiling sequence
+
+**Mutual Fund Subscriptions**:
+- INV_2025041801234 (John Michael Smith): Existing Aggressive profile (expired), requires refresh + execution
+- INV_2025041801236 (David Thompson): Valid Conservative profile, direct to execution
+- INV_2025041801238 (Ahmed Hassan): Suitability mismatch scenario, requires waiver + supervisor approval
+- INV_2025041801239 (Elizabeth Wong): Valid Balanced profile, standard execution
+- INV_2025041801241 (Sandra Kowalski): Valid Balanced profile, phone banking channel
+- INV_2025041801242 (Jason Lee): Valid Balanced profile, insufficient funds scenario
+- INV_2025041801246 (William Chen): Valid Balanced profile, standard execution
+- INV_2025041801247 (Sophia Nguyen): Valid Aggressive profile, standard execution
+- INV_2025041801249 (Grace Kim): Valid Balanced profile, standard execution
+- INV_2025041801250 (Marcus Washington): Valid Aggressive profile, mobile app channel
+- INV_2025041801251 (Linda Foster): Valid Balanced profile, standard execution
+- INV_2025041801252 (Raj Sharma): Valid Balanced profile, phone banking channel
+- INV_2025041801254 (Thomas Mueller): Valid Aggressive profile, online banking channel
+
+**Structured Product Enrollments**:
+- INV_2025041801237 (Priya Patel): Valid Aggressive profile, DCI with cooling-off + A/V recording
+- INV_2025041801240 (Carlos Martinez): Valid Balanced profile, PPN with cooling-off + A/V recording
+- INV_2025041801243 (Fatima Al-Rashid): Valid Aggressive profile, structured note with threshold exceeded
+- INV_2025041801248 (Daniel O'Brien): Valid Aggressive profile, DCI with cooling-off
+- INV_2025041801253 (Catherine Dubois): Valid Balanced profile, PPN with cooling-off
+
+Each transaction exercises different pathways:
+- New vs. existing risk profiles
+- Various product categories (Mutual Fund, Structured Note, DCI, PPN)
+- Different risk profile combinations (Conservative, Balanced, Aggressive)
+- Suitability match vs. mismatch scenarios
+- Threshold-exceeding vs. standard transactions
+- Various channels (Branch, Phone, Mobile, Online)
+- With and without cooling-off periods
+- With and without A/V recording requirements
+
+All APIs can successfully process each sample data record by following the appropriate conditional logic based on transaction_type, previous_risk_profile validity, product_category, and compliance flags.
+
+</sop_breakdown>
+
+<TOOLS>
+
+<API>
+Name: ValidateExistingRiskProfile
+Description: Validates whether the client has an existing, unexpired risk profile assessment on file by comparing the previous_risk_profile_expiry_date against the current transaction_timestamp. Determines if a new risk assessment questionnaire administration is required or if the existing profile can be utilized for the investment transaction.
+Endpoint: /api/v1/risk-profile/validate
+Method: POST
+Request Body:
+{
+  "client_id": "string",
+  "transaction_timestamp": "datetime (ISO 8601 format)",
+  "previous_risk_profile": "enum (Conservative|Balanced|Aggressive) or null",
+  "previous_risk_profile_expiry_date": "datetime (ISO 8601 format) or null"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "client_id": "string",
+    "previous_risk_profile": "enum (Conservative|Balanced|Aggressive) or null",
+    "previous_risk_profile_expiry_date": "datetime or null",
+    "requires_new_assessment": "boolean",
+    "validation_timestamp": "datetime",
+    "profile_status": "string (valid|expired|not_found)"
+  },
+  "message": "string"
+}
+Dependencies: None (Entry point API)
+Error Scenarios:
+- Client ID not found in system: Return 404 with error message "Client not found", set requires_new_assessment = true
+- Invalid timestamp format: Return 400 with validation error message requesting ISO 8601 format
+- System clock unavailable: Return 500 with message "Unable to retrieve system timestamp", implement retry logic
+- Null previous_risk_profile with non-null expiry date (data inconsistency): Return 422 with message "Data inconsistency detected", set requires_new_assessment = true
+- Expiry date exactly equals transaction timestamp (boundary condition): Apply inclusive logic treating as expired, set requires_new_assessment = true
+</API>
+
+<API>
+Name: AdministerRiskQuestionnaire
+Description: Administers the regulatory-mandated Risk Tolerance Questionnaire to the client, collecting structured responses across multiple dimensions including age bracket, income stability, investment horizon, loss tolerance, and prior investment experience. Applies weighted scoring algorithm based on questionnaire responses to generate a numerical risk_questionnaire_total_score ranging from 0 to 100 points for subsequent risk profile classification.
+Endpoint: /api/v1/risk-profile/questionnaire
+Method: POST
+Request Body:
+{
+  "client_id": "string",
+  "client_age": "integer",
+  "client_annual_income": "float",
+  "client_investment_experience_years": "integer",
+  "client_liquidity_needs": "enum (Low|Medium|High)",
+  "risk_questionnaire_responses": "JSON object containing structured questionnaire answers"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "client_id": "string",
+    "risk_questionnaire_responses": "JSON object",
+    "risk_questionnaire_total_score": "integer (0-100)",
+    "score_breakdown": {
+      "age_score": "integer",
+      "income_stability_score": "integer",
+      "investment_horizon_score": "integer",
+      "loss_tolerance_score": "integer",
+      "experience_score": "integer"
+    },
+    "assessment_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: ValidateExistingRiskProfile (state_dependency - only executes when requires_new_assessment = TRUE)
+Error Scenarios:
+- Invalid client_age (negative, zero, or > 120): Return 400 with message "Invalid client age value", request valid age between 1-120
+- Missing required questionnaire responses: Return 422 with message "Incomplete questionnaire responses", specify missing fields
+- Invalid client_investment_experience_years (negative): Return 400 with message "Investment experience years cannot be negative"
+- Scoring algorithm computation failure: Return 500 with message "Risk scoring calculation error", log for technical investigation
+- Client_age exactly at bracket boundary (e.g., 30, 40, 50, 60): Apply inclusive lower bound rule for bracket assignment
+- Inconsistent responses across related questions: Log warning, proceed with calculation using provided values
+- Risk score calculation results outside 0-100 range: Return 500 with message "Invalid risk score result", trigger algorithm review
+</API>
+
+<API>
+Name: CalculateRiskProfile
+Description: Applies deterministic mapping algorithm to convert numerical risk_questionnaire_total_score into categorical risk profile classification using regulatory-defined score ranges: Conservative (0-35 points), Balanced (36-65 points), and Aggressive (66-100 points). This classification serves as the foundation for all subsequent product suitability matching operations.
+Endpoint: /api/v1/risk-profile/calculate
+Method: POST
+Request Body:
+{
+  "risk_questionnaire_total_score": "integer"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "risk_questionnaire_total_score": "integer",
+    "calculated_risk_profile": "enum (Conservative|Balanced|Aggressive)",
+    "profile_description": "string",
+    "suitable_product_categories": "array of strings",
+    "calculation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: AdministerRiskQuestionnaire (data_dependency - requires risk_questionnaire_total_score output)
+Error Scenarios:
+- Risk score outside valid range (< 0 or > 100): Return 400 with message "Risk score must be between 0 and 100", request valid score
+- Risk score exactly at classification boundary (35 or 65): Apply inclusive lower bound rule (35 = Conservative, 65 = Balanced)
+- Null or missing risk_questionnaire_total_score: Return 400 with message "Risk questionnaire score is required"
+- Invalid data type for risk score (non-integer): Return 400 with message "Risk score must be an integer value"
+- Classification mapping configuration unavailable: Return 500 with message "Risk profile classification service unavailable", implement retry with exponential backoff
+</API>
+
+<API>
+Name: AuthorizeAndActivateRiskProfile
+Description: Presents the calculated risk profile to the client for review and explicit consent, captures client authorization via configured method (OTP, Biometric, Physical_Signature, or Digital_Signature), computes risk profile expiry date by adding 730 days to current timestamp, and updates client master record to set investable_status to "Active" thereby enabling investment transaction processing.
+Endpoint: /api/v1/risk-profile/authorize
+Method: POST
+Request Body:
+{
+  "client_id": "string",
+  "calculated_risk_profile": "enum (Conservative|Balanced|Aggressive)",
+  "client_authorization_method": "enum (OTP|Biometric|Physical_Signature|Digital_Signature)",
+  "transaction_timestamp": "datetime (ISO 8601 format)"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "client_id": "string",
+    "calculated_risk_profile": "enum (Conservative|Balanced|Aggressive)",
+    "client_authorization_timestamp": "datetime",
+    "risk_profile_expiry_date": "datetime",
+    "investable_status": "enum (Active|Inactive)",
+    "authorization_method_used": "string",
+    "profile_validity_days": "integer"
+  },
+  "message": "string"
+}
+Dependencies: CalculateRiskProfile (data_dependency - requires calculated_risk_profile for client authorization)
+Error Scenarios:
+- Authorization method failure (OTP timeout after 300 seconds): Return 408 with message "Authorization timeout", allow retry up to 3 attempts
+- Biometric signature capture failure (match confidence < 95%): Return 401 with message "Biometric authentication failed", request re-scan
+- Client refuses to authorize calculated profile: Return 403 with message "Client authorization declined", terminate workflow and log refusal
+- Physical signature verification mismatch: Return 401 with message "Signature does not match specimen on file", request re-signature
+- CRM system update failure for investable_status: Return 500 with message "Unable to update client profile", implement compensating transaction rollback
+- Invalid client_authorization_method value: Return 400 with message "Invalid authorization method specified"
+- System unable to calculate expiry date (timestamp service failure): Return 500 with message "Unable to set profile expiry date", use default 730-day period
+- Client master record locked by concurrent process: Return 409 with message "Client record currently locked", implement retry with backoff
+</API>
+
+<API>
+Name: RecommendSuitableProducts
+Description: Queries product master database applying hierarchical suitability filters based on client calculated_risk_profile to return only investment products whose product_risk_rating aligns with or is lower than client risk tolerance according to regulatory suitability matrix. Conservative clients see Conservative and Moderate products; Balanced clients see Conservative, Moderate, and Balanced products; Aggressive clients see all product categories.
+Endpoint: /api/v1/products/recommend
+Method: POST
+Request Body:
+{
+  "client_id": "string",
+  "calculated_risk_profile": "enum (Conservative|Balanced|Aggressive)",
+  "investable_status": "enum (Active|Inactive)"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "client_id": "string",
+    "calculated_risk_profile": "string",
+    "suitable_products_list": [
+      {
+        "product_code": "string",
+        "product_name": "string",
+        "product_risk_rating": "enum (Conservative|Moderate|Balanced|Growth|Aggressive)",
+        "product_category": "enum (Mutual_Fund|Bond|Structured_Note|Dual_Currency_Investment|Principal_Protected_Note)",
+        "current_nav": "float",
+        "front_end_load_percentage": "float",
+        "annual_management_fee_percentage": "float"
+      }
+    ],
+    "total_suitable_products": "integer",
+    "recommendation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: AuthorizeAndActivateRiskProfile (state_dependency - requires investable_status = "Active" before generating recommendations)
+Error Scenarios:
+- investable_status is not "Active": Return 403 with message "Client investable status is inactive", block product recommendations
+- No suitable products available for client risk profile: Return 200 with empty suitable_products_list array and message "No products currently match client risk profile"
+- Product master database unavailable: Return 503 with message "Product database temporarily unavailable", implement retry logic with circuit breaker
+- Invalid calculated_risk_profile value: Return 400 with message "Invalid risk profile specified"
+- Client_id not found: Return 404 with message "Client not found"
+- Product master data incomplete (missing risk ratings): Log warning, exclude products with incomplete data from recommendations
+- Concurrent product master update during query: Implement read consistency with snapshot isolation to prevent inconsistent results
+</API>
+
+<API>
+Name: CreateInvestmentOrder
+Description: Creates comprehensive new transaction record with system-generated transaction_id, captures all order parameters including client identification, relationship manager, product selection, subscription amount, and settlement account. Retrieves and populates product master data including risk rating, current NAV, fee structures. Assigns compliance officer based on transaction value and complexity. Records operational metadata including branch, channel, and region for reporting purposes.
+Endpoint: /api/v1/transactions/create
+Method: POST
+Request Body:
+{
+  "client_id": "string",
+  "relationship_manager_id": "string",
+  "product_code": "string",
+  "subscription_amount": "float",
+  "settlement_account_number": "string",
+  "transaction_timestamp": "datetime (ISO 8601 format)",
+  "branch_code": "string",
+  "channel": "enum (Branch|Phone_Banking|Mobile_App|Online_Banking)",
+  "region": "string"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_id": "string",
+    "client_id": "string",
+    "relationship_manager_id": "string",
+    "transaction_type": "enum (Risk_Profiling|Mutual_Fund_Subscription|Structured_Product_Enrollment)",
+    "product_code": "string",
+    "product_name": "string",
+    "product_risk_rating": "enum (Conservative|Moderate|Balanced|Growth|Aggressive)",
+    "product_category": "enum (Mutual_Fund|Bond|Structured_Note|Dual_Currency_Investment|Principal_Protected_Note)",
+    "subscription_amount": "float",
+    "current_nav": "float",
+    "front_end_load_percentage": "float",
+    "annual_management_fee_percentage": "float",
+    "settlement_account_number": "string",
+    "compliance_officer_id": "string",
+    "branch_code": "string",
+    "channel": "string",
+    "region": "string",
+    "transaction_timestamp": "datetime",
+    "order_creation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: RecommendSuitableProducts (state_dependency - logically follows product selection, requires client has investable_status = Active)
+Error Scenarios:
+- Product code not found in product master database: Return 404 with message "Product code does not exist", request valid product_code
+- Invalid settlement_account_number format: Return 400 with message "Invalid settlement account number format"
+- Settlement account not associated with client_id: Return 403 with message "Settlement account does not belong to client"
+- Subscription amount below product minimum investment threshold: Return 400 with message "Subscription amount below product minimum"
+- Subscription amount exceeds product maximum investment limit: Return 400 with message "Subscription amount exceeds product maximum"
+- Transaction ID generation conflict (duplicate): Retry generation with incremented sequence, implement idempotency with unique request key
+- Product master data incomplete (missing NAV or fees): Return 422 with message "Product data incomplete, cannot create order"
+- Relationship manager not authorized for product category: Return 403 with message "Relationship manager lacks certification for this product"
+- Compliance officer assignment algorithm failure: Return 500 with message "Unable to assign compliance officer", use default officer
+- Invalid channel specification: Return 400 with message "Invalid transaction channel"
+</API>
+
+<API>
+Name: ValidateProductSuitability
+Description: Executes automated real-time suitability check by comparing product_risk_rating against client calculated_risk_profile using hierarchical matching matrix enforcing regulatory suitability rules. Determines if product exceeds client risk tolerance, sets suitability_check_passed and suitability_mismatch_flag accordingly. Triggers mismatch waiver and supervisor approval workflow when violation detected, preventing transaction progression until proper override procedures completed.
+Endpoint: /api/v1/compliance/suitability-check
+Method: POST
+Request Body:
+{
+  "transaction_id": "string",
+  "calculated_risk_profile": "enum (Conservative|Balanced|Aggressive)",
+  "product_risk_rating": "enum (Conservative|Moderate|Balanced|Growth|Aggressive)"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_id": "string",
+    "calculated_risk_profile": "string",
+    "product_risk_rating": "string",
+    "suitability_check_passed": "boolean",
+    "suitability_mismatch_flag": "boolean",
+    "mismatch_waiver_required": "boolean",
+    "supervisor_approval_required": "boolean",
+    "suitability_assessment": "string (suitable|unsuitable|marginally_suitable)",
+    "mismatch_severity": "string (none|low|medium|high)",
+    "validation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: 
+- CreateInvestmentOrder (data_dependency - requires transaction_id and product_risk_rating)
+- AuthorizeAndActivateRiskProfile or existing profile (data_dependency - requires calculated_risk_profile)
+Error Scenarios:
+- Suitability mismatch detected (product risk exceeds client tolerance): Return 200 with suitability_check_passed = FALSE, suitability_mismatch_flag = TRUE, trigger waiver workflow
+- Risk profile expired since transaction initiation: Return 409 with message "Risk profile expired during processing", require profile refresh
+- Invalid calculated_risk_profile value: Return 400 with message "Invalid client risk profile"
+- Invalid product_risk_rating value: Return 400 with message "Invalid product risk rating"
+- Transaction_id not found: Return 404 with message "Transaction not found"
+- Suitability matrix configuration missing: Return 500 with message "Suitability rules not configured", default to conservative blocking behavior
+- Product rating exactly matches client profile (boundary case): Apply permissive rule, set suitability_check_passed = TRUE
+- Multiple concurrent suitability checks for same transaction: Implement idempotency, return cached result if exists within 60 seconds
+</API>
+
+<API>
+Name: ExecuteAMLSanctionsScreening
+Description: Interfaces with enterprise AML monitoring platform to perform real-time sanctions list screening of client_id and client_name against all relevant sanctions databases including OFAC SDN list, EU consolidated sanctions, UN Security Council sanctions, and applicable national registries. Returns screening status indicating Clear (no matches), Flagged (potential match requiring manual review), or Pending (screening in progress).
+Endpoint: /api/v1/compliance/aml-screening
+Method: POST
+Request Body:
+{
+  "client_id": "string",
+  "client_name": "string",
+  "transaction_id": "string"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_id": "string",
+    "client_id": "string",
+    "client_name": "string",
+    "aml_sanctions_screening_status": "enum (Clear|Flagged|Pending)",
+    "screening_reference_id": "string",
+    "sanctions_lists_checked": "array of strings",
+    "match_details": "array of objects (if Flagged)",
+    "screening_timestamp": "datetime",
+    "next_action_required": "string"
+  },
+  "message": "string"
+}
+Dependencies: CreateInvestmentOrder (data_dependency - requires transaction_id to associate screening with transaction, retrieves client_id)
+Error Scenarios:
+- AML platform timeout (> 10 seconds): Return 504 with message "AML screening timeout", implement exponential backoff retry up to 3 attempts
+- Sanctions match flagged requiring manual review: Return 200 with aml_sanctions_screening_status = "Flagged", block transaction progression, escalate to compliance officer
+- AML platform completely unavailable: Return 503 with message "AML service unavailable", route transaction to manual compliance review queue
+- Partial name match with low confidence score: Return 200 with status = "Flagged", provide match details for compliance officer disposition
+- Client name contains special characters causing screening error: Sanitize input, retry screening, if fails return 400 with message "Unable to process client name format"
+- Multiple sanctions hits across different lists: Return 200 with status = "Flagged", aggregate all match details in response
+- Screening result pending beyond acceptable timeframe (> 60 seconds): Return 202 with status = "Pending", implement polling mechanism
+- Client recently added to sanctions list (timing edge case): AML platform should catch, but if delayed return "Clear" initially, implement periodic re-screening
+</API>
+
+<API>
+Name: ValidateThresholdAndSOW
+Description: Compares subscription_amount against configured monitoring_threshold_amount (typically $100,000) to determine if transaction exceeds regulatory large-transaction threshold requiring enhanced due diligence. When threshold exceeded, validates that source_of_wealth_documented flag is TRUE indicating current and valid Source of Wealth documentation is on file. Blocks execution if SOW documentation missing for threshold-exceeding transactions.
+Endpoint: /api/v1/compliance/threshold-sow-check
+Method: POST
+Request Body:
+{
+  "subscription_amount": "float",
+  "monitoring_threshold_amount": "float",
+  "source_of_wealth_documented": "boolean"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "subscription_amount": "float",
+    "monitoring_threshold_amount": "float",
+    "transaction_threshold_exceeded": "boolean",
+    "source_of_wealth_documented": "boolean",
+    "sow_validation_passed": "boolean",
+    "threshold_percentage": "float",
+    "validation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: CreateInvestmentOrder (data_dependency - requires subscription_amount from order creation)
+Error Scenarios:
+- Threshold exceeded but SOW not documented (source_of_wealth_documented = FALSE): Return 200 with sow_validation_passed = FALSE, block transaction with message "Source of Wealth documentation required"
+- SOW documentation expired (edge case requiring date validation): Return 428 with message "Source of Wealth documentation requires update"
+- Subscription amount exactly equals threshold (boundary condition): Apply inclusive rule, set transaction_threshold_exceeded = TRUE
+- Invalid subscription_amount (negative or zero): Return 400 with message "Invalid subscription amount"
+- Invalid monitoring_threshold_amount configuration: Return 500 with message "Threshold configuration error", use default $100,000
+- Multiple transactions aggregating to exceed threshold (requires client transaction history): Log warning for compliance review, validate current transaction independently
+- Currency conversion required for foreign currency subscriptions: Convert to USD equivalent before threshold comparison, document exchange rate used
+</API>
+
+<API>
+Name: VerifyFundsAvailability
+Description: Queries Core Banking System to retrieve real-time available_balance for specified settlement_account_number. Compares retrieved available_balance against subscription_amount to confirm sufficient liquid funds exist for transaction settlement without creating overdraft condition. Returns funds_availability_verified as TRUE only when available_balance >= subscription_amount.
+Endpoint: /api/v1/banking/verify-funds
+Method: POST
+Request Body:
+{
+  "settlement_account_number": "string",
+  "subscription_amount": "float"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "settlement_account_number": "string",
+    "subscription_amount": "float",
+    "available_balance": "float",
+    "funds_availability_verified": "boolean",
+    "balance_shortfall": "float",
+    "balance_verification_timestamp": "datetime",
+    "account_status": "string (active|frozen|restricted|closed)"
+  },
+  "message": "string"
+}
+Dependencies: CreateInvestmentOrder (data_dependency - requires settlement_account_number and subscription_amount)
+Error Scenarios:
+- Insufficient funds (available_balance < subscription_amount): Return 200 with funds_availability_verified = FALSE, calculate and return balance_shortfall
+- Settlement account frozen or restricted: Return 423 with message "Account locked, transaction cannot proceed", notify relationship manager
+- Settlement account closed: Return 410 with message "Account closed", require alternative settlement account
+- Core Banking System unavailable: Return 503 with message "Banking system temporarily unavailable", implement circuit breaker pattern with retry
+- Available balance exactly equals subscription amount (no buffer): Return 200 with funds_availability_verified = TRUE, log warning about zero remaining balance
+- Concurrent transactions depleting available balance: Implement pessimistic locking or optimistic concurrency control, return 409 if balance changed
+- Invalid settlement_account_number format: Return 400 with message "Invalid account number format"
+- Currency mismatch between account and subscription amount: Return 400 with message "Currency conversion required", provide FX rate
+- Account balance query timeout: Return 504 with message "Balance inquiry timeout", retry up to 2 times
+</API>
+
+<API>
+Name: AggregateComplianceChecks
+Description: Aggregates validation results from all parallel pre-trade compliance checks including suitability validation, AML sanctions screening, threshold/SOW validation, and funds availability verification. Applies boolean AND logic across all validation outcomes to produce consolidated pre_trade_compliance_passed flag. Transaction may proceed to execution only when ALL compliance checks return successful status.
+Endpoint: /api/v1/compliance/aggregate-checks
+Method: POST
+Request Body:
+{
+  "suitability_check_passed": "boolean",
+  "aml_sanctions_screening_status": "enum (Clear|Flagged|Pending)",
+  "transaction_threshold_exceeded": "boolean",
+  "source_of_wealth_documented": "boolean",
+  "funds_availability_verified": "boolean"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "pre_trade_compliance_passed": "boolean",
+    "suitability_check_passed": "boolean",
+    "aml_check_passed": "boolean",
+    "threshold_sow_check_passed": "boolean",
+    "funds_check_passed": "boolean",
+    "failed_checks": "array of strings",
+    "compliance_summary": "string",
+    "aggregation_timestamp": "datetime",
+    "ready_for_execution": "boolean"
+  },
+  "message": "string"
+}
+Dependencies:
+- ValidateProductSuitability (data_dependency - requires suitability_check_passed)
+- ExecuteAMLSanctionsScreening (data_dependency - requires aml_sanctions_screening_status)
+- ValidateThresholdAndSOW (data_dependency - requires transaction_threshold_exceeded, implicitly uses source_of_wealth_documented)
+- VerifyFundsAvailability (data_dependency - requires funds_availability_verified)
+Error Scenarios:
+- One or more validations still pending: Return 202 with message "Compliance checks pending", implement polling mechanism with 60-second timeout
+- AML screening status = "Flagged": Set aml_check_passed = FALSE, pre_trade_compliance_passed = FALSE, block execution
+- AML screening status = "Pending": Return 202 with message "AML screening in progress", wait for completion
+- Threshold exceeded with undocumented SOW: Set threshold_sow_check_passed = FALSE, pre_trade_compliance_passed = FALSE
+- Conflicting validation results requiring manual review: Apply most restrictive rule, set pre_trade_compliance_passed = FALSE
+- Missing required validation input parameter: Return 400 with message "Incomplete compliance check inputs"
+- All checks passed but supervisor approval still required (from suitability mismatch): Return 200 with pre_trade_compliance_passed = TRUE but ready_for_execution = FALSE
+- Timeout waiting for all parallel checks to complete: Return 504 with message "Compliance aggregation timeout", route to manual review
+</API>
+
+<API>
+Name: CalculateTransactionFinancials
+Description: Computes comprehensive transaction financial metrics with regulatory precision: front_end_load_amount (subscription_amount × front_end_load_percentage / 100), net_investment_amount (subscription_amount - front_end_load_amount), estimated_units (net_investment_amount / current_nav for mutual funds with 4 decimal precision), and annual_management_fee_amount (net_investment_amount × annual_management_fee_percentage / 100). Provides transparent fee disclosure enabling client understanding of all costs and actual invested capital.
+Endpoint: /api/v1/transactions/calculate-financials
+Method: POST
+Request Body:
+{
+  "subscription_amount": "float",
+  "front_end_load_percentage": "float",
+  "annual_management_fee_percentage": "float",
+  "current_nav": "float",
+  "product_category": "enum (Mutual_Fund|Bond|Structured_Note|Dual_Currency_Investment|Principal_Protected_Note)",
+  "pre_trade_compliance_passed": "boolean"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "subscription_amount": "float",
+    "front_end_load_percentage": "float",
+    "front_end_load_amount": "float (2 decimal precision)",
+    "net_investment_amount": "float (2 decimal precision)",
+    "current_nav": "float",
+    "estimated_units": "float (4 decimal precision)",
+    "annual_management_fee_percentage": "float",
+    "annual_management_fee_amount": "float (2 decimal precision)",
+    "total_first_year_fees": "float",
+    "effective_investment_percentage": "float",
+    "calculation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies:
+- CreateInvestmentOrder (data_dependency - requires subscription_amount, front_end_load_percentage, annual_management_fee_percentage, current_nav, product_category)
+- AggregateComplianceChecks (state_dependency - only executes when pre_trade_compliance_passed = TRUE)
+Error Scenarios:
+- pre_trade_compliance_passed = FALSE: Return 403 with message "Transaction not compliant, cannot calculate financials"
+- Invalid current_nav (zero, negative, or null for Mutual_Fund): Return 400 with message "Invalid or missing NAV for mutual fund", request NAV refresh
+- Front-end load amount exceeds subscription amount (misconfiguration): Return 400 with message "Front-end load configuration error exceeds subscription"
+- Negative net_investment_amount after fee deduction: Return 400 with message "Fees exceed subscription amount, transaction cannot proceed"
+- Division by zero when calculating estimated_units (NAV = 0): Return 400 with message "Cannot calculate units with zero NAV"
+- Rounding precision loss causing material discrepancy: Apply banker's rounding (round half to even), log discrepancy if > 0.01%
+- Product_category is structured product but current_nav provided: Ignore NAV, set estimated_units = 0 (not applicable)
+- Invalid product_category value: Return 400 with message "Invalid product category"
+- Subscription amount is zero or negative: Return 400 with message "Invalid subscription amount for financial calculation"
+</API>
+
+<API>
+Name: ManageCoolingOffPeriod
+Description: Evaluates product_category against cooling-off period requirements to determine applicability (TRUE for Structured_Note, Dual_Currency_Investment, Principal_Protected_Note). When applicable, calculates cooling-off expiry timestamp by adding cooling_off_period_hours to client_authorization_timestamp. Sets transaction_status to "Pending_Cooling_Off" if cooling-off applies and period not elapsed, or "Ready_for_Execution" if cooling-off not required or period completed.
+Endpoint: /api/v1/transactions/manage-cooling-off
+Method: POST
+Request Body:
+{
+  "transaction_id": "string",
+  "product_category": "enum (Mutual_Fund|Bond|Structured_Note|Dual_Currency_Investment|Principal_Protected_Note)",
+  "cooling_off_period_required": "boolean",
+  "cooling_off_period_hours": "integer",
+  "client_authorization_timestamp": "datetime (ISO 8601 format)"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_id": "string",
+    "product_category": "string",
+    "cooling_off_period_required": "boolean",
+    "cooling_off_period_hours": "integer",
+    "client_authorization_timestamp": "datetime",
+    "cooling_off_expiry_timestamp": "datetime or null",
+    "transaction_status": "enum (Pending_Cooling_Off|Ready_for_Execution|Cancelled)",
+    "hours_remaining": "integer or null",
+    "status_determination_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: CalculateTransactionFinancials (state_dependency - executes after financial calculations complete, uses product_category)
+Error Scenarios:
+- Client requests cancellation during cooling-off period: Return 200 with transaction_status = "Cancelled", initiate refund workflow, log cancellation
+- Cooling-off expiry calculation error (timestamp arithmetic failure): Return 500 with message "Unable to calculate cooling-off expiry", use conservative longer period
+- Cooling-off period spans non-business days (weekends/holidays): Calculate based on actual hours, not business hours, document expiry datetime
+- Client authorization timestamp missing for cooling-off transaction: Return 400 with message "Authorization timestamp required for cooling-off calculation"
+- Transaction_id not found: Return 404 with message "Transaction not found"
+- Invalid cooling_off_period_hours (negative or > 168): Return 400 with message "Invalid cooling-off period configuration"
+- Current system time exactly equals cooling-off expiry (boundary condition): Apply inclusive rule, set status = "Ready_for_Execution"
+- Cooling-off period already expired at time of status check: Set transaction_status = "Ready_for_Execution", proceed to execution
+- System clock discrepancy affecting expiry calculation: Use UTC consistently, log warning if significant clock skew detected
+</API>
+
+<API>
+Name: ExecuteInvestmentTransaction
+Description: Final execution step consummating investment transaction through appropriate channel routing. For Mutual_Fund products, transmits electronic purchase order to fund house gateway with client and product details, receives trade_reference_number. For structured products, routes order to Treasury/Global Markets desk, receives contract_note_number. Instructs Core Banking System to debit settlement_account_number for full subscription_amount. Sets transaction_status to "Executed", records execution_timestamp, calculates settlement_date based on product-specific T+1 or T+2 cycles.
+Endpoint: /api/v1/transactions/execute
+Method: POST
+Request Body:
+{
+  "transaction_id": "string",
+  "product_category": "enum (Mutual_Fund|Bond|Structured_Note|Dual_Currency_Investment|Principal_Protected_Note)",
+  "product_code": "string",
+  "net_investment_amount": "float",
+  "settlement_account_number": "string",
+  "client_id": "string",
+  "transaction_status": "enum (Ready_for_Execution|Pending_Cooling_Off)",
+  "subscription_amount": "float"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_id": "string",
+    "product_category": "string",
+    "trade_reference_number": "string or null",
+    "contract_note_number": "string or null",
+    "execution_timestamp": "datetime",
+    "settlement_date": "datetime",
+    "transaction_status": "enum (Executed|Failed|Cancelled)",
+    "settlement_account_debited": "boolean",
+    "debit_reference_number": "string",
+    "execution_channel": "string (fund_house|treasury_desk)",
+    "settlement_cycle": "string (T+0|T+1|T+2)"
+  },
+  "message": "string"
+}
+Dependencies:
+- ManageCoolingOffPeriod (state_dependency - only executes when transaction_status = "Ready_for_Execution")
+- CalculateTransactionFinancials (data_dependency - requires net_investment_amount)
+- CreateInvestmentOrder (data_dependency - requires transaction_id, product_code, product_category, settlement_account_number, client_id)
+Error Scenarios:
+- Transaction status not "Ready_for_Execution": Return 409 with message "Transaction not ready for execution", specify current status
+- Fund house order gateway timeout or rejection: Return 502 with message "Fund house order rejected", set transaction_status = "Failed", log details
+- Core Banking System debit failure after order submitted: Return 500 with message "Settlement debit failed", initiate compensating transaction to reverse fund house order
+- Settlement account insufficient funds at execution time (race condition): Return 402 with message "Insufficient funds at execution", cancel order, set status = "Failed"
+- Settlement account frozen between validation and execution: Return 423 with message "Account locked, cannot execute", set status = "Failed"
+- Treasury desk manual review required for structured product: Return 202 with message "Order pending Treasury desk approval", maintain status in system
+- Duplicate execution attempt (idempotency violation): Return 200 with existing execution details if transaction already executed within 5 minutes
+- Invalid product_code at execution time: Return 404 with message "Product no longer available"
+- NAV changed significantly since order creation (> 5% for mutual funds): Log warning, proceed with execution at current NAV, document variance
+- Settlement date calculation falls on non-business day: Adjust to next business day using holiday calendar
+- Order routing system unavailable: Return 503 with message "Execution service unavailable", queue for retry with exponential backoff
+</API>
+
+<API>
+Name: CalculateSTPFlag
+Description: Evaluates entire transaction lifecycle to determine if straight-through processing was achieved by checking for any manual intervention indicators including suitability mismatch requiring waiver, supervisor approval requirements, AML screening flags, or back-office corrections. Sets straight_through_processing_flag to TRUE only for zero-touch transactions completing without human intervention, providing key operational efficiency metric for STP rate KPI reporting.
+Endpoint: /api/v1/transactions/calculate-stp
+Method: POST
+Request Body:
+{
+  "transaction_id": "string",
+  "suitability_mismatch_flag": "boolean",
+  "supervisor_approval_required": "boolean",
+  "aml_sanctions_screening_status": "enum (Clear|Flagged|Pending)"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_id": "string",
+    "straight_through_processing_flag": "boolean",
+    "manual_intervention_indicators": "array of strings",
+    "stp_assessment": "string (full_stp|partial_stp|manual_processing)",
+    "automation_rate": "float (percentage)",
+    "calculation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: ExecuteInvestmentTransaction (state_dependency - executes after transaction execution to evaluate complete lifecycle)
+Error Scenarios:
+- Transaction audit trail incomplete or missing: Return 200 with straight_through_processing_flag = FALSE (conservative approach), log data quality issue
+- Multiple contradictory STP indicators: Apply conservative rule, if any manual touchpoint detected set flag = FALSE
+- Transaction_id not found: Return 404 with message "Transaction not found"
+- Transaction not yet executed: Return 409 with message "Cannot calculate STP flag for incomplete transaction"
+- Suitability mismatch flag TRUE: Set straight_through_processing_flag = FALSE, add "suitability_override" to manual_intervention_indicators
+- Supervisor approval required TRUE: Set straight_through_processing_flag = FALSE, add "supervisor_approval" to manual_intervention_indicators
+- AML status "Flagged": Set straight_through_processing_flag = FALSE, add "aml_manual_review" to manual_intervention_indicators
+- Borderline scenario with minimal automated system correction: Apply strict interpretation, consider as STP if no human decision made
+</API>
+
+<API>
+Name: ExecutePostTradeComplianceReview
+Description: Performs post-execution quality assurance and regulatory compliance verification by reviewing transaction against standardized compliance checklist. Validates documentation completeness (disclosure_documents_presented), reviews audio_video_recording_id content quality for complex products, verifies suitability mismatch waiver documentation, and assesses overall transaction coherence relative to client profile. Documents findings in compliance_review_notes, sets compliance_defect_flag if violations or deficiencies identified requiring corrective action.
+Endpoint: /api/v1/compliance/post-trade-review
+Method: POST
+Request Body:
+{
+  "transaction_id": "string",
+  "audio_video_recording_id": "string or null",
+  "suitability_mismatch_flag": "boolean",
+  "transaction_threshold_exceeded": "boolean",
+  "disclosure_documents_presented": "array of strings"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_id": "string",
+    "compliance_defect_flag": "boolean",
+    "compliance_review_notes": "string",
+    "defects_identified": "array of strings",
+    "documentation_complete": "boolean",
+    "recording_quality_acceptable": "boolean or null",
+    "review_completion_timestamp": "datetime",
+    "reviewer_recommendation": "string (approve|escalate|remediate)",
+    "follow_up_required": "boolean"
+  },
+  "message": "string"
+}
+Dependencies: ExecuteInvestmentTransaction (state_dependency - only executes after transaction status = "Executed")
+Error Scenarios:
+- Audio/video recording file corrupted or inaccessible: Set compliance_defect_flag = TRUE, add "recording_unavailable" to defects_identified, escalate for manual review
+- Mandatory disclosure documents missing from presented list: Set compliance_defect_flag = TRUE, document specific missing disclosures, require remediation
+- Suitability mismatch without proper waiver documentation: Set compliance_defect_flag = TRUE, critical violation requiring immediate escalation
+- Transaction threshold exceeded without evidence of SOW verification: Set compliance_defect_flag = TRUE, require retroactive SOW documentation
+- Transaction_id not found: Return 404 with message "Transaction not found"
+- Transaction not yet executed (premature review): Return 409 with message "Cannot review incomplete transaction"
+- Compliance officer unavailable for immediate review: Queue for next available officer, return 202 with message "Review queued"
+- Multiple defects identified requiring prioritization: Set compliance_defect_flag = TRUE, prioritize defects by severity in response
+- Recording quality insufficient for compliance verification: Set compliance_defect_flag = TRUE, require re-recording or enhanced documentation
+- Client profile inconsistencies identified during review: Set compliance_defect_flag = TRUE, recommend profile update and transaction re-evaluation
+</API>
+
+<API>
+Name: CalculateProcessingMetrics
+Description: Computes end-to-end transaction processing efficiency metrics by calculating total_processing_time_minutes as elapsed time between transaction_timestamp (initiation) and execution_timestamp (completion). Provides quantitative measure enabling monitoring of processing efficiency, cycle time analysis, identification of bottlenecks, and trend analysis for continuous process improvement initiatives.
+Endpoint: /api/v1/transactions/calculate-metrics
+Method: POST
+Request Body:
+{
+  "transaction_timestamp": "datetime (ISO 8601 format)",
+  "execution_timestamp": "datetime (ISO 8601 format)"
+}
+Response:
+{
+  "status": "string (success|error)",
+  "data": {
+    "transaction_timestamp": "datetime",
+    "execution_timestamp": "datetime",
+    "total_processing_time_minutes": "integer",
+    "processing_time_hours": "float",
+    "processing_date_span": "integer (days)",
+    "business_hours_processing_time": "integer (minutes)",
+    "efficiency_rating": "string (excellent|good|acceptable|poor)",
+    "calculation_timestamp": "datetime"
+  },
+  "message": "string"
+}
+Dependencies: ExecuteInvestmentTransaction (data_dependency - requires execution_timestamp for time calculation)
+Error Scenarios:
+- Execution timestamp missing or null: Return 400 with message "Execution timestamp required for metrics calculation"
+- Transaction timestamp missing or null: Return 400 with message "Transaction timestamp required for metrics calculation"
+- Execution timestamp precedes transaction timestamp (invalid data): Return 400 with message "Invalid timestamp sequence detected"
+- Negative time calculation due to clock skew: Return 500 with message "System time inconsistency detected", log for clock synchronization review
+- Processing time exceeds reasonable threshold (> 24 hours): Return 200 with calculated metrics, flag as anomaly for investigation
+- Transaction spans midnight causing date boundary complexity: Calculate elapsed time correctly accounting for date rollover
+- Timezone conversion issues for cross-region transactions: Ensure both timestamps in UTC before calculation
+- Very short processing time (< 1 minute for complex transaction): Return 200 with metrics, may indicate pre-validation or cached processing
+- Processing time calculation precision loss: Round to nearest integer minute, document rounding method
+</API>
+
+</TOOLS>

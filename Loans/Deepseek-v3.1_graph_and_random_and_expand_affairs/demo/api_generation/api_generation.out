@@ -1,0 +1,1114 @@
+<sop_breakdown>
+
+## 1. Independent Tasks/Operations within Main Procedure
+
+Based on the SOP's Main Procedure (Section 5) and the API dependency graph, the independent tasks are:
+
+### Phase 5.1: Mortgage Application Intake and Pre-qualification
+- **Task 5.1.1**: Customer Identity Verification and KYC
+- **Task 5.1.2**: Employment and Income Declaration Validation
+- **Task 5.1.3**: Asset Declaration and Reserve Verification
+- **Task 5.1.4**: Credit Report Authorization and Tri-Bureau Pull
+- **Task 5.1.5**: Representative Credit Score Calculation
+- **Task 5.1.6**: Pre-qualification Decision Screening
+- **Task 5.1.7**: Maximum Loan Amount Calculation
+
+### Phase 5.2: Credit Underwriting
+- **Task 5.2.1**: Assignment to Underwriter and Document Verification Initiation
+- **Task 5.2.2**: Self-Employed Income Analysis
+- **Task 5.2.3**: Asset and Reserve Verification
+- **Task 5.2.4**: Credit History Forensic Analysis
+- **Task 5.2.5**: Debt-to-Income and DSCR Calculation
+- **Task 5.2.6**: Probability of Default Scoring
+- **Task 5.2.7**: Risk-Adjusted Interest Rate Determination
+- **Task 5.2.8**: Compensating Factors Evaluation
+- **Task 5.2.9**: Underwriting Summary Preparation
+
+### Phase 5.3: Property Valuation and Appraisal
+- **Task 5.3.1**: Appraisal Order Transmission
+- **Task 5.3.2**: Appraiser Assignment and Site Inspection
+- **Task 5.3.3**: Comparable Sales Analysis
+- **Task 5.3.4**: Value Reconciliation and Report Completion
+- **Task 5.3.5**: AVM Validation and Quality Control
+- **Task 5.3.6**: Final LTV Calculation
+
+### Phase 5.4: Final Decision Rendering
+- **Task 5.4.1**: Credit Refresh and Final Decision Tree Execution
+- **Task 5.4.2**: Conditions Documentation
+- **Task 5.4.3**: Decline Reason Documentation
+- **Task 5.4.4**: Decision Timestamp and Turnaround Time
+- **Task 5.4.5**: Closing Preparation (for approved loans)
+- **Task 5.4.6**: Fair Lending Surveillance
+- **Task 5.4.7**: Performance Tracking
+
+## 2. External Dependencies for Each Task
+
+### Task 5.1.1 - ValidateApplicantIdentity
+- **Dependencies**: OFAC SDN database API, SSA Consent Based Verification Service
+- **Input Sources**: application_id, applicant_name, applicant_ssn, applicant_dob, applicant_address, co_applicant_name, co_applicant_ssn
+
+### Task 5.1.2 - ValidateEmploymentAndIncome
+- **Dependencies**: Document parsing services (OCR for pay stubs)
+- **Input Sources**: application_id, employment_status, employer_name, employment_years, gross_monthly_income, additional_income_monthly, pay_stubs_uploaded, w2_forms_uploaded, tax_returns_uploaded
+
+### Task 5.1.3 - ValidateLiquidAssets
+- **Dependencies**: Bank statement parsing, age calculation services
+- **Input Sources**: application_id, liquid_assets, retirement_accounts, bank_statements_uploaded, down_payment_amount, requested_loan_amount, applicant_dob
+
+### Task 5.1.4 - PullCreditReports
+- **Dependencies**: Equifax API, Experian API, TransUnion API
+- **Input Sources**: Requires validated identity from ValidateApplicantIdentity (verified_applicant_name, verified_applicant_ssn, verified_applicant_dob), plus applicant_address, credit_consent_signed, credit_consent_timestamp
+
+### Task 5.1.5 - CalculateRepresentativeCreditScore
+- **Dependencies**: None (pure calculation)
+- **Input Sources**: fico_score_equifax, fico_score_experian, fico_score_transunion from PullCreditReports
+
+### Task 5.1.6 - ExecutePrequalificationAnalysis
+- **Dependencies**: Current market rate services, pricing matrix database
+- **Input Sources**: representative_credit_score (from CalculateRepresentativeCreditScore), preliminary_gross_monthly_income (from ValidateEmploymentAndIncome), total_monthly_debt_obligations (from PullCreditReports), requested_loan_amount, loan_term_months, estimated_property_value, down_payment_amount, property_type, property_occupancy, loan_purpose
+
+### Task 5.2.1 - VerifyEmploymentAndIncome
+- **Dependencies**: Employer VOE services, IRS Form 4506-T processing
+- **Input Sources**: Requires prequalification_decision from ExecutePrequalificationAnalysis, plus employment_status, employer_name, employment_years, gross_monthly_income, additional_income_monthly, pay_stubs_uploaded, w2_forms_uploaded, tax_returns_uploaded
+
+### Task 5.2.3 - VerifyAssetsAndReserves
+- **Dependencies**: Bank statement verification services, retirement account valuation
+- **Input Sources**: Requires prequalification_decision, verified_gross_monthly_income (from VerifyEmploymentAndIncome), plus liquid_assets, retirement_accounts, bank_statements_uploaded, down_payment_amount, requested_loan_amount, applicant_dob, property_type, property_occupancy
+
+### Task 5.2.4 - AnalyzeCreditHistory
+- **Dependencies**: Credit report parsing services
+- **Input Sources**: credit_report_full_data (from PullCreditReports), derogatory_marks_count, bankruptcy_history
+
+### Task 5.2.5 - CalculateDebtRatios
+- **Dependencies**: Property tax assessor API, insurance quotation services, MI rate tables
+- **Input Sources**: verified_gross_monthly_income (from VerifyEmploymentAndIncome), total_monthly_debt_obligations (from PullCreditReports), requested_loan_amount, loan_term_months, estimated_interest_rate_prequalification (from ExecutePrequalificationAnalysis), property_address, estimated_property_value, representative_credit_score, preliminary_ltv_ratio
+
+### Task 5.2.6 - CalculateProbabilityOfDefault
+- **Dependencies**: Logistic regression model engine
+- **Input Sources**: representative_credit_score, debt_to_income_ratio (from CalculateDebtRatios), preliminary_ltv_ratio, reserve_months_calculated (from VerifyAssetsAndReserves), employment_years, property_type, property_occupancy, loan_purpose, detailed_derogatory_marks_count (from AnalyzeCreditHistory)
+
+### Task 5.2.7 - DetermineFinalInterestRate
+- **Dependencies**: Current market rate feeds, pricing matrix database
+- **Input Sources**: credit_score_grade (from CalculateProbabilityOfDefault), representative_credit_score, preliminary_ltv_ratio, property_type, property_occupancy, loan_purpose, debt_to_income_ratio, loan_term_months
+
+### Task 5.2.8 - EvaluateCompensatingFactors
+- **Dependencies**: HUD median income database
+- **Input Sources**: debt_to_income_ratio, reserve_months_calculated, payment_history_quality (from AnalyzeCreditHistory), verified_gross_monthly_income, monthly_housing_payment_total (from CalculateDebtRatios), total_monthly_debt_obligations, preliminary_ltv_ratio, employment_years, credit_depth_rating (from AnalyzeCreditHistory), applicant_address
+
+### Task 5.3.1 - OrderPropertyAppraisal
+- **Dependencies**: Appraisal Management Company API
+- **Input Sources**: Requires prequalification_decision, plus property_address, property_type, property_occupancy, estimated_property_value, requested_loan_amount, loan_purpose
+
+### Task 5.3.2 - ConductPropertyValuation
+- **Dependencies**: Appraiser inspection services, MLS database, public records
+- **Input Sources**: appraisal_order_number (from OrderPropertyAppraisal), property_address, property_type, estimated_property_value
+
+### Task 5.3.5 - ValidateAppraisalWithAVM
+- **Dependencies**: AVM platform API (CoreLogic, Freddie Mac)
+- **Input Sources**: final_appraised_value (from ConductPropertyValuation), property_address, property_type
+
+### Task 5.3.6 - CalculateLoanToValueRatio
+- **Dependencies**: None (pure calculation)
+- **Input Sources**: final_appraised_value (from ValidateAppraisalWithAVM), requested_loan_amount, estimated_property_value, loan_purpose, representative_credit_score, property_type, property_occupancy
+
+### Task 5.4.1 - RenderFinalLoanDecision
+- **Dependencies**: Credit refresh services, underwriting decision engine
+- **Input Sources**: debt_to_income_ratio, debt_service_coverage_ratio, loan_to_value_ratio, probability_of_default_score, credit_score_grade, final_risk_adjusted_interest_rate, compensating_factors_present, property_condition (from ConductPropertyValuation), bankruptcy_seasoning_compliant (from AnalyzeCreditHistory), foreclosure_history_compliant (from AnalyzeCreditHistory), verified_gross_monthly_income, requested_loan_amount, loan_term_months, application_timestamp
+
+### Task 5.4.6 - ExecuteFairLendingMonitoring
+- **Dependencies**: HMDA database, statistical analysis engine
+- **Input Sources**: Requires final_decision (from RenderFinalLoanDecision), approved_interest_rate, conditions_count, representative_credit_score, debt_to_income_ratio, loan_to_value_ratio, property_address
+
+### Task 5.4.7 - TrackLoanPerformanceMetrics
+- **Dependencies**: Performance database, reporting services
+- **Input Sources**: application_timestamp, final_decision, final_decision_timestamp (from RenderFinalLoanDecision), conditions_count, approved_loan_amount
+
+## 3. Edge Cases for Each Task
+
+### ValidateApplicantIdentity
+- SSN pattern indicates deceased person
+- OFAC positive match requiring escalation
+- Missing co-applicant information when co-applicant exists
+- Name mismatch between ID and application
+- Multiple active bankruptcies across applicants
+
+### ValidateEmploymentAndIncome
+- Self-employed with negative Schedule C income
+- Income declining >10% year-over-year
+- Missing W-2 forms for stated employment
+- Pay stub dates outside acceptable 30-day window
+- Multiple employers with overlapping dates
+
+### ValidateLiquidAssets
+- Large deposits exactly 50% or 100% of income (boundary conditions)
+- Applicant under age 59.5 with only retirement accounts
+- Bank statements showing negative balances
+- Assets denominated in foreign currency
+- Gift funds exceeding down payment amount
+
+### PullCreditReports
+- Insufficient credit file from one or more bureaus
+- Credit freeze preventing bureau access
+- Recent name change causing file mismatch
+- Co-applicant with no credit history
+- Credit report errors requiring dispute
+
+### CalculateRepresentativeCreditScore
+- Only one bureau provides score
+- All three bureaus return insufficient file
+- Tied scores requiring median determination
+- Co-applicant and applicant with identical scores
+
+### ExecutePrequalificationAnalysis
+- DTI exactly at 43.00% threshold (boundary)
+- Requested loan amount equals or exceeds conforming limit
+- Property type not in standard pricing matrix
+- Negative additional_income_monthly
+- Zero down payment scenarios
+
+### VerifyEmploymentAndIncome
+- Employer out of business or unreachable
+- Self-employed with 100% K-1 passthrough income
+- Income from rental property with negative cash flow
+- Seasonal employment with irregular pay patterns
+- Commission-only compensation with high variability
+
+### VerifyAssetsAndReserves
+- All assets in retirement accounts requiring heavy discount
+- Reserves exactly at minimum threshold
+- Multiple large deposits requiring extensive sourcing
+- Assets held jointly with non-applicant party
+- Earnest money deposit exceeding available liquid assets
+
+### AnalyzeCreditHistory
+- Bankruptcy filed within last 24 months
+- Authorized user accounts vs. primary accounts
+- Medical collections exactly at $500 threshold
+- Multiple foreclosures across credit history
+- Active Chapter 13 with perfect payment history
+
+### CalculateDebtRatios
+- Student loans in deferment with no documented payment
+- Tax lien with payment plan not reflected on credit
+- Alimony ending within 12 months of closing
+- Investment property with negative net rental income
+- HOA dues not yet established for new construction
+
+### CalculateProbabilityOfDefault
+- Input parameters at extreme values (FICO 850, DTI 0%)
+- Missing employment_years for recent graduate
+- Multiple property types requiring dummy variable logic
+- Model coefficients producing PD > 100% or negative
+- Conflicting risk signals (high FICO, high DTI, high LTV)
+
+### DetermineFinalInterestRate
+- Credit score exactly at tier boundary (e.g., 740)
+- Multiple rate adjustments summing to negative rate
+- Cash-out refinance with LTV exactly at 70%
+- Investment property multi-family with maximum adjustments
+- Rate lock expiration during underwriting
+
+### EvaluateCompensatingFactors
+- Reserves exactly at 6-month or 12-month threshold
+- Residual income calculation for high-cost-of-living areas
+- Housing payment history for first-time homebuyers
+- LTV exactly at 70.00% boundary
+- Insufficient points for exception but marginal miss
+
+### OrderPropertyAppraisal
+- Rural property with limited appraiser availability
+- Condominium requiring project review
+- Property address incomplete or invalid
+- Appraisal rush order fee scenarios
+- Property type not matching MLS data
+
+### ConductPropertyValuation
+- No comparable sales within 12 months
+- Subject property is unique/custom construction
+- Property condition exactly at C3/C4 boundary
+- Comparable adjustments exceeding 25% gross
+- Declining market with negative time adjustments
+
+### ValidateAppraisalWithAVM
+- AVM returns no confidence score (insufficient data)
+- Variance exactly at +10.00% or -10.00%
+- Final appraised value below purchase price
+- AVM estimated value significantly higher triggering review
+- Property type not supported by AVM model
+
+### CalculateLoanToValueRatio
+- Appraised value exactly equals purchase price
+- Refinance with no purchase price available
+- LTV exactly at 80.00% MI threshold
+- Requested loan amount exceeds maximum by LTV
+- Combined LTV with subordinate financing
+
+### RenderFinalLoanDecision
+- DTI exactly at 43.00% QM threshold
+- Multiple policy violations requiring decline
+- Approved with conditions but critical condition outstanding
+- Property condition C4 with repair cost estimate unavailable
+- Bankruptcy discharged exactly 4 years prior
+
+### ExecuteFairLendingMonitoring
+- Missing demographic data (applicant declined to provide)
+- Small sample size preventing statistical significance
+- Approved interest rate below base rate (error scenario)
+- Conditions count negative or null
+- Census tract geocoding failure
+
+### TrackLoanPerformanceMetrics
+- Application and decision timestamps in wrong order
+- Funded loan without approved amount
+- Turnaround time exceeding 365 days
+- First pass yield true but conditions count > 0
+- Performance data aggregation across fiscal year boundaries
+
+## 4. Key API Parameters (from SOP and Dependency Graph)
+
+All APIs use parameters that exist in the sample_data. Key parameters mapped:
+
+**Input Parameters** (from sample_data):
+- application_id, application_timestamp, loan_officer_id, processor_id, underwriter_id
+- applicant_name, applicant_ssn, applicant_dob, applicant_address
+- co_applicant_name, co_applicant_ssn
+- employment_status, employer_name, employment_years
+- gross_monthly_income, additional_income_monthly
+- liquid_assets, retirement_accounts
+- requested_loan_amount, loan_purpose, loan_term_months
+- property_address, property_type, property_occupancy, estimated_property_value
+- down_payment_amount
+- credit_consent_signed, credit_consent_timestamp
+- pay_stubs_uploaded, tax_returns_uploaded, bank_statements_uploaded, w2_forms_uploaded
+- document_verification_timestamp, credit_pull_timestamp
+- fico_score_equifax, fico_score_experian, fico_score_transunion
+- derogatory_marks_count, bankruptcy_history
+- total_monthly_debt_obligations
+- appraisal_order_timestamp, appraiser_id, appraisal_company
+- site_inspection_timestamp, property_square_footage, property_condition
+- comparable_properties_count
+
+**Output Parameters** (from sample_data):
+- prequalification_decision, max_loan_amount_prequalified, estimated_interest_rate_prequalification
+- verified_gross_monthly_income
+- debt_to_income_ratio, debt_service_coverage_ratio
+- probability_of_default_score, credit_score_grade
+- compensating_factors_present
+- final_risk_adjusted_interest_rate
+- final_appraised_value, avm_estimated_value
+- appraisal_avm_variance_percent, second_review_triggered
+- loan_to_value_ratio
+- final_decision, final_decision_timestamp
+- approved_loan_amount, approved_interest_rate, approved_loan_term_months
+- conditions_count, decline_reason
+- turnaround_time_days, first_pass_yield
+- funded_status, funding_date, fair_lending_audit_flag
+
+## 5. API Generation Approach
+
+**Strategy**:
+1. Create one API per task identified in the dependency graph
+2. Ensure strict adherence to input/output parameters from sample_data
+3. Sequence APIs according to dependency graph order
+4. Implement comprehensive error handling for edge cases
+5. Validate that each API can process all 20 sample records
+6. Ensure atomic operations - each API performs one distinct function
+7. Map data flow explicitly between dependent APIs
+
+**Sequencing**:
+1. **Tier 1** (No dependencies): ValidateApplicantIdentity, ValidateEmploymentAndIncome, ValidateLiquidAssets
+2. **Tier 2** (Depends on Tier 1): PullCreditReports
+3. **Tier 3** (Depends on Tier 2): CalculateRepresentativeCreditScore
+4. **Tier 4** (Depends on Tier 1-3): ExecutePrequalificationAnalysis
+5. **Tier 5** (Depends on Tier 4): VerifyEmploymentAndIncome, VerifyAssetsAndReserves, OrderPropertyAppraisal
+6. **Tier 6** (Depends on Tier 2-5): AnalyzeCreditHistory
+7. **Tier 7** (Depends on Tier 5-6): CalculateDebtRatios
+8. **Tier 8** (Depends on Tier 7): CalculateProbabilityOfDefault
+9. **Tier 9** (Depends on Tier 8): DetermineFinalInterestRate, EvaluateCompensatingFactors
+10. **Tier 10** (Depends on OrderPropertyAppraisal): ConductPropertyValuation
+11. **Tier 11** (Depends on Tier 10): ValidateAppraisalWithAVM
+12. **Tier 12** (Depends on Tier 11): CalculateLoanToValueRatio
+13. **Tier 13** (Depends on all): RenderFinalLoanDecision
+14. **Tier 14** (Depends on Tier 13): ExecuteFairLendingMonitoring, TrackLoanPerformanceMetrics
+
+## 6. Parameter Source Mapping
+
+Each API parameter sourced from either:
+- **user_input**: Original sample_data fields
+- **other_api**: Response parameters from dependent APIs
+
+Detailed mapping in each API specification below.
+
+## 7. API Sequencing with Dependencies
+
+**Execution Order**:
+1. ValidateApplicantIdentity → outputs verified identity data
+2. ValidateEmploymentAndIncome → outputs preliminary income
+3. ValidateLiquidAssets → outputs preliminary reserves
+4. PullCreditReports (needs ValidateApplicantIdentity) → outputs credit scores and debts
+5. CalculateRepresentativeCreditScore (needs PullCreditReports) → outputs representative score
+6. ExecutePrequalificationAnalysis (needs 2,3,4,5) → outputs prequalification decision
+7. VerifyEmploymentAndIncome (needs 6) → outputs verified income
+8. VerifyAssetsAndReserves (needs 6,7) → outputs verified reserves
+9. OrderPropertyAppraisal (needs 6) → outputs appraisal order details
+10. AnalyzeCreditHistory (needs 4) → outputs detailed credit analysis
+11. CalculateDebtRatios (needs 7,4,6) → outputs DTI and DSCR
+12. CalculateProbabilityOfDefault (needs 5,11,8,10) → outputs PD score and grade
+13. DetermineFinalInterestRate (needs 12,11) → outputs interest rate
+14. EvaluateCompensatingFactors (needs 11,8,10) → outputs compensating factors
+15. ConductPropertyValuation (needs 9) → outputs appraised value
+16. ValidateAppraisalWithAVM (needs 15) → outputs AVM validation
+17. CalculateLoanToValueRatio (needs 16) → outputs LTV ratio
+18. RenderFinalLoanDecision (needs 11,12,13,14,15,17,10) → outputs final decision
+19. ExecuteFairLendingMonitoring (needs 18) → outputs audit flag
+20. TrackLoanPerformanceMetrics (needs 18) → outputs performance metrics
+
+## 8. Error Scenarios and Handling
+
+**Common Error Patterns**:
+- **Validation Errors**: Return 400 Bad Request with specific field errors
+- **Business Rule Violations**: Return 422 Unprocessable Entity with policy explanation
+- **External Service Failures**: Return 503 Service Unavailable with retry guidance
+- **Data Not Found**: Return 404 Not Found for missing application_id
+- **Authorization Failures**: Return 401 Unauthorized for consent issues
+- **Calculation Errors**: Return 500 Internal Server Error with error details
+
+**Specific Scenarios** (documented per API below)
+
+## 9. Sample Data Processing Validation
+
+Each API designed to handle all 20 sample records with varying characteristics:
+- Record 1: Standard full-time W-2, good credit, primary residence
+- Record 2: Self-employed, excellent credit, no co-applicant
+- Record 3: Cash-out refi, moderate credit, derogatory marks
+- Record 4: Condo, marginal credit, high DTI risk
+- Record 5: Townhouse, good credit, single applicant
+- Record 6: Self-employed, excellent credit, high-value property
+- Record 7: Marginal credit, high derogatory marks, DTI challenge
+- Record 8: Refinance, good credit, married couple
+- Record 9: Excellent credit, high-value property, single applicant
+- Record 10: Investment property, moderate credit, DTI challenge
+- Record 11: Self-employed, good credit, married couple
+- Record 12: Excellent credit, high-value property
+- Record 13: Second home, good credit, single applicant
+- Record 14: Marginal credit, high derogatory marks, potential decline
+- Record 15: Self-employed, excellent credit, jumbo loan
+- Record 16: Below minimum credit, bankruptcy history, likely decline
+- Record 17: Excellent credit, married couple, high-value property
+- Record 18: Good credit, single applicant, condo
+- Record 19: Moderate credit, cash-out refi, derogatory marks
+- Record 20: Marginal credit, married couple, townhouse
+
+All APIs must successfully process each record or return appropriate error responses.
+
+</sop_breakdown>
+
+<TOOLS>
+
+<API>
+Name: ValidateApplicantIdentity
+Description: Performs comprehensive Know Your Customer (KYC) verification by validating government-issued identification documents, checking applicant and co-applicant information against OFAC Specially Designated Nationals lists and other government watchlists, validating Social Security Number patterns and authenticity through SSA Consent Based Verification Service when necessary, and ensuring identity documents match application data fields to prevent identity fraud and comply with USA PATRIOT Act Section 326 Customer Identification Program requirements.
+Endpoint: /api/v1/mortgage/identity/validate
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "applicant_name": "string",
+  "applicant_ssn": "string",
+  "applicant_dob": "date",
+  "applicant_address": "string",
+  "co_applicant_name": "string (optional)",
+  "co_applicant_ssn": "string (optional)"
+}
+Response:
+{
+  "application_id": "string",
+  "identity_verification_status": "enum (Verified, Pending, Failed)",
+  "ofac_clearance_status": "boolean",
+  "verified_applicant_name": "string",
+  "verified_applicant_ssn": "string",
+  "verified_applicant_dob": "date",
+  "verification_timestamp": "datetime",
+  "verification_notes": "string"
+}
+Dependencies: None (independent first-tier API)
+Error Scenarios:
+- OFAC Positive Match: Return status 422 with {"error": "OFAC_MATCH", "message": "Applicant matched OFAC SDN list, escalation required", "requires_compliance_review": true}
+- Invalid SSN Pattern: Return status 400 with {"error": "INVALID_SSN", "message": "Social Security Number pattern invalid or in known invalid range"}
+- Missing Required Fields: Return status 400 with {"error": "MISSING_FIELDS", "message": "Required fields missing: applicant_name, applicant_ssn, applicant_dob"}
+- SSA Verification Failed: Return status 503 with {"error": "SSA_UNAVAILABLE", "message": "Social Security Administration verification service unavailable, retry required"}
+- Name Mismatch: Return status 422 with {"error": "NAME_MISMATCH", "message": "Applicant name does not match identification documents"}
+</API>
+
+<API>
+Name: ValidateEmploymentAndIncome
+Description: Analyzes uploaded income documentation including pay stubs, W-2 forms, and tax returns to calculate preliminary gross monthly income, validates employment status and employer information against document data, performs income averaging for self-employed applicants using Schedule C or K-1 distributions with add-backs for non-cash deductions, flags year-over-year income declines exceeding 10% for underwriter attention, and establishes initial income figures for pre-qualification debt-to-income calculations.
+Endpoint: /api/v1/mortgage/income/validate
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "employment_status": "enum (Full-Time, Self-Employed, Part-Time, Retired)",
+  "employer_name": "string (optional)",
+  "employment_years": "float (optional)",
+  "gross_monthly_income": "float",
+  "additional_income_monthly": "float (optional)",
+  "pay_stubs_uploaded": "boolean",
+  "w2_forms_uploaded": "boolean",
+  "tax_returns_uploaded": "boolean (optional)"
+}
+Response:
+{
+  "application_id": "string",
+  "preliminary_gross_monthly_income": "float",
+  "income_validation_status": "enum (Validated, Requires_Review, Insufficient_Documentation)",
+  "income_stability_flag": "boolean",
+  "employment_verification_required": "boolean",
+  "validation_timestamp": "datetime",
+  "validation_notes": "string"
+}
+Dependencies: None (independent first-tier API)
+Error Scenarios:
+- Missing Required Documents: Return status 422 with {"error": "MISSING_DOCUMENTS", "message": "Pay stubs or W-2 forms required for Full-Time employment status"}
+- Self-Employed Missing Tax Returns: Return status 422 with {"error": "MISSING_TAX_RETURNS", "message": "Tax returns required for Self-Employed status"}
+- Income Decline >10%: Return status 200 with income_stability_flag=false and validation_notes indicating decline
+- Negative Income: Return status 422 with {"error": "NEGATIVE_INCOME", "message": "Calculated income is negative, cannot proceed"}
+- Document Parse Failure: Return status 503 with {"error": "DOCUMENT_PARSE_ERROR", "message": "Unable to extract data from uploaded documents"}
+</API>
+
+<API>
+Name: ValidateLiquidAssets
+Description: Reviews uploaded bank statements covering two consecutive months to verify declared liquid assets and retirement accounts, identifies and flags large deposits exceeding 50% of monthly income or cumulative deposits exceeding 100% of monthly income requiring source documentation, calculates available reserves after accounting for down payment and estimated closing costs, determines reserve months by dividing remaining liquid assets by proposed total housing payment, and applies appropriate discount factors to retirement accounts based on applicant age to reflect tax and penalty implications.
+Endpoint: /api/v1/mortgage/assets/validate
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "liquid_assets": "float",
+  "retirement_accounts": "float (optional)",
+  "bank_statements_uploaded": "boolean",
+  "down_payment_amount": "float",
+  "requested_loan_amount": "float",
+  "applicant_dob": "date"
+}
+Response:
+{
+  "application_id": "string",
+  "verified_liquid_assets": "float",
+  "large_deposits_flagged": "boolean",
+  "reserve_months_preliminary": "float",
+  "asset_verification_status": "enum (Verified, Requires_Sourcing, Insufficient)",
+  "validation_timestamp": "datetime",
+  "validation_notes": "string"
+}
+Dependencies: None (independent first-tier API)
+Error Scenarios:
+- Insufficient Assets: Return status 422 with {"error": "INSUFFICIENT_ASSETS", "message": "Liquid assets insufficient to cover down payment and closing costs"}
+- Missing Bank Statements: Return status 422 with {"error": "MISSING_STATEMENTS", "message": "Bank statements required for asset verification"}
+- Large Deposits Detected: Return status 200 with large_deposits_flagged=true and validation_notes detailing deposits requiring sourcing
+- Negative Balance: Return status 422 with {"error": "NEGATIVE_BALANCE", "message": "Bank statements show negative balances"}
+- Age Calculation Error: Return status 400 with {"error": "INVALID_DOB", "message": "Applicant date of birth invalid or future dated"}
+</API>
+
+<API>
+Name: PullCreditReports
+Description: Executes tri-bureau credit report acquisition by transmitting applicant and co-applicant verified identity information to institution's credit bureau API interfaces connected to Equifax, Experian, and TransUnion repositories, retrieves in-file credit reports with FICO scores calculated using mortgage-specific scoring models (FICO Score 2, 5, and 4 respectively), extracts and populates credit score fields for each bureau, analyzes credit report narrative to count derogatory marks including collections, charge-offs, public records, late payments, identifies bankruptcy history and foreclosure history, and calculates total monthly debt obligations by summing all recurring payment obligations shown on tradelines.
+Endpoint: /api/v1/mortgage/credit/pull
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "verified_applicant_name": "string",
+  "verified_applicant_ssn": "string",
+  "verified_applicant_dob": "date",
+  "applicant_address": "string",
+  "co_applicant_name": "string (optional)",
+  "co_applicant_ssn": "string (optional)",
+  "credit_consent_signed": "boolean",
+  "credit_consent_timestamp": "datetime"
+}
+Response:
+{
+  "application_id": "string",
+  "credit_pull_timestamp": "datetime",
+  "fico_score_equifax": "integer",
+  "fico_score_experian": "integer",
+  "fico_score_transunion": "integer",
+  "derogatory_marks_count": "integer",
+  "bankruptcy_history": "boolean",
+  "total_monthly_debt_obligations": "float",
+  "credit_report_summary": "string"
+}
+Dependencies: ValidateApplicantIdentity (requires verified_applicant_name, verified_applicant_ssn, verified_applicant_dob)
+Error Scenarios:
+- Credit Consent Not Signed: Return status 403 with {"error": "NO_CONSENT", "message": "Credit consent not signed or timestamp missing"}
+- Insufficient Credit File: Return status 422 with {"error": "INSUFFICIENT_FILE", "message": "One or more bureaus returned insufficient credit file", "bureaus_with_scores": ["Experian"]}
+- Credit Freeze: Return status 422 with {"error": "CREDIT_FREEZE", "message": "Credit report frozen, applicant must unfreeze to proceed"}
+- Bureau API Unavailable: Return status 503 with {"error": "BUREAU_UNAVAILABLE", "message": "Credit bureau API temporarily unavailable, retry in 5 minutes"}
+- Invalid SSN for Credit Pull: Return status 400 with {"error": "INVALID_CREDENTIALS", "message": "SSN or name does not match bureau records"}
+</API>
+
+<API>
+Name: CalculateRepresentativeCreditScore
+Description: Applies the FICO Score Tri-Merge Middle Score Methodology by ranking the three bureau credit scores (fico_score_equifax, fico_score_experian, fico_score_transunion) in ascending order and selecting the median value as the representative score, handling cases where only two scores are available by selecting the lower value, or using a single score if only one bureau provides data, and for co-applicant scenarios, determining each individual's representative score then selecting the lower of the two as the qualifying credit score used for all subsequent underwriting policy evaluation, pricing decisions, and mortgage insurance premium calculations.
+Endpoint: /api/v1/mortgage/credit/calculate-representative-score
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "fico_score_equifax": "integer (optional)",
+  "fico_score_experian": "integer (optional)",
+  "fico_score_transunion": "integer (optional)",
+  "co_applicant_fico_equifax": "integer (optional)",
+  "co_applicant_fico_experian": "integer (optional)",
+  "co_applicant_fico_transunion": "integer (optional)"
+}
+Response:
+{
+  "application_id": "string",
+  "representative_credit_score": "integer",
+  "credit_score_methodology_applied": "string",
+  "credit_score_calculation_timestamp": "datetime"
+}
+Dependencies: PullCreditReports (requires fico_score_equifax, fico_score_experian, fico_score_transunion)
+Error Scenarios:
+- No Credit Scores Available: Return status 422 with {"error": "NO_SCORES", "message": "No credit scores available from any bureau"}
+- All Bureaus Insufficient: Return status 422 with {"error": "INSUFFICIENT_CREDIT_HISTORY", "message": "All three bureaus returned insufficient file, cannot determine representative score"}
+- Invalid Score Values: Return status 400 with {"error": "INVALID_SCORES", "message": "Credit score values must be between 300 and 850"}
+- Co-Applicant Scores Missing: Return status 400 with {"error": "INCOMPLETE_CO_APPLICANT_DATA", "message": "Co-applicant exists but credit scores not provided"}
+</API>
+
+<API>
+Name: ExecutePrequalificationAnalysis
+Description: Performs systematic pre-qualification screening by comparing representative credit score against institutional minimum threshold of 620 for conventional products, calculates preliminary debt-to-income ratio using estimated housing payment derived from requested loan amount and proxy interest rate based on credit score tier plus total monthly debt obligations divided by gross monthly income, evaluates calculated DTI against policy thresholds to generate prequalification_decision classification of Qualified (DTI ≤43%), Conditionally Qualified (DTI 43.01-50%), or Not Qualified (DTI >50% or FICO <620), calculates maximum loan capacity by solving DTI equation for loan amount that achieves 43% ratio, determines estimated interest rate by applying credit score band and property type pricing adjustments to current market base rates.
+Endpoint: /api/v1/mortgage/prequalification/analyze
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "representative_credit_score": "integer",
+  "preliminary_gross_monthly_income": "float",
+  "total_monthly_debt_obligations": "float",
+  "requested_loan_amount": "float",
+  "loan_term_months": "integer",
+  "estimated_property_value": "float",
+  "down_payment_amount": "float",
+  "property_type": "enum (Single Family, Condo, Townhouse, Multi-Family)",
+  "property_occupancy": "enum (Primary Residence, Investment Property, Second Home)",
+  "loan_purpose": "enum (Purchase, Refinance, Cash-Out Refinance)"
+}
+Response:
+{
+  "application_id": "string",
+  "prequalification_decision": "enum (Qualified, Conditionally Qualified, Not Qualified)",
+  "max_loan_amount_prequalified": "float",
+  "estimated_interest_rate_prequalification": "float",
+  "preliminary_dti_ratio": "float",
+  "preliminary_ltv_ratio": "float",
+  "prequalification_timestamp": "datetime"
+}
+Dependencies: CalculateRepresentativeCreditScore (requires representative_credit_score), ValidateEmploymentAndIncome (requires preliminary_gross_monthly_income), PullCreditReports (requires total_monthly_debt_obligations)
+Error Scenarios:
+- Credit Score Below Minimum: Return status 200 with prequalification_decision="Not Qualified" and notes indicating FICO below 620
+- DTI Exceeds Maximum: Return status 200 with prequalification_decision="Not Qualified" and preliminary_dti_ratio >50%
+- Zero or Negative Income: Return status 400 with {"error": "INVALID_INCOME", "message": "Gross monthly income must be positive"}
+- Loan Amount Exceeds Capacity: Return status 200 with max_loan_amount_prequalified less than requested_loan_amount
+- Invalid Property Type: Return status 400 with {"error": "INVALID_PROPERTY_TYPE", "message": "Property type must be Single Family, Condo, Townhouse, or Multi-Family"}
+</API>
+
+<API>
+Name: VerifyEmploymentAndIncome
+Description: Conducts comprehensive income verification through Verification of Employment (VOE) telephone calls or written requests to employers using independently verified contact information to confirm current employment status, job title, hire date, base salary or hourly wage, and employment continuity expectations for Full-Time employed applicants, performs detailed tax return analysis for Self-Employed applicants by examining IRS Form 1040 with Schedule C, E, K-1 distributions over two years to calculate adjusted income with add-backs for depreciation and depletion while subtracting one-time income events, applies two-year income averaging methodology, flags year-over-year income declines exceeding 10% requiring documented justification, verifies bonus and commission income through employer confirmation of continuation likelihood.
+Endpoint: /api/v1/mortgage/income/verify
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "prequalification_decision": "enum",
+  "employment_status": "enum (Full-Time, Self-Employed, Part-Time, Retired)",
+  "employer_name": "string (optional)",
+  "employment_years": "float (optional)",
+  "gross_monthly_income": "float",
+  "additional_income_monthly": "float (optional)",
+  "pay_stubs_uploaded": "boolean",
+  "w2_forms_uploaded": "boolean",
+  "tax_returns_uploaded": "boolean (optional)"
+}
+Response:
+{
+  "application_id": "string",
+  "verified_gross_monthly_income": "float",
+  "income_verification_method": "string",
+  "employment_stability_rating": "enum (Stable, Marginal, Unstable)",
+  "income_trending_direction": "enum (Increasing, Stable, Declining)",
+  "document_verification_timestamp": "datetime"
+}
+Dependencies: ExecutePrequalificationAnalysis (requires prequalification_decision as state gate)
+Error Scenarios:
+- Prequalification Not Qualified: Return status 422 with {"error": "PREQUALIFICATION_FAILED", "message": "Cannot proceed to verification for Not Qualified applications"}
+- Employer Unreachable: Return status 503 with {"error": "VOE_FAILED", "message": "Unable to reach employer for verification, manual follow-up required"}
+- Income Variance >20%: Return status 422 with {"error": "INCOME_DISCREPANCY", "message": "Verified income differs from stated income by more than 20%"}
+- Self-Employed Income Declining: Return status 200 with income_trending_direction="Declining" and employment_stability_rating="Marginal"
+- Missing Tax Returns for Self-Employed: Return status 422 with {"error": "MISSING_TAX_RETURNS", "message": "Tax returns required but not uploaded for Self-Employed status"}
+</API>
+
+<API>
+Name: VerifyAssetsAndReserves
+Description: Executes comprehensive asset verification by examining two consecutive months of bank statements for all checking, savings, and money market accounts to confirm ending balances match or exceed declared liquid_assets, investigates all individual deposits exceeding 50% of monthly income or cumulative deposits exceeding 100% of monthly income to identify potential undisclosed borrowed funds requiring source documentation such as asset transfer statements or gift letters with donor verification, applies appropriate discount factors to retirement_accounts (25% for under age 59.5, 10% for age 59.5 and above) to reflect tax and penalty implications, calculates net available assets after subtracting down_payment_amount and estimated closing costs, determines reserve months by dividing remaining assets by proposed total housing payment.
+Endpoint: /api/v1/mortgage/assets/verify
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "prequalification_decision": "enum",
+  "liquid_assets": "float",
+  "retirement_accounts": "float (optional)",
+  "bank_statements_uploaded": "boolean",
+  "down_payment_amount": "float",
+  "requested_loan_amount": "float",
+  "applicant_dob": "date",
+  "verified_gross_monthly_income": "float",
+  "property_type": "enum",
+  "property_occupancy": "enum"
+}
+Response:
+{
+  "application_id": "string",
+  "verified_liquid_assets_final": "float",
+  "verified_retirement_accounts_discounted": "float",
+  "reserve_months_calculated": "float",
+  "large_deposit_explanations_required": "boolean",
+  "reserve_compensating_factor_points": "integer",
+  "asset_verification_complete_timestamp": "datetime"
+}
+Dependencies: ExecutePrequalificationAnalysis (requires prequalification_decision as state gate), VerifyEmploymentAndIncome (requires verified_gross_monthly_income)
+Error Scenarios:
+- Insufficient Reserves: Return status 200 with reserve_months_calculated below policy minimum and reserve_compensating_factor_points=0
+- Large Deposits Unsourced: Return status 422 with {"error": "DEPOSITS_REQUIRE_SOURCING", "message": "Large deposits detected requiring source documentation", "large_deposit_explanations_required": true}
+- Bank Statements Incomplete: Return status 422 with {"error": "INCOMPLETE_STATEMENTS", "message": "Bank statements must cover two consecutive months"}
+- Assets Below Down Payment: Return status 422 with {"error": "INSUFFICIENT_FUNDS", "message": "Verified assets insufficient to cover down payment and closing costs"}
+- Retirement Account Discount Error: Return status 500 with {"error": "CALCULATION_ERROR", "message": "Unable to apply retirement account discount factor"}
+</API>
+
+<API>
+Name: AnalyzeCreditHistory
+Description: Conducts forensic analysis of tri-bureau credit report narrative sections by examining each tradeline's 24-month payment history to identify and count derogatory marks including 30-day late payments (1 point), 60-day late payments (2 points), 90+ day late payments (3 points), collections accounts with distinction between medical collections under $500 (may be disregarded per GSE guidelines) and non-medical collections requiring payment or acceptance justification, charge-offs, public records including tax liens and civil judgments, reviews foreclosure and short sale history to verify compliance with institutional seasoning requirements, validates bankruptcy_history and ensures sufficient time has elapsed since discharge, analyzes credit inquiry patterns in preceding 90 days to identify potential undisclosed debt.
+Endpoint: /api/v1/mortgage/credit/analyze-history
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "credit_report_full_data": "object",
+  "derogatory_marks_count": "integer",
+  "bankruptcy_history": "boolean"
+}
+Response:
+{
+  "application_id": "string",
+  "detailed_derogatory_marks_count": "integer",
+  "payment_history_quality": "enum (Excellent, Good, Fair, Poor)",
+  "bankruptcy_seasoning_compliant": "boolean",
+  "foreclosure_history_compliant": "boolean",
+  "credit_depth_rating": "enum (Deep, Moderate, Thin, Insufficient)",
+  "undisclosed_debt_risk_flag": "boolean",
+  "credit_analysis_timestamp": "datetime"
+}
+Dependencies: PullCreditReports (requires credit_report_full_data, derogatory_marks_count, bankruptcy_history)
+Error Scenarios:
+- Bankruptcy Within 24 Months: Return status 200 with bankruptcy_seasoning_compliant=false
+- Active Foreclosure: Return status 200 with foreclosure_history_compliant=false
+- Excessive Recent Inquiries: Return status 200 with undisclosed_debt_risk_flag=true
+- Credit Report Parse Error: Return status 500 with {"error": "PARSE_ERROR", "message": "Unable to parse credit report data structure"}
+- Missing Tradeline Data: Return status 422 with {"error": "INCOMPLETE_CREDIT_DATA", "message": "Credit report missing required tradeline information"}
+</API>
+
+<API>
+Name: CalculateDebtRatios
+Description: Computes precise debt-to-income ratio and debt service coverage ratio using verified financial data by first calculating exact monthly housing payment using mortgage payment formula P=L[c(1+c)^n]/[(1+c)^n-1] where P is principal and interest, L is approved loan amount, c is monthly interest rate, n is loan term in months, then adding property taxes obtained from tax assessor records, hazard insurance quoted by carrier, mortgage insurance premium calculated from MI rate tables based on LTV and credit score if LTV exceeds 80%, and HOA dues from association documents, summing this total housing payment with total_monthly_debt_obligations from credit report, dividing by verified_gross_monthly_income and multiplying by 100 to produce debt_to_income_ratio, and calculating debt_service_coverage_ratio as verified_gross_monthly_income divided by sum of housing payment plus debt obligations.
+Endpoint: /api/v1/mortgage/underwriting/calculate-debt-ratios
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "verified_gross_monthly_income": "float",
+  "total_monthly_debt_obligations": "float",
+  "requested_loan_amount": "float",
+  "loan_term_months": "integer",
+  "estimated_interest_rate_prequalification": "float",
+  "property_address": "string",
+  "estimated_property_value": "float",
+  "representative_credit_score": "integer",
+  "preliminary_ltv_ratio": "float"
+}
+Response:
+{
+  "application_id": "string",
+  "debt_to_income_ratio": "float",
+  "debt_service_coverage_ratio": "float",
+  "monthly_housing_payment_total": "float",
+  "dti_policy_compliance_status": "enum (Compliant, Marginal, Non-Compliant)",
+  "dscr_policy_compliance_status": "enum (Compliant, Marginal, Non-Compliant)",
+  "debt_ratio_calculation_timestamp": "datetime"
+}
+Dependencies: VerifyEmploymentAndIncome (requires verified_gross_monthly_income), PullCreditReports (requires total_monthly_debt_obligations), ExecutePrequalificationAnalysis (requires estimated_interest_rate_prequalification)
+Error Scenarios:
+- DTI Exceeds 50%: Return status 200 with dti_policy_compliance_status="Non-Compliant"
+- DSCR Below 1.0: Return status 200 with dscr_policy_compliance_status="Non-Compliant"
+- Zero Income: Return status 400 with {"error": "ZERO_INCOME", "message": "Cannot calculate DTI with zero income"}
+- Property Tax Data Unavailable: Return status 503 with {"error": "TAX_DATA_UNAVAILABLE", "message": "Unable to retrieve property tax information"}
+- Mortgage Insurance Calculation Error: Return status 500 with {"error": "MI_CALCULATION_ERROR", "message": "Unable to determine mortgage insurance premium"}
+</API>
+
+<API>
+Name: CalculateProbabilityOfDefault
+Description: Executes institution's proprietary multivariate logistic regression model to quantify default risk by computing probability_of_default_score as PD = 1/(1+e^-z) where z = β₀ + β₁(FICO) + β₂(DTI) + β₃(LTV) + β₄(Reserves) + β₅(Employment_Years) + β₆(Property_Type_Indicator) + β₇(Occupancy_Indicator) + β₈(Loan_Purpose_Indicator) + β₉(Derogatory_Marks) with institution-calibrated beta coefficients derived from historical loan performance data, maps the PD score to credit_score_grade using thresholds of ≤2.0% for Grade A, 2.01-4.0% for Grade B, 4.01-7.0% for Grade C, and >7.0% for Grade D requiring special review.
+Endpoint: /api/v1/mortgage/underwriting/calculate-probability-default
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "representative_credit_score": "integer",
+  "debt_to_income_ratio": "float",
+  "preliminary_ltv_ratio": "float",
+  "reserve_months_calculated": "float",
+  "employment_years": "float",
+  "property_type": "enum",
+  "property_occupancy": "enum",
+  "loan_purpose": "enum",
+  "detailed_derogatory_marks_count": "integer"
+}
+Response:
+{
+  "application_id": "string",
+  "probability_of_default_score": "float",
+  "credit_score_grade": "enum (A, B, C, D)",
+  "pd_model_version": "string",
+  "pd_calculation_timestamp": "datetime",
+  "model_input_parameters": "object"
+}
+Dependencies: CalculateRepresentativeCreditScore (requires representative_credit_score), CalculateDebtRatios (requires debt_to_income_ratio), VerifyAssetsAndReserves (requires reserve_months_calculated), AnalyzeCreditHistory (requires detailed_derogatory_marks_count)
+Error Scenarios:
+- PD Score Exceeds 100%: Return status 500 with {"error": "MODEL_ERROR", "message": "Probability calculation exceeded valid range"}
+- Missing Required Parameters: Return status 400 with {"error": "INCOMPLETE_DATA", "message": "All model input parameters required"}
+- Grade D Assignment: Return status 200 with credit_score_grade="D" indicating special review required
+- Model Coefficient Error: Return status 500 with {"error": "MODEL_CALIBRATION_ERROR", "message": "Unable to apply model coefficients"}
+- Extreme Parameter Values: Return status 422 with {"error": "PARAMETER_OUT_OF_RANGE", "message": "One or more parameters outside model training range"}
+</API>
+
+<API>
+Name: DetermineFinalInterestRate
+Description: Applies multi-dimensional risk-based pricing matrix to calculate final_risk_adjusted_interest_rate by retrieving base interest rate indexed to current 30-year Freddie Mac Primary Mortgage Market Survey rate or institution's cost of funds benchmark, then applying additive pricing adjustments across multiple risk dimensions including credit score adjustments ranging from -0.500% for FICO ≥780 to +2.000% for FICO 620-639, LTV ratio adjustments ranging from +0.000% for LTV ≤60% to +1.000% for LTV 90.01-95%, property type adjustments, occupancy adjustments, loan purpose adjustments, and DTI adjustments, summing all applicable adjustments algebraically to produce final interest rate expressed to three decimal places.
+Endpoint: /api/v1/mortgage/pricing/determine-interest-rate
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "credit_score_grade": "enum",
+  "representative_credit_score": "integer",
+  "preliminary_ltv_ratio": "float",
+  "property_type": "enum",
+  "property_occupancy": "enum",
+  "loan_purpose": "enum",
+  "debt_to_income_ratio": "float",
+  "loan_term_months": "integer"
+}
+Response:
+{
+  "application_id": "string",
+  "final_risk_adjusted_interest_rate": "float",
+  "base_interest_rate": "float",
+  "pricing_adjustments_detail": "object",
+  "rate_calculation_timestamp": "datetime",
+  "rate_lock_eligible": "boolean"
+}
+Dependencies: CalculateProbabilityOfDefault (requires credit_score_grade), CalculateDebtRatios (requires debt_to_income_ratio)
+Error Scenarios:
+- Credit Score at Tier Boundary: Return status 200 with note in pricing_adjustments_detail about boundary treatment
+- Negative Final Rate: Return status 422 with {"error": "INVALID_RATE", "message": "Calculated rate is negative, pricing matrix error"}
+- Rate Exceeds Maximum: Return status 422 with {"error": "RATE_TOO_HIGH", "message": "Calculated rate exceeds institutional maximum"}
+- Pricing Matrix Unavailable: Return status 503 with {"error": "PRICING_UNAVAILABLE", "message": "Pricing matrix service temporarily unavailable"}
+- Invalid Adjustment Combination: Return status 500 with {"error": "PRICING_ERROR", "message": "Unable to calculate valid rate with given parameters"}
+</API>
+
+<API>
+Name: EvaluateCompensatingFactors
+Description: Conducts systematic compensating factors analysis for applications with elevated risk indicators by evaluating and scoring positive offsetting characteristics including reserve months (3 points for >12 months, 2 points for 6-12 months, 1 point for 3-6 months), housing payment history assessment (2 points for 12+ months of equal or higher payment without 30-day lates), residual income analysis (2 points for residual exceeding 120% of regional HUD median income after all obligations), LTV position evaluation (2 points for LTV ≤70% representing substantial equity), employment stability assessment (1 point for employment_years >5.0 in same field), and credit depth review (1 point for 3+ revolving accounts with limits >$5,000 and utilization <30%).
+Endpoint: /api/v1/mortgage/underwriting/evaluate-compensating-factors
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "debt_to_income_ratio": "float",
+  "reserve_months_calculated": "float",
+  "payment_history_quality": "enum",
+  "verified_gross_monthly_income": "float",
+  "monthly_housing_payment_total": "float",
+  "total_monthly_debt_obligations": "float",
+  "preliminary_ltv_ratio": "float",
+  "employment_years": "float",
+  "credit_depth_rating": "enum",
+  "applicant_address": "string"
+}
+Response:
+{
+  "application_id": "string",
+  "compensating_factors_present": "boolean",
+  "total_compensating_factor_points": "integer",
+  "compensating_factors_detail": "object",
+  "exception_approval_eligible": "boolean",
+  "compensating_factor_analysis_timestamp": "datetime"
+}
+Dependencies: CalculateDebtRatios (requires debt_to_income_ratio, monthly_housing_payment_total), VerifyAssetsAndReserves (requires reserve_months_calculated), AnalyzeCreditHistory (requires payment_history_quality, credit_depth_rating)
+Error Scenarios:
+- DTI Below Threshold: Return status 200 with compensating_factors_present=false and note that analysis not required
+- Insufficient Points for Exception: Return status 200 with exception_approval_eligible=false
+- HUD Data Unavailable: Return status 503 with {"error": "HUD_DATA_UNAVAILABLE", "message": "Unable to retrieve regional median income data"}
+- Invalid LTV for Equity Factor: Return status 400 with {"error": "INVALID_LTV", "message": "LTV ratio outside valid range for compensating factor evaluation"}
+- Calculation Error: Return status 500 with {"error": "SCORING_ERROR", "message": "Unable to calculate compensating factor points"}
+</API>
+
+<API>
+Name: OrderPropertyAppraisal
+Description: Initiates property valuation process by transmitting appraisal order to independent Appraisal Management Company or internal appraisal desk with comprehensive property information including property_address, property_type classification, property_occupancy status, estimated_property_value from purchase contract or applicant estimate, specific appraisal form requirements (URAR Form 1004 for single-family, Form 1073 for condos, Form 1025 for 2-4 units), recording appraisal_order_timestamp to initiate 10-business-day completion expectation per service level agreement.
+Endpoint: /api/v1/mortgage/appraisal/order
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "prequalification_decision": "enum",
+  "property_address": "string",
+  "property_type": "enum",
+  "property_occupancy": "enum",
+  "estimated_property_value": "float",
+  "requested_loan_amount": "float",
+  "loan_purpose": "enum"
+}
+Response:
+{
+  "application_id": "string",
+  "appraisal_order_timestamp": "datetime",
+  "appraiser_id": "string",
+  "appraisal_company": "string",
+  "appraisal_order_number": "string",
+  "expected_completion_date": "date"
+}
+Dependencies: ExecutePrequalificationAnalysis (requires prequalification_decision as state gate)
+Error Scenarios:
+- Not Qualified Application: Return status 422 with {"error": "PREQUALIFICATION_REQUIRED", "message": "Cannot order appraisal for Not Qualified applications"}
+- Invalid Property Address: Return status 400 with {"error": "INVALID_ADDRESS", "message": "Property address cannot be validated"}
+- AMC Service Unavailable: Return status 503 with {"error": "AMC_UNAVAILABLE", "message": "Appraisal Management Company service temporarily unavailable"}
+- No Appraiser Available: Return status 422 with {"error": "NO_APPRAISER", "message": "No appraiser available with geographic competency for this property"}
+- Duplicate Order: Return status 409 with {"error": "ORDER_EXISTS", "message": "Appraisal order already exists for this application"}
+</API>
+
+<API>
+Name: ConductPropertyValuation
+Description: Executes comprehensive property appraisal by licensed appraiser conducting site inspection to measure property_square_footage using external perimeter methodology, assessing property_condition using standardized C1-C5 rating scale, photographing interior rooms and exterior elevations for report documentation, identifying and analyzing minimum three closed sales of comparable properties within 12 months and 1 mile radius matching subject property characteristics, constructing adjustment grid quantifying dollar differences between subject and each comparable, reconciling adjusted comparable values into final opinion of market value, recording site_inspection_timestamp and comparable_properties_count, completing URAR Form 1004 with all required sections.
+Endpoint: /api/v1/mortgage/appraisal/conduct-valuation
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "appraisal_order_number": "string",
+  "property_address": "string",
+  "property_type": "enum",
+  "estimated_property_value": "float"
+}
+Response:
+{
+  "application_id": "string",
+  "site_inspection_timestamp": "datetime",
+  "property_square_footage": "integer",
+  "property_condition": "enum (C1, C2, C3, C4, C5)",
+  "comparable_properties_count": "integer",
+  "final_appraised_value": "float",
+  "appraisal_completion_timestamp": "datetime"
+}
+Dependencies: OrderPropertyAppraisal (requires appraisal_order_number)
+Error Scenarios:
+- No Comparable Sales: Return status 422 with {"error": "INSUFFICIENT_COMPS", "message": "Unable to identify sufficient comparable sales within required timeframe and distance"}
+- Property Condition C5: Return status 200 with property_condition="C5" indicating substantial deficiencies
+- Adjustment Exceeds Limit: Return status 422 with {"error": "EXCESSIVE_ADJUSTMENTS", "message": "Comparable adjustments exceed 25% gross limit"}
+- Access Denied: Return status 503 with {"error": "ACCESS_DENIED", "message": "Unable to access property for inspection"}
+- Appraised Value Significantly Low: Return status 200 with final_appraised_value substantially below estimated_property_value
+</API>
+
+<API>
+Name: ValidateAppraisalWithAVM
+Description: Executes automated appraisal quality control by submitting property_address to institution's Automated Valuation Model platform which returns avm_estimated_value derived from statistical analysis of historical sales data, property characteristics from public records, hedonic pricing models, and market condition indices along with confidence score and forecast standard deviation, calculates appraisal_avm_variance_percent using formula [(final_appraised_value - avm_estimated_value) / avm_estimated_value] × 100, compares absolute variance value against 10.00% tolerance threshold, sets second_review_triggered Boolean to true if variance exceeds ±10.00%.
+Endpoint: /api/v1/mortgage/appraisal/validate-with-avm
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "property_address": "string",
+  "final_appraised_value": "float",
+  "property_type": "enum"
+}
+Response:
+{
+  "application_id": "string",
+  "avm_estimated_value": "float",
+  "appraisal_avm_variance_percent": "float",
+  "second_review_triggered": "boolean",
+  "avm_confidence_score": "float",
+  "avm_validation_timestamp": "datetime"
+}
+Dependencies: ConductPropertyValuation (requires final_appraised_value)
+Error Scenarios:
+- AVM Data Unavailable: Return status 503 with {"error": "AVM_UNAVAILABLE", "message": "Automated Valuation Model service unavailable for this property"}
+- Variance Exceeds Tolerance: Return status 200 with second_review_triggered=true
+- Property Type Not Supported: Return status 422 with {"error": "UNSUPPORTED_PROPERTY", "message": "AVM does not support this property type"}
+- Low Confidence Score: Return status 200 with avm_confidence_score below threshold and note in response
+- Address Not Found: Return status 404 with {"error": "ADDRESS_NOT_FOUND", "message": "Property address not found in AVM database"}
+</API>
+
+<API>
+Name: CalculateLoanToValueRatio
+Description: Computes definitive loan-to-value ratio using validated final_appraised_value and requested_loan_amount by applying formula LTV = (requested_loan_amount / MIN(final_appraised_value, purchase_price)) × 100 for purchase transactions where the lesser of appraised value or contract price establishes collateral value per prudential lending standards, or LTV = (requested_loan_amount / final_appraised_value) × 100 for refinance transactions where no purchase price exists, expressing result as percentage with precision to two decimal places, comparing calculated loan_to_value_ratio against institutional policy thresholds stratified by credit score tier, property type, and occupancy status.
+Endpoint: /api/v1/mortgage/underwriting/calculate-ltv
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "final_appraised_value": "float",
+  "requested_loan_amount": "float",
+  "estimated_property_value": "float",
+  "loan_purpose": "enum",
+  "representative_credit_score": "integer",
+  "property_type": "enum",
+  "property_occupancy": "enum"
+}
+Response:
+{
+  "application_id": "string",
+  "loan_to_value_ratio": "float",
+  "ltv_policy_compliance_status": "enum (Compliant, Marginal, Non-Compliant)",
+  "mortgage_insurance_required": "boolean",
+  "maximum_loan_amount_by_ltv": "float",
+  "loan_amount_adjustment_required": "boolean",
+  "ltv_calculation_timestamp": "datetime"
+}
+Dependencies: ValidateAppraisalWithAVM (requires validated final_appraised_value)
+Error Scenarios:
+- LTV Exceeds Maximum: Return status 200 with ltv_policy_compliance_status="Non-Compliant" and loan_amount_adjustment_required=true
+- Appraised Value Below Purchase Price: Return status 200 with maximum_loan_amount_by_ltv less than requested_loan_amount
+- LTV Exactly at 80%: Return status 200 with mortgage_insurance_required=false (boundary condition)
+- Zero Appraised Value: Return status 400 with {"error": "INVALID_APPRAISAL", "message": "Appraised value must be positive"}
+- Loan Amount Exceeds Value: Return status 422 with {"error": "EXCESSIVE_LTV", "message": "Requested loan amount exceeds property value"}
+</API>
+
+<API>
+Name: RenderFinalLoanDecision
+Description: Synthesizes all underwriting findings to render ultimate credit decision by executing comprehensive decision tree logic that evaluates debt_to_income_ratio against 43.00% QM threshold and 50.00% absolute maximum, loan_to_value_ratio against credit-score-stratified policy thresholds, credit_score_grade for A/B acceptability versus C requiring compensating factors or D requiring decline, property_condition for C3 or better acceptability versus C4/C5 requiring repairs or decline, probability_of_default_score for acceptable risk levels, compensating_factors_present Boolean for marginal DTI or LTV cases, and bankruptcy/foreclosure seasoning compliance.
+Endpoint: /api/v1/mortgage/underwriting/render-final-decision
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "debt_to_income_ratio": "float",
+  "debt_service_coverage_ratio": "float",
+  "loan_to_value_ratio": "float",
+  "probability_of_default_score": "float",
+  "credit_score_grade": "enum",
+  "final_risk_adjusted_interest_rate": "float",
+  "compensating_factors_present": "boolean",
+  "property_condition": "enum",
+  "bankruptcy_seasoning_compliant": "boolean",
+  "foreclosure_history_compliant": "boolean",
+  "verified_gross_monthly_income": "float",
+  "requested_loan_amount": "float",
+  "loan_term_months": "integer",
+  "application_timestamp": "datetime"
+}
+Response:
+{
+  "application_id": "string",
+  "final_decision": "enum (Approved, Approved with Conditions, Declined)",
+  "final_decision_timestamp": "datetime",
+  "approved_loan_amount": "float",
+  "approved_interest_rate": "float",
+  "approved_loan_term_months": "integer",
+  "conditions_count": "integer",
+  "decline_reason": "string",
+  "first_pass_yield": "boolean"
+}
+Dependencies: CalculateDebtRatios (requires debt_to_income_ratio, debt_service_coverage_ratio), CalculateProbabilityOfDefault (requires probability_of_default_score, credit_score_grade), DetermineFinalInterestRate (requires final_risk_adjusted_interest_rate), CalculateLoanToValueRatio (requires loan_to_value_ratio), EvaluateCompensatingFactors (requires compensating_factors_present), AnalyzeCreditHistory (requires bankruptcy_seasoning_compliant, foreclosure_history_compliant), ConductPropertyValuation (requires property_condition)
+Error Scenarios:
+- DTI Exceeds 50% Without Compensating Factors: Return status 200 with final_decision="Declined" and decline_reason="Debt-to-income ratio of X% exceeds maximum permissible threshold"
+- Credit Score Grade D: Return status 200 with final_decision="Declined" and decline_reason="Probability of default exceeds acceptable risk threshold"
+- Property Condition C5: Return status 200 with final_decision="Declined" and decline_reason="Property condition unacceptable for financing"
+- Bankruptcy Not Seasoned: Return status 200 with final_decision="Declined" and decline_reason="Bankruptcy discharge insufficient seasoning"
+- Multiple Policy Violations: Return status 200 with final_decision="Declined" and comprehensive decline_reason listing all violations
+</API>
+
+<API>
+Name: ExecuteFairLendingMonitoring
+Description: Conducts automated fair lending compliance surveillance by capturing demographic information collected per Home Mortgage Disclosure Act requirements including applicant ethnicity, race, sex, and Census tract geocode derived from property_address, performing statistical analysis comparing approval rates across demographic cohorts after controlling for legitimate risk factors (credit score, DTI, LTV) to identify statistically significant disparities indicating potential disparate treatment or disparate impact violations of Equal Credit Opportunity Act, analyzing final_risk_adjusted_interest_rate spreads across demographic groups to detect pricing discrimination after risk adjustment, evaluating conditions_count patterns to identify inconsistent application of underwriting standards across protected classes.
+Endpoint: /api/v1/mortgage/compliance/fair-lending-monitor
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "final_decision": "enum",
+  "approved_interest_rate": "float (optional)",
+  "conditions_count": "integer (optional)",
+  "representative_credit_score": "integer",
+  "debt_to_income_ratio": "float",
+  "loan_to_value_ratio": "float",
+  "property_address": "string"
+}
+Response:
+{
+  "application_id": "string",
+  "fair_lending_audit_flag": "boolean",
+  "demographic_data_complete": "boolean",
+  "pricing_variance_alert": "boolean",
+  "decisioning_consistency_alert": "boolean",
+  "fair_lending_monitoring_timestamp": "datetime"
+}
+Dependencies: RenderFinalLoanDecision (requires final_decision)
+Error Scenarios:
+- Missing Demographic Data: Return status 200 with demographic_data_complete=false
+- Pricing Anomaly Detected: Return status 200 with pricing_variance_alert=true
+- Geocoding Failed: Return status 503 with {"error": "GEOCODING_FAILED", "message": "Unable to determine Census tract from property address"}
+- Statistical Analysis Error: Return status 500 with {"error": "ANALYSIS_ERROR", "message": "Fair lending statistical analysis failed"}
+- HMDA Database Unavailable: Return status 503 with {"error": "HMDA_UNAVAILABLE", "message": "HMDA database temporarily unavailable"}
+</API>
+
+<API>
+Name: TrackLoanPerformanceMetrics
+Description: Calculates operational and business performance metrics by computing turnaround_time_days as calendar days between application_timestamp and final_decision_timestamp to measure process efficiency against institutional target of ≤25 days for W-2 wage earner applications and ≤35 days for self-employed applications, records first_pass_yield Boolean based on conditions_count equaling zero (true for clean approval, false if conditions exist) to measure operational quality and file preparation completeness, tracks funded_status Boolean indicating whether approved loan ultimately closed and was disbursed, records funding_date when loan funds were advanced.
+Endpoint: /api/v1/mortgage/performance/track-metrics
+Method: POST
+Request Body:
+{
+  "application_id": "string",
+  "application_timestamp": "datetime",
+  "final_decision": "enum",
+  "final_decision_timestamp": "datetime",
+  "conditions_count": "integer",
+  "approved_loan_amount": "float (optional)"
+}
+Response:
+{
+  "application_id": "string",
+  "turnaround_time_days": "integer",
+  "first_pass_yield": "boolean",
+  "funded_status": "boolean",
+  "funding_date": "date",
+  "performance_metrics_calculated_timestamp": "datetime"
+}
+Dependencies: RenderFinalLoanDecision (requires final_decision_timestamp)
+Error Scenarios:
+- Negative Turnaround Time: Return status 400 with {"error": "INVALID_TIMESTAMPS", "message": "Decision timestamp precedes application timestamp"}
+- Turnaround Exceeds 365 Days: Return status 200 with note indicating excessive processing time
+- First Pass Yield Inconsistency: Return status 200 with first_pass_yield=false when conditions_count > 0
+- Missing Decision Timestamp: Return status 400 with {"error": "MISSING_TIMESTAMP", "message": "Final decision timestamp required"}
+- Funded Without Approval: Return status 422 with {"error": "INVALID_STATE", "message": "Loan cannot be funded without approved status"}
+</API>
+
+</TOOLS>
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件

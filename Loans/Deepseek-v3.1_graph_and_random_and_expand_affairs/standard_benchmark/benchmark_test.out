@@ -1,0 +1,4603 @@
+
+================================================================================
+Processing Application: MLN-2025-068712
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 16100.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 175000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 816
+  fico_score_experian: 809
+  fico_score_transunion: 823
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 816
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Conditionally Qualified
+  preliminary_debt_to_income_ratio: 48.5
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 477176.91
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 15697.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 51.8
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 49.75
+  debt_service_coverage_ratio: 2.01
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 0.5
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.75
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-068712-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 792850.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 848349.5
+  appraisal_avm_variance_percent: -6.54
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 79.62
+
+API 18: RenderFinalLoanDecision
+  final_decision: Approved with Conditions
+  approved_loan_amount: 625000.0
+  approved_interest_rate: 6.75
+  conditions_count: 1
+  turnaround_time_days: 166
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: False
+  funded_status: True
+  funding_date: 2026-02-01
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-068712, prequalification_decision:Conditionally Qualified, max_loan_amount_prequalified:477176.91, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:15697.0, debt_to_income_ratio:49.75, debt_service_coverage_ratio:2.01, probability_of_default_score:0.5, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:6.75, final_appraised_value:792850.0, avm_estimated_value:848349.5, appraisal_avm_variance_percent:-6.54, second_review_triggered:False, loan_to_value_ratio:79.62, final_decision:Approved with Conditions, approved_loan_amount:625000.0, approved_interest_rate:6.75, approved_loan_term_months:360, conditions_count:1, turnaround_time_days:166, first_pass_yield:False, funded_status:True, funding_date:2026-02-01, fair_lending_audit_flag:False, final_result:Conditionally Qualified477176.916.00.5True792850.0
+
+
+================================================================================
+Processing Application: MLN-2025-063032
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 16900.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 192000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 814
+  fico_score_experian: 821
+  fico_score_transunion: 817
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 817
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 52.55
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 455813.68
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 16468.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 29.0
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 53.19
+  debt_service_coverage_ratio: 1.88
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 19.1
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063032-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 877850.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 921742.5
+  appraisal_avm_variance_percent: -4.76
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 82.59
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 162
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063032, prequalification_decision:Not Qualified, max_loan_amount_prequalified:455813.68, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:16468.0, debt_to_income_ratio:53.19, debt_service_coverage_ratio:1.88, probability_of_default_score:19.1, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:6.875, final_appraised_value:877850.0, avm_estimated_value:921742.5, appraisal_avm_variance_percent:-4.76, second_review_triggered:False, loan_to_value_ratio:82.59, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:162, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified455813.686.019.1True877850.0
+
+
+================================================================================
+Processing Application: MLN-2025-067094
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 8750.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 52000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 695
+  fico_score_experian: 702
+  fico_score_transunion: 698
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 698
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 70.87
+  estimated_interest_rate_prequalification: 8.25
+  max_loan_amount_prequalified: 443.7
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 8727.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 4.08
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 73.34
+  debt_service_coverage_ratio: 1.36
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.91
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 9.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 4
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-067094-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 380000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 395200.0
+  appraisal_avm_variance_percent: -3.85
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 85.53
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 173
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-067094, prequalification_decision:Not Qualified, max_loan_amount_prequalified:443.7, estimated_interest_rate_prequalification:8.25, verified_gross_monthly_income:8727.5, debt_to_income_ratio:73.34, debt_service_coverage_ratio:1.36, probability_of_default_score:99.91, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:9.625, final_appraised_value:380000.0, avm_estimated_value:395200.0, appraisal_avm_variance_percent:-3.85, second_review_triggered:False, loan_to_value_ratio:85.53, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:173, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified443.78.2599.91False380000.0
+
+
+================================================================================
+Processing Application: MLN-2025-063002
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10100.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 58000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 712
+  fico_score_experian: 718
+  fico_score_transunion: 715
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 715
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 54.29
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 153639.39
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 9846.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 18.08
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 57.72
+  debt_service_coverage_ratio: 1.73
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 93.76
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063002-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 375000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 345000.0
+  appraisal_avm_variance_percent: 8.7
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 86.67
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 192
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063002, prequalification_decision:Not Qualified, max_loan_amount_prequalified:153639.39, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:9846.5, debt_to_income_ratio:57.72, debt_service_coverage_ratio:1.73, probability_of_default_score:93.76, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:8.125, final_appraised_value:375000.0, avm_estimated_value:345000.0, appraisal_avm_variance_percent:8.7, second_review_triggered:False, loan_to_value_ratio:86.67, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:192, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified153639.397.093.76True375000.0
+
+
+================================================================================
+Processing Application: MLN-2025-053286
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 14500.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 172000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 786
+  fico_score_experian: 793
+  fico_score_transunion: 789
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 789
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Qualified
+  preliminary_debt_to_income_ratio: 42.76
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 430465.27
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 14104.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 119.53
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 43.96
+  debt_service_coverage_ratio: 2.27
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 0.0
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.0
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 11
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053286-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 591700.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 591700.0
+  appraisal_avm_variance_percent: 0.0
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 71.83
+
+API 18: RenderFinalLoanDecision
+  final_decision: Approved with Conditions
+  approved_loan_amount: 425000.0
+  approved_interest_rate: 7.0
+  conditions_count: 1
+  turnaround_time_days: 217
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: False
+  funded_status: True
+  funding_date: 2026-02-01
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053286, prequalification_decision:Qualified, max_loan_amount_prequalified:430465.27, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:14104.0, debt_to_income_ratio:43.96, debt_service_coverage_ratio:2.27, probability_of_default_score:0.0, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:7.0, final_appraised_value:591700.0, avm_estimated_value:591700.0, appraisal_avm_variance_percent:0.0, second_review_triggered:False, loan_to_value_ratio:71.83, final_decision:Approved with Conditions, approved_loan_amount:425000.0, approved_interest_rate:7.0, approved_loan_term_months:360, conditions_count:1, turnaround_time_days:217, first_pass_yield:False, funded_status:True, funding_date:2026-02-01, fair_lending_audit_flag:False, final_result:Qualified430465.276.50.0True591700.0
+
+
+================================================================================
+Processing Application: MLN-2025-051456
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10500.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 72000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 766
+  fico_score_experian: 772
+  fico_score_transunion: 769
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 769
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 65.46
+  estimated_interest_rate_prequalification: 6.375
+  max_loan_amount_prequalified: 147092.79
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10450.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 43.61
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 65.78
+  debt_service_coverage_ratio: 1.52
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 11.85
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.75
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 7
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-051456-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 546000.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 578760.0
+  appraisal_avm_variance_percent: -5.66
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 76.92
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 245
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-051456, prequalification_decision:Not Qualified, max_loan_amount_prequalified:147092.79, estimated_interest_rate_prequalification:6.375, verified_gross_monthly_income:10450.0, debt_to_income_ratio:65.78, debt_service_coverage_ratio:1.52, probability_of_default_score:11.85, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:6.75, final_appraised_value:546000.0, avm_estimated_value:578760.0, appraisal_avm_variance_percent:-5.66, second_review_triggered:False, loan_to_value_ratio:76.92, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:245, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified147092.796.37511.85True546000.0
+
+
+================================================================================
+Processing Application: MLN-2025-068476
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 9500.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 68000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 682
+  fico_score_experian: 689
+  fico_score_transunion: 685
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 685
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 95.97
+  estimated_interest_rate_prequalification: 7.25
+  max_loan_amount_prequalified: -102612.77
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 9465.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 4.52
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Fair
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 98.43
+  debt_service_coverage_ratio: 1.02
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.99
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.375
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 1
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-068476-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 681600.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 627072.0
+  appraisal_avm_variance_percent: 8.7
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 93.16
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 167
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-068476, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-102612.77, estimated_interest_rate_prequalification:7.25, verified_gross_monthly_income:9465.0, debt_to_income_ratio:98.43, debt_service_coverage_ratio:1.02, probability_of_default_score:99.99, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:8.375, final_appraised_value:681600.0, avm_estimated_value:627072.0, appraisal_avm_variance_percent:8.7, second_review_triggered:False, loan_to_value_ratio:93.16, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:167, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-102612.777.2599.99False681600.0
+
+
+================================================================================
+Processing Application: MLN-2025-068019
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 9100.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 59000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 706
+  fico_score_experian: 713
+  fico_score_transunion: 709
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 709
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 66.65
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 41534.99
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 9075.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 16.45
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 70.71
+  debt_service_coverage_ratio: 1.41
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 98.68
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.5
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-068019-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 409050.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 384507.0
+  appraisal_avm_variance_percent: 6.38
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 90.12
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 169
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-068019, prequalification_decision:Not Qualified, max_loan_amount_prequalified:41534.99, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:9075.0, debt_to_income_ratio:70.71, debt_service_coverage_ratio:1.41, probability_of_default_score:98.68, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:8.5, final_appraised_value:409050.0, avm_estimated_value:384507.0, appraisal_avm_variance_percent:6.38, second_review_triggered:False, loan_to_value_ratio:90.12, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:169, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified41534.997.098.68True409050.0
+
+
+================================================================================
+Processing Application: MLN-2025-067786
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 12100.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 98000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 741
+  fico_score_experian: 748
+  fico_score_transunion: 744
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 744
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 62.71
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 146562.4
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 12050.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 46.85
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 62.97
+  debt_service_coverage_ratio: 1.59
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 12.87
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.0
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-067786-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 648450.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 641965.5
+  appraisal_avm_variance_percent: 1.01
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 77.88
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 170
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-067786, prequalification_decision:Not Qualified, max_loan_amount_prequalified:146562.4, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:12050.0, debt_to_income_ratio:62.97, debt_service_coverage_ratio:1.59, probability_of_default_score:12.87, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:8.0, final_appraised_value:648450.0, avm_estimated_value:641965.5, appraisal_avm_variance_percent:1.01, second_review_triggered:False, loan_to_value_ratio:77.88, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:170, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified146562.47.012.87True648450.0
+
+
+================================================================================
+Processing Application: MLN-2025-053269
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 13300.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 125000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 782
+  fico_score_experian: 789
+  fico_score_transunion: 785
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 785
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 50.19
+  estimated_interest_rate_prequalification: 6.125
+  max_loan_amount_prequalified: 327622.14
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 13230.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 68.39
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 50.46
+  debt_service_coverage_ratio: 1.98
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 0.07
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053269-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 632400.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 632400.0
+  appraisal_avm_variance_percent: 0.0
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 76.69
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 226
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053269, prequalification_decision:Not Qualified, max_loan_amount_prequalified:327622.14, estimated_interest_rate_prequalification:6.125, verified_gross_monthly_income:13230.0, debt_to_income_ratio:50.46, debt_service_coverage_ratio:1.98, probability_of_default_score:0.07, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:6.875, final_appraised_value:632400.0, avm_estimated_value:632400.0, appraisal_avm_variance_percent:0.0, second_review_triggered:False, loan_to_value_ratio:76.69, final_decision:Declined, conditions_count:0, decline_reason:DTI exceeds absolute maximum of 50%, turnaround_time_days:226, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified327622.146.1250.07True632400.0
+
+
+================================================================================
+Processing Application: MLN-2025-061387
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10500.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 68000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 749
+  fico_score_experian: 756
+  fico_score_transunion: 752
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 752
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 64.49
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 68030.65
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10465.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 20.94
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 64.7
+  debt_service_coverage_ratio: 1.55
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 89.73
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-061387-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 494700.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 455124.0
+  appraisal_avm_variance_percent: 8.7
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 87.63
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 199
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-061387, prequalification_decision:Not Qualified, max_loan_amount_prequalified:68030.65, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:10465.0, debt_to_income_ratio:64.7, debt_service_coverage_ratio:1.55, probability_of_default_score:89.73, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:494700.0, avm_estimated_value:455124.0, appraisal_avm_variance_percent:8.7, second_review_triggered:False, loan_to_value_ratio:87.63, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:199, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified68030.656.589.73True494700.0
+
+
+================================================================================
+Processing Application: MLN-2025-052348
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 6700.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 22000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 612
+  fico_score_experian: 608
+  fico_score_transunion: 615
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 612
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: None
+  estimated_interest_rate_prequalification: None
+  max_loan_amount_prequalified: None
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 6690.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 6.16
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Poor
+  credit_depth_rating: Insufficient
+
+API 10: CalculateDebtRatios
+警告: estimated_interest_rate_prequalification 为 None，使用默认值 5.0%
+Error processing MLN-2025-052348: '>' not supported between instances of 'NoneType' and 'float'
+
+================================================================================
+Processing Application: MLN-2025-067561
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 8300.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 42000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 626
+  fico_score_experian: 633
+  fico_score_transunion: 629
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 629
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 73.06
+  estimated_interest_rate_prequalification: 8.875
+  max_loan_amount_prequalified: -3529.63
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 8280.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 7.89
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Poor
+  credit_depth_rating: Insufficient
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 73.86
+  debt_service_coverage_ratio: 1.35
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.95
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 10.0
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 2
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-067561-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 362250.0
+  property_condition: C3
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 344137.5
+  appraisal_avm_variance_percent: 5.26
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.86
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 171
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-067561, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-3529.63, estimated_interest_rate_prequalification:8.875, verified_gross_monthly_income:8280.0, debt_to_income_ratio:73.86, debt_service_coverage_ratio:1.35, probability_of_default_score:99.95, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:10.0, final_appraised_value:362250.0, avm_estimated_value:344137.5, appraisal_avm_variance_percent:5.26, second_review_triggered:False, loan_to_value_ratio:89.86, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:171, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-3529.638.87599.95False362250.0
+
+
+================================================================================
+Processing Application: MLN-2025-053276
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 7900.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 38000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 682
+  fico_score_experian: 689
+  fico_score_transunion: 685
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 685
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 68.6
+  estimated_interest_rate_prequalification: 8.25
+  max_loan_amount_prequalified: 5756.94
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 7880.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 3.55
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Fair
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 71.32
+  debt_service_coverage_ratio: 1.4
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.92
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 9.375
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 2
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053276-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 328300.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 351281.0
+  appraisal_avm_variance_percent: -6.54
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 83.76
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 222
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053276, prequalification_decision:Not Qualified, max_loan_amount_prequalified:5756.94, estimated_interest_rate_prequalification:8.25, verified_gross_monthly_income:7880.0, debt_to_income_ratio:71.32, debt_service_coverage_ratio:1.4, probability_of_default_score:99.92, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:9.375, final_appraised_value:328300.0, avm_estimated_value:351281.0, appraisal_avm_variance_percent:-6.54, second_review_triggered:False, loan_to_value_ratio:83.76, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:222, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified5756.948.2599.92False328300.0
+
+
+================================================================================
+Processing Application: MLN-2025-063692
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 9950.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 71000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 761
+  fico_score_experian: 768
+  fico_score_transunion: 764
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 764
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 58.35
+  estimated_interest_rate_prequalification: 6.25
+  max_loan_amount_prequalified: 147010.13
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 9922.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 17.63
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 57.84
+  debt_service_coverage_ratio: 1.73
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 84.05
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063692-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 451050.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 460071.0
+  appraisal_avm_variance_percent: -1.96
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 87.57
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 188
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063692, prequalification_decision:Not Qualified, max_loan_amount_prequalified:147010.13, estimated_interest_rate_prequalification:6.25, verified_gross_monthly_income:9922.5, debt_to_income_ratio:57.84, debt_service_coverage_ratio:1.73, probability_of_default_score:84.05, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.125, final_appraised_value:451050.0, avm_estimated_value:460071.0, appraisal_avm_variance_percent:-1.96, second_review_triggered:False, loan_to_value_ratio:87.57, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:188, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified147010.136.2584.05True451050.0
+
+
+================================================================================
+Processing Application: MLN-2025-056773
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10800.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 72000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 731
+  fico_score_experian: 738
+  fico_score_transunion: 734
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 734
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 50.52
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 222931.17
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10527.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 22.14
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 51.83
+  debt_service_coverage_ratio: 1.93
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 77.46
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-056773-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 383150.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 390813.0
+  appraisal_avm_variance_percent: -1.96
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 90.04
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 221
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-056773, prequalification_decision:Not Qualified, max_loan_amount_prequalified:222931.17, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:10527.5, debt_to_income_ratio:51.83, debt_service_coverage_ratio:1.93, probability_of_default_score:77.46, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:8.125, final_appraised_value:383150.0, avm_estimated_value:390813.0, appraisal_avm_variance_percent:-1.96, second_review_triggered:False, loan_to_value_ratio:90.04, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:221, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified222931.177.077.46True383150.0
+
+
+================================================================================
+Processing Application: MLN-2025-053277
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 13800.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 95000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 727
+  fico_score_experian: 734
+  fico_score_transunion: 730
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 730
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 64.23
+  estimated_interest_rate_prequalification: 6.625
+  max_loan_amount_prequalified: 137537.34
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 13725.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 12.97
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 64.58
+  debt_service_coverage_ratio: 1.55
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 97.95
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.75
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 7
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053277-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 668250.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 721710.0
+  appraisal_avm_variance_percent: -7.41
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.04
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 222
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053277, prequalification_decision:Not Qualified, max_loan_amount_prequalified:137537.34, estimated_interest_rate_prequalification:6.625, verified_gross_monthly_income:13725.0, debt_to_income_ratio:64.58, debt_service_coverage_ratio:1.55, probability_of_default_score:97.95, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.75, final_appraised_value:668250.0, avm_estimated_value:721710.0, appraisal_avm_variance_percent:-7.41, second_review_triggered:False, loan_to_value_ratio:89.04, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:222, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified137537.346.62597.95True668250.0
+
+
+================================================================================
+Processing Application: MLN-2025-053285
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 11500.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 68000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 709
+  fico_score_experian: 716
+  fico_score_transunion: 712
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 712
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 67.12
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 78159.94
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 11455.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 12.86
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 69.12
+  debt_service_coverage_ratio: 1.45
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.04
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053285-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 532800.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 527472.0
+  appraisal_avm_variance_percent: 1.01
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 92.91
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 218
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053285, prequalification_decision:Not Qualified, max_loan_amount_prequalified:78159.94, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:11455.0, debt_to_income_ratio:69.12, debt_service_coverage_ratio:1.45, probability_of_default_score:99.04, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:8.125, final_appraised_value:532800.0, avm_estimated_value:527472.0, appraisal_avm_variance_percent:1.01, second_review_triggered:False, loan_to_value_ratio:92.91, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:218, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified78159.947.099.04True532800.0
+
+
+================================================================================
+Processing Application: MLN-2025-054481
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 11750.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 92000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 757
+  fico_score_experian: 764
+  fico_score_transunion: 760
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 760
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 64.72
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 131249.06
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 11707.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 19.52
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 66.66
+  debt_service_coverage_ratio: 1.5
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 91.44
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 7
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-054481-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 624000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 655200.0
+  appraisal_avm_variance_percent: -4.76
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.17
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 232
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-054481, prequalification_decision:Not Qualified, max_loan_amount_prequalified:131249.06, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:11707.5, debt_to_income_ratio:66.66, debt_service_coverage_ratio:1.5, probability_of_default_score:91.44, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:624000.0, avm_estimated_value:655200.0, appraisal_avm_variance_percent:-4.76, second_review_triggered:False, loan_to_value_ratio:89.17, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:232, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified131249.066.591.44True624000.0
+
+
+================================================================================
+Processing Application: MLN-2025-054963
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 12650.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 108000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 745
+  fico_score_experian: 739
+  fico_score_transunion: 752
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 745
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 53.88
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 228141.84
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 12602.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 68.03
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 54.08
+  debt_service_coverage_ratio: 1.85
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 0.24
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.0
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-054963-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 591600.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 556104.0
+  appraisal_avm_variance_percent: 6.38
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 73.53
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 229
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-054963, prequalification_decision:Not Qualified, max_loan_amount_prequalified:228141.84, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:12602.5, debt_to_income_ratio:54.08, debt_service_coverage_ratio:1.85, probability_of_default_score:0.24, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:8.0, final_appraised_value:591600.0, avm_estimated_value:556104.0, appraisal_avm_variance_percent:6.38, second_review_triggered:False, loan_to_value_ratio:73.53, final_decision:Declined, conditions_count:0, decline_reason:DTI exceeds absolute maximum of 50%, turnaround_time_days:229, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified228141.847.00.24True591600.0
+
+
+================================================================================
+Processing Application: MLN-2025-063029
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 7050.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 28000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 634
+  fico_score_experian: 640
+  fico_score_transunion: 637
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 637
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 72.13
+  estimated_interest_rate_prequalification: 8.875
+  max_loan_amount_prequalified: -18088.05
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 7037.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 3.98
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Poor
+  credit_depth_rating: Insufficient
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 72.82
+  debt_service_coverage_ratio: 1.37
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.97
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 10.375
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 1
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063029-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 278250.0
+  property_condition: C3
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 283815.0
+  appraisal_avm_variance_percent: -1.96
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 90.57
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 165
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063029, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-18088.05, estimated_interest_rate_prequalification:8.875, verified_gross_monthly_income:7037.5, debt_to_income_ratio:72.82, debt_service_coverage_ratio:1.37, probability_of_default_score:99.97, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:10.375, final_appraised_value:278250.0, avm_estimated_value:283815.0, appraisal_avm_variance_percent:-1.96, second_review_triggered:False, loan_to_value_ratio:90.57, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:165, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-18088.058.87599.97False278250.0
+
+
+================================================================================
+Processing Application: MLN-2025-063026
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 11000.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 98000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 727
+  fico_score_experian: 734
+  fico_score_transunion: 730
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 730
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 59.73
+  estimated_interest_rate_prequalification: 7.125
+  max_loan_amount_prequalified: 151769.61
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10965.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 58.0
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.93
+  debt_service_coverage_ratio: 1.67
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 1.91
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063026-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 581400.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 575586.0
+  appraisal_avm_variance_percent: 1.01
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 73.1
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 168
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063026, prequalification_decision:Not Qualified, max_loan_amount_prequalified:151769.61, estimated_interest_rate_prequalification:7.125, verified_gross_monthly_income:10965.0, debt_to_income_ratio:59.93, debt_service_coverage_ratio:1.67, probability_of_default_score:1.91, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:8.125, final_appraised_value:581400.0, avm_estimated_value:575586.0, appraisal_avm_variance_percent:1.01, second_review_triggered:False, loan_to_value_ratio:73.1, final_decision:Declined, conditions_count:0, decline_reason:DTI exceeds absolute maximum of 50%, turnaround_time_days:168, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified151769.617.1251.91True581400.0
+
+
+================================================================================
+Processing Application: MLN-2025-053266
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10450.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 72000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 736
+  fico_score_experian: 743
+  fico_score_transunion: 739
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 739
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 51.85
+  estimated_interest_rate_prequalification: 6.625
+  max_loan_amount_prequalified: 170646.25
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10417.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 37.0
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 52.01
+  debt_service_coverage_ratio: 1.92
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 23.74
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.75
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053266-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 361350.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 350509.5
+  appraisal_avm_variance_percent: 3.09
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 87.17
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 227
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053266, prequalification_decision:Not Qualified, max_loan_amount_prequalified:170646.25, estimated_interest_rate_prequalification:6.625, verified_gross_monthly_income:10417.5, debt_to_income_ratio:52.01, debt_service_coverage_ratio:1.92, probability_of_default_score:23.74, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.75, final_appraised_value:361350.0, avm_estimated_value:350509.5, appraisal_avm_variance_percent:3.09, second_review_triggered:False, loan_to_value_ratio:87.17, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:227, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified170646.256.62523.74True361350.0
+
+
+================================================================================
+Processing Application: MLN-2025-057492
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 20000.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 285000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 841
+  fico_score_experian: 835
+  fico_score_transunion: 847
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 841
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 56.75
+  estimated_interest_rate_prequalification: 7.25
+  max_loan_amount_prequalified: 491991.6
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 19428.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 58.17
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.45
+  debt_service_coverage_ratio: 1.68
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 0.66
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.25
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-057492-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 1136250.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 1215787.5
+  appraisal_avm_variance_percent: -6.54
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 79.56
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 217
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-057492, prequalification_decision:Not Qualified, max_loan_amount_prequalified:491991.6, estimated_interest_rate_prequalification:7.25, verified_gross_monthly_income:19428.0, debt_to_income_ratio:59.45, debt_service_coverage_ratio:1.68, probability_of_default_score:0.66, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:8.25, final_appraised_value:1136250.0, avm_estimated_value:1215787.5, appraisal_avm_variance_percent:-6.54, second_review_triggered:False, loan_to_value_ratio:79.56, final_decision:Declined, conditions_count:0, decline_reason:DTI exceeds absolute maximum of 50%, turnaround_time_days:217, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified491991.67.250.66True1136250.0
+
+
+================================================================================
+Processing Application: MLN-2025-053252
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 15000.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 105000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 749
+  fico_score_experian: 756
+  fico_score_transunion: 752
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 752
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 59.28
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 238634.65
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 14910.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 7.64
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.64
+  debt_service_coverage_ratio: 1.68
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 97.61
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053252-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 696000.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 696000.0
+  appraisal_avm_variance_percent: 0.0
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.8
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 234
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053252, prequalification_decision:Not Qualified, max_loan_amount_prequalified:238634.65, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:14910.0, debt_to_income_ratio:59.64, debt_service_coverage_ratio:1.68, probability_of_default_score:97.61, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:696000.0, avm_estimated_value:696000.0, appraisal_avm_variance_percent:0.0, second_review_triggered:False, loan_to_value_ratio:89.8, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:234, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified238634.656.597.61True696000.0
+
+
+================================================================================
+Processing Application: MLN-2025-061524
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 11500.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 125000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 781
+  fico_score_experian: 788
+  fico_score_transunion: 784
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 784
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 59.51
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 228226.53
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 11455.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 34.89
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.75
+  debt_service_coverage_ratio: 1.67
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 24.6
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-061524-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 609600.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 566928.0
+  appraisal_avm_variance_percent: 7.53
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.4
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 198
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-061524, prequalification_decision:Not Qualified, max_loan_amount_prequalified:228226.53, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:11455.0, debt_to_income_ratio:59.75, debt_service_coverage_ratio:1.67, probability_of_default_score:24.6, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.125, final_appraised_value:609600.0, avm_estimated_value:566928.0, appraisal_avm_variance_percent:7.53, second_review_triggered:False, loan_to_value_ratio:89.4, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:198, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified228226.536.024.6True609600.0
+
+
+================================================================================
+Processing Application: MLN-2025-068241
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10350.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 75000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 729
+  fico_score_experian: 736
+  fico_score_transunion: 732
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 732
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 66.51
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 59258.76
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10317.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 17.94
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 66.03
+  debt_service_coverage_ratio: 1.51
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 94.7
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-068241-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 515000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 489250.0
+  appraisal_avm_variance_percent: 5.26
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 85.0
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 168
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-068241, prequalification_decision:Not Qualified, max_loan_amount_prequalified:59258.76, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:10317.5, debt_to_income_ratio:66.03, debt_service_coverage_ratio:1.51, probability_of_default_score:94.7, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.875, final_appraised_value:515000.0, avm_estimated_value:489250.0, appraisal_avm_variance_percent:5.26, second_review_triggered:False, loan_to_value_ratio:85.0, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:168, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified59258.767.094.7True515000.0
+
+
+================================================================================
+Processing Application: MLN-2025-065493
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 11050.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 87000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 746
+  fico_score_experian: 739
+  fico_score_transunion: 753
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 746
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 62.37
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 116324.51
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 11012.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 21.18
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 62.58
+  debt_service_coverage_ratio: 1.6
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 86.93
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-065493-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 556500.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 562065.0
+  appraisal_avm_variance_percent: -0.99
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 85.85
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 180
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-065493, prequalification_decision:Not Qualified, max_loan_amount_prequalified:116324.51, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:11012.5, debt_to_income_ratio:62.58, debt_service_coverage_ratio:1.6, probability_of_default_score:86.93, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:556500.0, avm_estimated_value:562065.0, appraisal_avm_variance_percent:-0.99, second_review_triggered:False, loan_to_value_ratio:85.85, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:180, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified116324.516.586.93True556500.0
+
+
+================================================================================
+Processing Application: MLN-2025-065278
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 7400.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 31000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 649
+  fico_score_experian: 656
+  fico_score_transunion: 652
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 652
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 70.76
+  estimated_interest_rate_prequalification: 7.875
+  max_loan_amount_prequalified: -13343.55
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 7385.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 10.7
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Fair
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 71.52
+  debt_service_coverage_ratio: 1.4
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.87
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 9.375
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 2
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-065278-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 282150.0
+  property_condition: C3
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 301900.5
+  appraisal_avm_variance_percent: -6.54
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 95.69
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 181
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-065278, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-13343.55, estimated_interest_rate_prequalification:7.875, verified_gross_monthly_income:7385.0, debt_to_income_ratio:71.52, debt_service_coverage_ratio:1.4, probability_of_default_score:99.87, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:9.375, final_appraised_value:282150.0, avm_estimated_value:301900.5, appraisal_avm_variance_percent:-6.54, second_review_triggered:False, loan_to_value_ratio:95.69, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:181, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-13343.557.87599.87False282150.0
+
+
+================================================================================
+Processing Application: MLN-2025-063001
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10500.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 78000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 748
+  fico_score_experian: 755
+  fico_score_transunion: 751
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 751
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 63.58
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 93146.62
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10465.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 13.55
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 63.79
+  debt_service_coverage_ratio: 1.57
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 96.08
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063001-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 504900.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 545292.0
+  appraisal_avm_variance_percent: -7.41
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 86.16
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 193
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063001, prequalification_decision:Not Qualified, max_loan_amount_prequalified:93146.62, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:10465.0, debt_to_income_ratio:63.79, debt_service_coverage_ratio:1.57, probability_of_default_score:96.08, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:504900.0, avm_estimated_value:545292.0, appraisal_avm_variance_percent:-7.41, second_review_triggered:False, loan_to_value_ratio:86.16, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:193, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified93146.626.596.08True504900.0
+
+
+================================================================================
+Processing Application: MLN-2025-057439
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10650.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 68000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 753
+  fico_score_experian: 747
+  fico_score_transunion: 760
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 753
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 57.89
+  estimated_interest_rate_prequalification: 6.75
+  max_loan_amount_prequalified: 150439.85
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10612.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 19.34
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.98
+  debt_service_coverage_ratio: 1.67
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 89.33
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 7
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-057439-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 453200.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 475860.0
+  appraisal_avm_variance_percent: -4.76
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.77
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 218
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-057439, prequalification_decision:Not Qualified, max_loan_amount_prequalified:150439.85, estimated_interest_rate_prequalification:6.75, verified_gross_monthly_income:10612.5, debt_to_income_ratio:59.98, debt_service_coverage_ratio:1.67, probability_of_default_score:89.33, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.875, final_appraised_value:453200.0, avm_estimated_value:475860.0, appraisal_avm_variance_percent:-4.76, second_review_triggered:False, loan_to_value_ratio:89.77, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:218, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified150439.856.7589.33True453200.0
+
+
+================================================================================
+Processing Application: MLN-2025-062391
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 7150.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 28000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 658
+  fico_score_experian: 665
+  fico_score_transunion: 661
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 661
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 71.23
+  estimated_interest_rate_prequalification: 7.625
+  max_loan_amount_prequalified: -20203.63
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 7137.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 8.89
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Fair
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 74.78
+  debt_service_coverage_ratio: 1.34
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.92
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 9.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 2
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-062391-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 294000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 273420.0
+  appraisal_avm_variance_percent: 7.53
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 94.64
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 194
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-062391, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-20203.63, estimated_interest_rate_prequalification:7.625, verified_gross_monthly_income:7137.5, debt_to_income_ratio:74.78, debt_service_coverage_ratio:1.34, probability_of_default_score:99.92, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:9.125, final_appraised_value:294000.0, avm_estimated_value:273420.0, appraisal_avm_variance_percent:7.53, second_review_triggered:False, loan_to_value_ratio:94.64, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:194, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-20203.637.62599.92False294000.0
+
+
+================================================================================
+Processing Application: MLN-2025-060043
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 8900.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 52000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 675
+  fico_score_experian: 681
+  fico_score_transunion: 678
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 678
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 71.33
+  estimated_interest_rate_prequalification: 7.75
+  max_loan_amount_prequalified: 3012.7
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 8870.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 15.03
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Fair
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 72.24
+  debt_service_coverage_ratio: 1.38
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.44
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 4
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-060043-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 395000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 426600.0
+  appraisal_avm_variance_percent: -7.41
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.87
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 205
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-060043, prequalification_decision:Not Qualified, max_loan_amount_prequalified:3012.7, estimated_interest_rate_prequalification:7.75, verified_gross_monthly_income:8870.0, debt_to_income_ratio:72.24, debt_service_coverage_ratio:1.38, probability_of_default_score:99.44, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:8.875, final_appraised_value:395000.0, avm_estimated_value:426600.0, appraisal_avm_variance_percent:-7.41, second_review_triggered:False, loan_to_value_ratio:89.87, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:205, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified3012.77.7599.44False395000.0
+
+
+================================================================================
+Processing Application: MLN-2025-062175
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 14100.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 142000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 807
+  fico_score_experian: 814
+  fico_score_transunion: 810
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 810
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Conditionally Qualified
+  preliminary_debt_to_income_ratio: 46.45
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 478914.32
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 13752.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 33.29
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 47.62
+  debt_service_coverage_ratio: 2.1
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 8.68
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.75
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-062175-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 686000.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 672280.0
+  appraisal_avm_variance_percent: 2.04
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 81.63
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 195
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-062175, prequalification_decision:Conditionally Qualified, max_loan_amount_prequalified:478914.32, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:13752.5, debt_to_income_ratio:47.62, debt_service_coverage_ratio:2.1, probability_of_default_score:8.68, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:6.75, final_appraised_value:686000.0, avm_estimated_value:672280.0, appraisal_avm_variance_percent:2.04, second_review_triggered:False, loan_to_value_ratio:81.63, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval, turnaround_time_days:195, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Conditionally Qualified478914.326.08.68True686000.0
+
+
+================================================================================
+Processing Application: MLN-2025-063020
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 9400.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 58000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 697
+  fico_score_experian: 704
+  fico_score_transunion: 700
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 700
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 59.87
+  estimated_interest_rate_prequalification: 6.75
+  max_loan_amount_prequalified: 90502.89
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 9370.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 13.57
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.47
+  debt_service_coverage_ratio: 1.68
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 97.44
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063020-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 379200.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 352656.0
+  appraisal_avm_variance_percent: 7.53
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 88.34
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 174
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063020, prequalification_decision:Not Qualified, max_loan_amount_prequalified:90502.89, estimated_interest_rate_prequalification:6.75, verified_gross_monthly_income:9370.0, debt_to_income_ratio:59.47, debt_service_coverage_ratio:1.68, probability_of_default_score:97.44, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:379200.0, avm_estimated_value:352656.0, appraisal_avm_variance_percent:7.53, second_review_triggered:False, loan_to_value_ratio:88.34, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:174, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified90502.896.7597.44True379200.0
+
+
+================================================================================
+Processing Application: MLN-2025-059174
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 7950.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 35000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 636
+  fico_score_experian: 642
+  fico_score_transunion: 639
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 639
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 73.36
+  estimated_interest_rate_prequalification: 8.875
+  max_loan_amount_prequalified: -8358.0
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 7927.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 12.59
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Poor
+  credit_depth_rating: Insufficient
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 74.19
+  debt_service_coverage_ratio: 1.35
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.91
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 10.375
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 3
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-059174-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 310000.0
+  property_condition: C3
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 328600.0
+  appraisal_avm_variance_percent: -5.66
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 95.16
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 209
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-059174, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-8358.0, estimated_interest_rate_prequalification:8.875, verified_gross_monthly_income:7927.5, debt_to_income_ratio:74.19, debt_service_coverage_ratio:1.35, probability_of_default_score:99.91, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:10.375, final_appraised_value:310000.0, avm_estimated_value:328600.0, appraisal_avm_variance_percent:-5.66, second_review_triggered:False, loan_to_value_ratio:95.16, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:209, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-8358.08.87599.91False310000.0
+
+
+================================================================================
+Processing Application: MLN-2025-055187
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 11600.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 82000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 781
+  fico_score_experian: 788
+  fico_score_transunion: 784
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 784
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 61.88
+  estimated_interest_rate_prequalification: 6.25
+  max_loan_amount_prequalified: 159245.19
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 11540.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 10.5
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 63.94
+  debt_service_coverage_ratio: 1.56
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 96.03
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.375
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 8
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-055187-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 565250.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 548292.5
+  appraisal_avm_variance_percent: 3.09
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 91.11
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 228
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-055187, prequalification_decision:Not Qualified, max_loan_amount_prequalified:159245.19, estimated_interest_rate_prequalification:6.25, verified_gross_monthly_income:11540.0, debt_to_income_ratio:63.94, debt_service_coverage_ratio:1.56, probability_of_default_score:96.03, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.375, final_appraised_value:565250.0, avm_estimated_value:548292.5, appraisal_avm_variance_percent:3.09, second_review_triggered:False, loan_to_value_ratio:91.11, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:228, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified159245.196.2596.03True565250.0
+
+
+================================================================================
+Processing Application: MLN-2025-063052
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 18900.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 285000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 819
+  fico_score_experian: 826
+  fico_score_transunion: 822
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 822
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Conditionally Qualified
+  preliminary_debt_to_income_ratio: 49.51
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 559641.46
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 18780.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 74.12
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 49.15
+  debt_service_coverage_ratio: 2.03
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 0.02
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063052-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 907250.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 979830.0
+  appraisal_avm_variance_percent: -7.41
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 84.32
+
+API 18: RenderFinalLoanDecision
+  final_decision: Approved with Conditions
+  approved_loan_amount: 765000.0
+  approved_interest_rate: 6.875
+  conditions_count: 2
+  turnaround_time_days: 191
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: False
+  funded_status: True
+  funding_date: 2026-02-01
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063052, prequalification_decision:Conditionally Qualified, max_loan_amount_prequalified:559641.46, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:18780.0, debt_to_income_ratio:49.15, debt_service_coverage_ratio:2.03, probability_of_default_score:0.02, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:6.875, final_appraised_value:907250.0, avm_estimated_value:979830.0, appraisal_avm_variance_percent:-7.41, second_review_triggered:False, loan_to_value_ratio:84.32, final_decision:Approved with Conditions, approved_loan_amount:765000.0, approved_interest_rate:6.875, approved_loan_term_months:360, conditions_count:2, turnaround_time_days:191, first_pass_yield:False, funded_status:True, funding_date:2026-02-01, fair_lending_audit_flag:False, final_result:Conditionally Qualified559641.466.00.02True907250.0
+
+
+================================================================================
+Processing Application: MLN-2025-063019
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 18800.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 215000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 819
+  fico_score_experian: 826
+  fico_score_transunion: 822
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 822
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 52.48
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 592846.89
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 18297.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 25.65
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 53.92
+  debt_service_coverage_ratio: 1.85
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 28.76
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.75
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063019-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 1059250.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 974510.0
+  appraisal_avm_variance_percent: 8.7
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 84.02
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 175
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063019, prequalification_decision:Not Qualified, max_loan_amount_prequalified:592846.89, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:18297.0, debt_to_income_ratio:53.92, debt_service_coverage_ratio:1.85, probability_of_default_score:28.76, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:6.75, final_appraised_value:1059250.0, avm_estimated_value:974510.0, appraisal_avm_variance_percent:8.7, second_review_triggered:False, loan_to_value_ratio:84.02, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:175, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified592846.896.028.76True1059250.0
+
+
+================================================================================
+Processing Application: MLN-2025-051278
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 8200.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 38000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 671
+  fico_score_experian: 678
+  fico_score_transunion: 674
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 674
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 72.74
+  estimated_interest_rate_prequalification: 7.75
+  max_loan_amount_prequalified: -25450.9
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 8180.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 9.54
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Fair
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 73.56
+  debt_service_coverage_ratio: 1.36
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.8
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 2
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-051278-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 357000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 349860.0
+  appraisal_avm_variance_percent: 2.04
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 90.0
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 246
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-051278, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-25450.9, estimated_interest_rate_prequalification:7.75, verified_gross_monthly_income:8180.0, debt_to_income_ratio:73.56, debt_service_coverage_ratio:1.36, probability_of_default_score:99.8, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:8.875, final_appraised_value:357000.0, avm_estimated_value:349860.0, appraisal_avm_variance_percent:2.04, second_review_triggered:False, loan_to_value_ratio:90.0, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:246, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-25450.97.7599.8False357000.0
+
+
+================================================================================
+Processing Application: MLN-2025-061907
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 10450.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 82000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 772
+  fico_score_experian: 779
+  fico_score_transunion: 775
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 775
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 55.55
+  estimated_interest_rate_prequalification: 6.25
+  max_loan_amount_prequalified: 181928.76
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 10412.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 31.24
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 55.12
+  debt_service_coverage_ratio: 1.81
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 29.86
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-061907-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 488250.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 498015.0
+  appraisal_avm_variance_percent: -1.96
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 84.95
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 198
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-061907, prequalification_decision:Not Qualified, max_loan_amount_prequalified:181928.76, estimated_interest_rate_prequalification:6.25, verified_gross_monthly_income:10412.5, debt_to_income_ratio:55.12, debt_service_coverage_ratio:1.81, probability_of_default_score:29.86, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.125, final_appraised_value:488250.0, avm_estimated_value:498015.0, appraisal_avm_variance_percent:-1.96, second_review_triggered:False, loan_to_value_ratio:84.95, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:198, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified181928.766.2529.86True488250.0
+
+
+================================================================================
+Processing Application: MLN-2025-060914
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 15300.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 185000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 836
+  fico_score_experian: 829
+  fico_score_transunion: 842
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 836
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 62.56
+  estimated_interest_rate_prequalification: 6.125
+  max_loan_amount_prequalified: 263120.26
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 14909.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 87.45
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 64.2
+  debt_service_coverage_ratio: 1.56
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 0.01
+  credit_score_grade: A
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.5
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-060914-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 785400.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 746130.0
+  appraisal_avm_variance_percent: 5.26
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 78.3
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 201
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-060914, prequalification_decision:Not Qualified, max_loan_amount_prequalified:263120.26, estimated_interest_rate_prequalification:6.125, verified_gross_monthly_income:14909.0, debt_to_income_ratio:64.2, debt_service_coverage_ratio:1.56, probability_of_default_score:0.01, compensating_factors_present:True, credit_score_grade:A, final_risk_adjusted_interest_rate:6.5, final_appraised_value:785400.0, avm_estimated_value:746130.0, appraisal_avm_variance_percent:5.26, second_review_triggered:False, loan_to_value_ratio:78.3, final_decision:Declined, conditions_count:0, decline_reason:DTI exceeds absolute maximum of 50%, turnaround_time_days:201, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified263120.266.1250.01True785400.0
+
+
+================================================================================
+Processing Application: MLN-2025-058981
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 14800.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 175000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 795
+  fico_score_experian: 802
+  fico_score_transunion: 798
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 798
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 59.63
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 264406.41
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 14745.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 46.15
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.09
+  debt_service_coverage_ratio: 1.69
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 3.81
+  credit_score_grade: B
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-058981-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 850500.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 850500.0
+  appraisal_avm_variance_percent: 0.0
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 83.33
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 210
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-058981, prequalification_decision:Not Qualified, max_loan_amount_prequalified:264406.41, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:14745.0, debt_to_income_ratio:59.09, debt_service_coverage_ratio:1.69, probability_of_default_score:3.81, compensating_factors_present:True, credit_score_grade:B, final_risk_adjusted_interest_rate:6.875, final_appraised_value:850500.0, avm_estimated_value:850500.0, appraisal_avm_variance_percent:0.0, second_review_triggered:False, loan_to_value_ratio:83.33, final_decision:Declined, conditions_count:0, decline_reason:DTI exceeds absolute maximum of 50%, turnaround_time_days:210, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified264406.416.03.81True850500.0
+
+
+================================================================================
+Processing Application: MLN-2025-056991
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 8900.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 52000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 684
+  fico_score_experian: 691
+  fico_score_transunion: 687
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 687
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 66.21
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 14454.58
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 8875.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 19.0
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Fair
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 67.01
+  debt_service_coverage_ratio: 1.49
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 98.42
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.5
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 3
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-056991-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 342000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 338580.0
+  appraisal_avm_variance_percent: 1.01
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 95.03
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 220
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-056991, prequalification_decision:Not Qualified, max_loan_amount_prequalified:14454.58, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:8875.0, debt_to_income_ratio:67.01, debt_service_coverage_ratio:1.49, probability_of_default_score:98.42, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:8.5, final_appraised_value:342000.0, avm_estimated_value:338580.0, appraisal_avm_variance_percent:1.01, second_review_triggered:False, loan_to_value_ratio:95.03, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:220, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified14454.587.098.42False342000.0
+
+
+================================================================================
+Processing Application: MLN-2025-055614
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 9250.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 54000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 739
+  fico_score_experian: 746
+  fico_score_transunion: 742
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 742
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 60.84
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 83983.58
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 9217.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 15.26
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 61.05
+  debt_service_coverage_ratio: 1.64
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 95.67
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-055614-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 400400.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 396396.0
+  appraisal_avm_variance_percent: 1.01
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 89.61
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 226
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-055614, prequalification_decision:Not Qualified, max_loan_amount_prequalified:83983.58, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:9217.5, debt_to_income_ratio:61.05, debt_service_coverage_ratio:1.64, probability_of_default_score:95.67, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:400400.0, avm_estimated_value:396396.0, appraisal_avm_variance_percent:1.01, second_review_triggered:False, loan_to_value_ratio:89.61, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:226, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified83983.586.595.67True400400.0
+
+
+================================================================================
+Processing Application: MLN-2025-063025
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 15700.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 175000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 796
+  fico_score_experian: 803
+  fico_score_transunion: 799
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 799
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 51.37
+  estimated_interest_rate_prequalification: 6.0
+  max_loan_amount_prequalified: 430767.14
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 15277.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 29.12
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Excellent
+  credit_depth_rating: Deep
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 52.08
+  debt_service_coverage_ratio: 1.92
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 23.56
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 6.875
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 9
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063025-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 818100.0
+  property_condition: C1
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 801738.0
+  appraisal_avm_variance_percent: 2.04
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 80.25
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 169
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063025, prequalification_decision:Not Qualified, max_loan_amount_prequalified:430767.14, estimated_interest_rate_prequalification:6.0, verified_gross_monthly_income:15277.5, debt_to_income_ratio:52.08, debt_service_coverage_ratio:1.92, probability_of_default_score:23.56, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:6.875, final_appraised_value:818100.0, avm_estimated_value:801738.0, appraisal_avm_variance_percent:2.04, second_review_triggered:False, loan_to_value_ratio:80.25, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:169, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified430767.146.023.56True818100.0
+
+
+================================================================================
+Processing Application: MLN-2025-053262
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 8650.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 48000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 723
+  fico_score_experian: 730
+  fico_score_transunion: 726
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 726
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 60.56
+  estimated_interest_rate_prequalification: 7.0
+  max_loan_amount_prequalified: 76644.33
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 8622.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 19.38
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 60.76
+  debt_service_coverage_ratio: 1.65
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 93.1
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.125
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053262-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 323000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 300390.0
+  appraisal_avm_variance_percent: 7.53
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 94.43
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 229
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053262, prequalification_decision:Not Qualified, max_loan_amount_prequalified:76644.33, estimated_interest_rate_prequalification:7.0, verified_gross_monthly_income:8622.5, debt_to_income_ratio:60.76, debt_service_coverage_ratio:1.65, probability_of_default_score:93.1, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:8.125, final_appraised_value:323000.0, avm_estimated_value:300390.0, appraisal_avm_variance_percent:7.53, second_review_triggered:False, loan_to_value_ratio:94.43, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:229, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified76644.337.093.1True323000.0
+
+
+================================================================================
+Processing Application: MLN-2025-053458
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 9600.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 58000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 746
+  fico_score_experian: 752
+  fico_score_transunion: 749
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 749
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 59.11
+  estimated_interest_rate_prequalification: 6.5
+  max_loan_amount_prequalified: 110299.31
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 9565.0
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 16.93
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 59.33
+  debt_service_coverage_ratio: 1.69
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 92.42
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 7.625
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053458-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 421200.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 429624.0
+  appraisal_avm_variance_percent: -1.96
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 87.65
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 237
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053458, prequalification_decision:Not Qualified, max_loan_amount_prequalified:110299.31, estimated_interest_rate_prequalification:6.5, verified_gross_monthly_income:9565.0, debt_to_income_ratio:59.33, debt_service_coverage_ratio:1.69, probability_of_default_score:92.42, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:7.625, final_appraised_value:421200.0, avm_estimated_value:429624.0, appraisal_avm_variance_percent:-1.96, second_review_triggered:False, loan_to_value_ratio:87.65, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:237, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified110299.316.592.42True421200.0
+
+
+================================================================================
+Processing Application: MLN-2025-063035
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 8750.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 52000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 716
+  fico_score_experian: 723
+  fico_score_transunion: 719
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 719
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 62.57
+  estimated_interest_rate_prequalification: 7.125
+  max_loan_amount_prequalified: 70875.3
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 8722.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 9.62
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Moderate
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 62.14
+  debt_service_coverage_ratio: 1.61
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 98.36
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.0
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: False
+  total_compensating_factor_points: 4
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-063035-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 385000.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 415800.0
+  appraisal_avm_variance_percent: -7.41
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 84.42
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 159
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: True
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-063035, prequalification_decision:Not Qualified, max_loan_amount_prequalified:70875.3, estimated_interest_rate_prequalification:7.125, verified_gross_monthly_income:8722.5, debt_to_income_ratio:62.14, debt_service_coverage_ratio:1.61, probability_of_default_score:98.36, compensating_factors_present:False, credit_score_grade:D, final_risk_adjusted_interest_rate:8.0, final_appraised_value:385000.0, avm_estimated_value:415800.0, appraisal_avm_variance_percent:-7.41, second_review_triggered:False, loan_to_value_ratio:84.42, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:159, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:True, final_result:Not Qualified70875.37.12598.36False385000.0
+
+
+================================================================================
+Processing Application: MLN-2025-053824
+================================================================================
+
+API 1: ValidateApplicantIdentity
+  identity_verification_status: Verified
+  ofac_screening_status: Clear
+
+API 2: ValidateEmploymentAndIncome
+  income_validation_status: Passed
+  preliminary_gross_monthly_income: 7950.0
+
+API 3: ValidateLiquidAssets
+  asset_validation_status: Passed
+  verified_liquid_assets: 41000.0
+
+API 4: PullCreditReports
+  fico_score_equifax: 692
+  fico_score_experian: 688
+  fico_score_transunion: 695
+
+API 5: CalculateRepresentativeCreditScore
+  representative_credit_score: 692
+
+API 6: ExecutePrequalificationAnalysis
+  prequalification_decision: Not Qualified
+  preliminary_debt_to_income_ratio: 70.34
+  estimated_interest_rate_prequalification: 7.375
+  max_loan_amount_prequalified: -9748.92
+
+API 7: VerifyEmploymentAndIncome
+  income_verification_status: Verified
+  verified_gross_monthly_income: 7932.5
+
+API 8: VerifyAssetsAndReserves
+  asset_verification_status: Verified
+  reserve_months_calculated: 15.11
+
+API 9: AnalyzeCreditHistory
+  payment_history_quality: Good
+  credit_depth_rating: Thin
+
+API 10: CalculateDebtRatios
+  debt_to_income_ratio: 70.5
+  debt_service_coverage_ratio: 1.42
+
+API 11: CalculateProbabilityOfDefault
+  probability_of_default_score: 99.06
+  credit_score_grade: D
+
+API 12: DetermineFinalInterestRate
+  final_risk_adjusted_interest_rate: 8.5
+
+API 13: EvaluateCompensatingFactors
+  compensating_factors_present: True
+  total_compensating_factor_points: 6
+
+API 14: OrderPropertyAppraisal
+  appraisal_order_number: APR-053824-001
+
+API 15: ConductPropertyValuation
+  final_appraised_value: 326400.0
+  property_condition: C2
+
+API 16: ValidateAppraisalWithAVM
+  avm_estimated_value: 306816.0
+  appraisal_avm_variance_percent: 6.38
+  second_review_triggered: False
+
+API 17: CalculateLoanToValueRatio
+  loan_to_value_ratio: 93.44
+
+API 18: RenderFinalLoanDecision
+  final_decision: Declined
+  approved_loan_amount: None
+  approved_interest_rate: None
+  conditions_count: 0
+  turnaround_time_days: 234
+
+API 19: ExecuteFairLendingMonitoring
+  fair_lending_audit_flag: False
+
+API 20: TrackLoanPerformanceMetrics
+  first_pass_yield: True
+  funded_status: False
+  funding_date: None
+
+================================================================================
+FINAL OUTPUT SUMMARY
+================================================================================
+application_id:MLN-2025-053824, prequalification_decision:Not Qualified, max_loan_amount_prequalified:-9748.92, estimated_interest_rate_prequalification:7.375, verified_gross_monthly_income:7932.5, debt_to_income_ratio:70.5, debt_service_coverage_ratio:1.42, probability_of_default_score:99.06, compensating_factors_present:True, credit_score_grade:D, final_risk_adjusted_interest_rate:8.5, final_appraised_value:326400.0, avm_estimated_value:306816.0, appraisal_avm_variance_percent:6.38, second_review_triggered:False, loan_to_value_ratio:93.44, final_decision:Declined, conditions_count:0, decline_reason:Credit grade D requires special approval; DTI exceeds absolute maximum of 50%; Probability of default exceeds acceptable threshold, turnaround_time_days:234, first_pass_yield:True, funded_status:False, fair_lending_audit_flag:False, final_result:Not Qualified-9748.927.37599.06True326400.0
+

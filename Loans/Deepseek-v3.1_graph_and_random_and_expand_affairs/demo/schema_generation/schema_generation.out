@@ -1,0 +1,109 @@
+```xml
+<schema>
+  <Existing_fields>
+    application_id - string, unique identifier for the mortgage loan application (e.g., "MLN-2025-048732").
+    application_timestamp - datetime, date and time when the application was submitted (e.g., "2025-04-18T10:15:30Z").
+    loan_officer_id - string, identifier for the assigned loan officer (e.g., "LO-8492").
+    
+    <!-- Customer Identification (KYC) -->
+    applicant_name - string, full legal name of the primary borrower (e.g., "John Michael Smith").
+    applicant_ssn - string, social security number or national ID (masked for privacy) (e.g., "***-**-4829").
+    applicant_dob - date, date of birth of the applicant (e.g., "1985-06-15").
+    applicant_address - string, current residential address (e.g., "1234 Oak Street, Springfield, IL 62704").
+    co_applicant_name - string, full legal name of co-borrower if applicable (e.g., "Jane Elizabeth Smith").
+    co_applicant_ssn - string, co-borrower's SSN (masked) (e.g., "***-**-7391").
+    
+    <!-- Income & Asset Declaration -->
+    employment_status - enum, current employment status (e.g., "Full-Time", "Self-Employed", "Part-Time", "Retired").
+    employer_name - string, name of current employer (e.g., "Acme Corporation").
+    employment_years - float, years with current employer (e.g., 5.5).
+    gross_monthly_income - float, self-declared gross monthly income in USD (e.g., 8500.00).
+    additional_income_monthly - float, other income sources per month (e.g., 1200.00).
+    liquid_assets - float, total declared liquid assets in USD (e.g., 75000.00).
+    retirement_accounts - float, value of retirement accounts in USD (e.g., 150000.00).
+    
+    <!-- Loan Request Details -->
+    requested_loan_amount - float, amount of loan requested by applicant in USD (e.g., 380000.00).
+    loan_purpose - enum, purpose of the loan (e.g., "Purchase", "Refinance", "Cash-Out Refinance").
+    loan_term_months - integer, requested loan term in months (e.g., 360, 180).
+    property_address - string, address of the property being financed (e.g., "5678 Elm Avenue, Springfield, IL 62705").
+    property_type - enum, type of property (e.g., "Single Family", "Condo", "Townhouse", "Multi-Family").
+    property_occupancy - enum, intended occupancy (e.g., "Primary Residence", "Investment Property", "Second Home").
+    estimated_property_value - float, applicant's estimated value of property in USD (e.g., 450000.00).
+    down_payment_amount - float, cash down payment in USD (e.g., 90000.00).
+    
+    <!-- Credit Pull Authorization -->
+    credit_consent_signed - boolean, whether credit pull consent was obtained (e.g., true).
+    credit_consent_timestamp - datetime, when credit consent was signed (e.g., "2025-04-18T10:22:45Z").
+    
+    <!-- Document Verification -->
+    pay_stubs_uploaded - boolean, whether pay stubs were uploaded (e.g., true).
+    tax_returns_uploaded - boolean, whether tax returns were uploaded (e.g., true).
+    bank_statements_uploaded - boolean, whether bank statements were uploaded (e.g., true).
+    w2_forms_uploaded - boolean, whether W-2 forms were uploaded (e.g., true).
+    document_verification_timestamp - datetime, when documents were verified (e.g., "2025-04-20T14:30:00Z").
+    
+    <!-- Credit Report Data -->
+    credit_pull_timestamp - datetime, when credit report was pulled (e.g., "2025-04-18T10:25:00Z").
+    fico_score_equifax - integer, FICO score from Equifax (e.g., 742).
+    fico_score_experian - integer, FICO score from Experian (e.g., 738).
+    fico_score_transunion - integer, FICO score from TransUnion (e.g., 745).
+    derogatory_marks_count - integer, number of derogatory marks on credit report (e.g., 0).
+    bankruptcy_history - boolean, whether applicant has bankruptcy history (e.g., false).
+    total_monthly_debt_obligations - float, total monthly debt payments in USD (e.g., 2800.00).
+    
+    <!-- Property Appraisal -->
+    appraisal_order_timestamp - datetime, when appraisal was ordered (e.g., "2025-04-21T09:00:00Z").
+    appraiser_id - string, identifier for the assigned appraiser (e.g., "APR-3291").
+    appraisal_company - string, name of appraisal management company (e.g., "National Valuation Services").
+    site_inspection_timestamp - datetime, when property inspection occurred (e.g., "2025-04-23T13:00:00Z").
+    property_square_footage - integer, total square footage of property (e.g., 2400).
+    property_condition - enum, assessed condition of property (e.g., "Excellent", "Good", "Fair", "Poor").
+    comparable_properties_count - integer, number of comparable properties analyzed (e.g., 3).
+    
+    <!-- Process Tracking -->
+    underwriter_id - string, identifier for the assigned underwriter (e.g., "UW-6174").
+    processor_id - string, identifier for the loan processor (e.g., "LP-2938").
+    application_status - enum, current status of application (e.g., "Pre-qualification", "Underwriting", "Appraisal Pending", "Decision Rendered").
+  </Existing_fields>
+  
+  <Field_to_be_obtained>
+    <!-- Pre-qualification Outputs -->
+    prequalification_decision - enum, preliminary eligibility decision (e.g., "Qualified", "Conditionally Qualified", "Not Qualified").
+    max_loan_amount_prequalified - float, maximum loan amount from pre-qualification in USD (e.g., 400000.00).
+    estimated_interest_rate_prequalification - float, tentative interest rate as percentage (e.g., 6.75).
+    
+    <!-- Credit Underwriting Outputs -->
+    verified_gross_monthly_income - float, underwriter-verified gross monthly income in USD (e.g., 8300.00).
+    debt_to_income_ratio - float, calculated DTI ratio as percentage (e.g., 33.73).
+    debt_service_coverage_ratio - float, calculated DSCR (e.g., 1.45).
+    probability_of_default_score - float, calculated PD score as percentage (e.g., 2.3).
+    compensating_factors_present - boolean, whether compensating factors exist for policy exceptions (e.g., true).
+    credit_score_grade - enum, final credit grade assigned (e.g., "A", "B", "C", "D").
+    final_risk_adjusted_interest_rate - float, final interest rate as percentage (e.g., 6.50).
+    
+    <!-- Property Valuation Outputs -->
+    final_appraised_value - float, appraiser's final property value in USD (e.g., 465000.00).
+    avm_estimated_value - float, automated valuation model estimate in USD (e.g., 458000.00).
+    appraisal_avm_variance_percent - float, percentage variance between appraisal and AVM (e.g., 1.5).
+    second_review_triggered - boolean, whether variance triggered second review (e.g., false).
+    loan_to_value_ratio - float, calculated LTV ratio as percentage (e.g., 81.72).
+    
+    <!-- Final Decision Outputs -->
+    final_decision - enum, ultimate loan decision (e.g., "Approved", "Approved with Conditions", "Declined").
+    final_decision_timestamp - datetime, when final decision was rendered (e.g., "2025-04-25T16:45:00Z").
+    approved_loan_amount - float, final approved loan amount in USD (e.g., 380000.00).
+    approved_interest_rate - float, final approved interest rate as percentage (e.g., 6.50).
+    approved_loan_term_months - integer, final approved term in months (e.g., 360).
+    conditions_count - integer, number of conditions attached to approval (e.g., 2).
+    decline_reason - string, reason for decline if applicable (e.g., "DTI exceeds maximum threshold").
+    
+    <!-- Process Metrics -->
+    turnaround_time_days - integer, days from application to final decision (e.g., 18).
+    first_pass_yield - boolean, whether approved without conditions on first submission (e.g., false).
+    funded_status - boolean, whether loan was ultimately funded (e.g., true).
+    funding_date - date, date when loan was funded if applicable (e.g., "2025-05-10").
+    fair_lending_audit_flag - boolean, whether application was flagged for fair lending review (e.g., false).
+  </Field_to_be_obtained>
+</schema>
+```

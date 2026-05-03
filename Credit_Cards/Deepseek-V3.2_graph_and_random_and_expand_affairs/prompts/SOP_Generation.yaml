@@ -1,0 +1,164 @@
+# prompts:
+#   name: complex_sop_generator
+#   parameters: [sop_title, additional_context, sample_schema]
+#   text: |
+#     你是一个专注于为复杂、技术性强且受监管环境设计高级标准操作流程（SOP）的专业 AI 系统。你的任务是生成一个包含领域术语丰富、逻辑复杂、结构复杂、需要大量专业知识才能完全理解的 SOP。
+
+#     下面是你需要创建的 SOP 的标题：
+#     <sop_title>
+#     {{sop_title}}
+#     </sop_title>
+
+#     {
+#     以下是你在生成 SOP 时必须参考的额外上下文：
+#     <additional_context>
+#     {{additional_context}}
+#     </additional_context>
+#     {
+
+#     {
+#     下面是一个数据架构（schema），注意<Existing_fields></Existing_fields>包裹的是现有数据中存在的字段，<Field_to_be_obtained></Field_to_be_obtained>包裹的是应该在SOP执行中逐步处理获取的字段。你应以此为指导来设计 SOP：
+#     <sample_schema>
+#     {{sample_schema}}
+#     </sample_schema>
+#     {
+
+#     在生成 SOP 之前，你必须彻底分析标题、额外上下文和示例架构，并在 <sop_analysis> 标签中规划出最复杂、最严谨的方法。请按照以下步骤进行：
+
+#     1. 将标题和额外上下文拆解成关键组成部分。
+#     2. 确定该 SOP 所属的具体行业或领域。
+#     3. 列出该 SOP 相关的潜在监管要求。
+#     4. 列举 SOP 中将使用的关键技术术语。
+#     5. 为 SOP 的每一部分构思复杂技术细节。
+#     6. 概述 SOP 各部分之间的相互依赖关系。
+#     7. 考虑潜在的复杂情况、边界场景和罕见情形。
+#     8. 确定具体的合规性问题及如何在 SOP 中处理它们。
+
+#     在整个规划过程中使用行业术语和复杂术语，考虑行业细节、监管要求和技术细节，确保这个规划阶段详尽深入。
+
+#     完成规划后，请使用以下结构生成 SOP：
+
+#     <SOP>
+#     1. Purpose
+#     [清晰、技术性的说明该 SOP 的目的]
+
+#     2. Scope
+#     [定义 SOP 的确切范围及适用对象]
+
+#     3. Definitions
+#     [列出并定义相关术语，确保术语技术性强，贴合领域]
+
+#     4. Input
+#     [列明启动流程所需的输入、材料或信息]
+
+#     5. Main Procedure
+#     5.1 [第一步]
+#       5.1.1 [详细说明子步骤]
+#       5.1.2 [详细说明子步骤]
+#     5.2 [第二步]
+#       5.2.1 [详细说明子步骤]
+#       5.2.2 [详细说明子步骤]
+#     [继续添加全部必要步骤和子步骤，确保逐一详细说明]
+
+#     6. Output
+#     [说明完成流程后预期结果或输出]
+#     </SOP>
+
+#     SOP 生成要求：
+
+#     1. 使用高级行业术语、冗长的技术句子，假设读者具有深厚领域知识。
+#     2. 确保整篇 SOP 的语言复杂、技术性强，需高级专业知识才能理解。
+#     3. 在不同章节之间使用交叉引用，形成互相关联的信息网。
+#     4. 在 Definitions 部分，包含将在 SOP 中使用的复杂、领域特定术语。
+#     5. 使用额外上下文中的信息构建 SOP 内容。
+#     6. 不使用项目符号或列表形式，而是使用完整段落的书面语言，每条要求必须详尽、含技术细节，并具备逻辑与动机。
+#     7. 在各阶段明确量化阈值和判断条件（例如评分界限、路由规则、升级触发条件）。
+#     8. SOP 应自包含，所有完成任务所需的信息需在文中明确说明。
+#     9. 如果提供了架构（schema），应充分利用其信息来设计决策指南中的阈值、成功和失败逻辑，提升 SOP 复杂度。要讲清楚<Existing_fields></Existing_fields>包裹的每个字段如何使用，以及<Field_to_be_obtained></Field_to_be_obtained>包裹的字段如何得到。
+#     10. 在每个章节中使用 <sop_analysis> 标签来思考如何提高复杂性和深度，考虑潜在问题、罕见情境和不易显现的细节。
+#     11. 整个 SOP 一次性生成，不得暂停、确认或与用户交互，不得询问是否继续。
+#     在 <SOP> </SOP> 标签中一次性输出完整 SOP。
+#     记住各步骤和子步骤必须详细清晰，同时具备复杂性和技术深度，这是 SOP 在其应用环境中有效性的关键。
+
+
+prompts:
+  name: complex_sop_generator
+  parameters: [sop_title, additional_context, sample_schema]
+  text: |
+    You are a professional AI system specialized in designing advanced Standard Operating Procedures (SOPs) for complex, technically demanding, and regulated environments. Your task is to generate an SOP rich in domain-specific terminology, featuring intricate logic, complex structures, and requiring substantial expertise to fully comprehend.
+    ***Try not to make the SOP content too long.***
+    Below is the title of the SOP you need to create:
+    <sop_title>
+    {{sop_title}}
+    </sop_title>
+
+    {
+    Here is the additional context you must refer to during SOP generation:
+    <additional_context>
+    {{additional_context}}
+    </additional_context>
+    {
+
+    {
+    Below is a data schema. Note that fields wrapped within <Existing_fields></Existing_fields> are those present in the existing data, while fields wrapped within <Field_to_be_obtained></Field_to_be_obtained> are those that should be gradually processed and obtained through the SOP's execution. You should use this as a guide to design the SOP:
+    <sample_schema>
+    {{sample_schema}}
+    </sample_schema>
+    {
+
+    Before generating the SOP, you must thoroughly analyze the title, additional context, and sample schema, and plan the most complex and rigorous approach within the <sop_analysis> tags. Follow these steps:
+
+    1. Deconstruct the title and additional context into their key components.
+    2. Identify the specific industry or domain to which this SOP belongs.
+    3. List the potential regulatory requirements related to this SOP.
+    4. Enumerate the key technical terms that will be used in the SOP.
+    5. Conceptualize complex technical details for each part of the SOP.
+    6. Outline the interdependencies between the various sections of the SOP.
+    7. Consider potential complications, edge cases, and rare scenarios.
+    8. Identify specific compliance issues and how to address them within the SOP.
+
+    Use industry jargon and complex terminology throughout your planning. Consider industry nuances, regulatory mandates, and technical specifics to ensure this planning phase is exhaustive and insightful.
+
+    After completing the planning, generate the SOP using the following structure:
+
+    <SOP>
+    1. Purpose
+    [Clear, technical articulation of the SOP's objective]
+
+    2. Scope
+    [Define the precise scope of the SOP and to whom it applies]
+
+    3. Definitions
+    [List and define relevant terms, ensuring they are technically robust and domain-appropriate]
+
+    4. Input
+    [Specify the inputs, materials, or information required to initiate the process]
+
+    5. Main Procedure
+    5.1 [Step 1]
+      5.1.1 [Detailed description of substep]
+      5.1.2 [Detailed description of substep]
+    5.2 [Step 2]
+      5.2.1 [Detailed description of substep]
+      5.2.2 [Detailed description of substep]
+    [Continue adding all necessary steps and substeps, ensuring each is detailed]
+
+    6. Output
+    [Describe the expected results or outputs upon process completion]
+    </SOP>
+
+    SOP Generation Requirements:
+
+    1. Employ advanced industry terminology and lengthy technical sentences, assuming the reader possesses deep domain knowledge.
+    2. Ensure the language throughout the SOP is complex and technically dense, requiring advanced expertise to understand.
+    3. Use cross-references between different sections to create an interconnected web of information.
+    4. In the Definitions section, include complex, domain-specific terminology that will be used in the SOP.
+    5. Utilize information from the additional context to construct the SOP content.
+    6. Avoid bullet points or list formats. Instead, use full paragraphs of written language. Each requirement must be elaborated exhaustively, contain technical details, and be presented with logical reasoning and motivation.
+    7. Explicitly define quantifiable thresholds and decision criteria at each stage (e.g., score cutoffs, routing rules, escalation triggers).
+    8. The SOP should be self-contained; all information necessary to complete the task must be explicitly stated within the text.
+    9. If a schema is provided, leverage its information extensively to design thresholds, success/failure logic, and decision pathways within the SOP, thereby enhancing its complexity. Clarify how each field within <Existing_fields></Existing_fields> is to be used and how fields within <Field_to_be_obtained></Field_to_be_obtained> are to be derived.
+    10. Within each section, use the <sop_analysis> tag to contemplate ways to increase complexity and depth, considering potential problems, rare situations, and non-obvious details.
+    11. Generate the entire SOP at once. Do not pause, confirm, or interact with the user, nor ask if you should proceed.
+    Output the complete SOP at once within the <SOP> </SOP> tags.
+    Remember, all steps and substeps must be detailed and clear while maintaining complexity and technical depth, as this is crucial for the SOP's effectiveness in its intended application context.

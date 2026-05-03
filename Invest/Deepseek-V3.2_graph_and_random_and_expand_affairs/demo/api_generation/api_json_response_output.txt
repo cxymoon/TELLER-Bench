@@ -1,0 +1,604 @@
+<sop_tool_analysis>
+
+## 1. Reference to Relevant SOP Sections
+
+The API metadata provided encompasses the complete investment transaction lifecycle detailed in the SOP:
+
+- **Section 5.1 (Client Risk Profile Assessment)**: APIs ValidateExistingRiskProfile, AdministerRiskQuestionnaire, CalculateRiskProfile, and AuthorizeAndActivateRiskProfile implement the risk profiling workflow
+- **Section 5.2 (Product Selection and Suitability)**: APIs RecommendSuitableProducts, CreateInvestmentOrder, and ValidateProductSuitability handle product recommendation and suitability matching
+- **Section 5.3 (Pre-Trade Compliance)**: APIs ExecuteAMLSanctionsScreening, ValidateThresholdAndSOW, VerifyFundsAvailability, and AggregateComplianceChecks implement comprehensive compliance screening
+- **Section 5.4 (Transaction Execution)**: APIs CalculateTransactionFinancials, ManageCoolingOffPeriod, and ExecuteInvestmentTransaction handle financial calculations and execution
+- **Section 5.5 (Post-Execution Review)**: APIs CalculateSTPFlag, ExecutePostTradeComplianceReview, and CalculateProcessingMetrics perform post-trade quality control
+
+## 2. Input Parameters Analysis
+
+Each API requires specific inputs aligned with the SOP's data requirements:
+
+- **Client Identification**: client_id, client_name consistently used across APIs
+- **Temporal Parameters**: transaction_timestamp, execution_timestamp in ISO 8601 format per SOP requirements
+- **Risk Assessment Data**: risk_questionnaire_responses (JSON object), risk_questionnaire_total_score, calculated_risk_profile
+- **Product Parameters**: product_code, product_category, product_risk_rating, subscription_amount
+- **Compliance Indicators**: Boolean flags for suitability_check_passed, source_of_wealth_documented, funds_availability_verified
+- **Financial Data**: subscription_amount, front_end_load_percentage, annual_management_fee_percentage, current_nav
+- **Account Information**: settlement_account_number for banking operations
+
+## 3. Constraints and Special Considerations
+
+Key constraints from the SOP:
+
+- **Risk Score Range**: 0-100 points with deterministic mapping (0-35 Conservative, 36-65 Balanced, 66-100 Aggressive)
+- **Expiry Period**: 730 days (2 years) for risk profile validity
+- **Threshold Amount**: $100,000 monitoring threshold requiring SOW documentation
+- **Cooling-Off Periods**: 24 or 48 hours for structured products
+- **Authorization Methods**: OTP (300 second timeout), Biometric (95% confidence), Physical_Signature, Digital_Signature
+- **Settlement Cycles**: T+0, T+1, or T+2 based on product category
+- **Precision Requirements**: 2 decimal places for amounts, 4 decimal places for units
+
+## 4. Alignment with Overall SOP Direction
+
+The API sequence strictly follows the SOP's procedural flow:
+
+1. **Entry Point**: ValidateExistingRiskProfile determines workflow branch
+2. **Conditional Logic**: If requires_new_assessment = TRUE, proceed through questionnaire administration
+3. **Sequential Dependencies**: Each API builds on outputs from predecessor APIs
+4. **Parallel Processing**: Compliance checks (AML, Threshold, Funds) execute concurrently before aggregation
+5. **State Management**: Transaction_status evolves through defined states (Pending → Pending_Cooling_Off → Ready_for_Execution → Executed)
+6. **Zero-Tolerance Controls**: Hard blocks prevent progression when compliance failures detected
+
+## 5. Edge Cases and Limitations
+
+Critical edge cases identified:
+
+- **Boundary Conditions**: Score exactly at 35 or 65, amount exactly at threshold, timestamp exactly at expiry
+- **Race Conditions**: Concurrent balance depletion, profile expiry during processing
+- **System Failures**: AML platform timeout, banking system unavailable, clock skew
+- **Data Inconsistencies**: Null profile with non-null expiry, negative values, invalid enumerations
+- **Timing Issues**: Cooling-off spanning weekends, NAV changes during processing
+- **Override Scenarios**: Suitability mismatch requiring waiver and supervisor approval
+
+## 6. Workflow Integration
+
+The APIs form a cohesive workflow with clear dependencies:
+
+**Phase 1 - Risk Profile Establishment** (Linear):
+ValidateExistingRiskProfile → AdministerRiskQuestionnaire → CalculateRiskProfile → AuthorizeAndActivateRiskProfile
+
+**Phase 2 - Product Selection** (Linear):
+RecommendSuitableProducts → CreateInvestmentOrder → ValidateProductSuitability
+
+**Phase 3 - Compliance Validation** (Parallel with Aggregation):
+- ExecuteAMLSanctionsScreening
+- ValidateThresholdAndSOW  
+- VerifyFundsAvailability
+→ AggregateComplianceChecks
+
+**Phase 4 - Execution** (Linear):
+CalculateTransactionFinancials → ManageCoolingOffPeriod → ExecuteInvestmentTransaction
+
+**Phase 5 - Post-Processing** (Parallel):
+- CalculateSTPFlag
+- ExecutePostTradeComplianceReview
+- CalculateProcessingMetrics
+
+This structure enables both straight-through processing for compliant transactions and exception handling for edge cases, fully supporting the SOP's goal of achieving high STP rates while maintaining zero-tolerance for regulatory breaches.
+
+</sop_tool_analysis>
+
+<SCHEMA>
+{
+  "toolSpec": {
+    "name": "ValidateExistingRiskProfile",
+    "description": "Validates whether the client has an existing, unexpired risk profile assessment on file by comparing the previous_risk_profile_expiry_date against the current transaction_timestamp. Determines if a new risk assessment questionnaire administration is required or if the existing profile can be utilized for the investment transaction. This is the entry point API that determines the workflow branch for risk profiling.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Unique identifier for the client whose risk profile validity is being checked. Must correspond to an existing client record in the CRM system."
+          },
+          "transaction_timestamp": {
+            "type": "string",
+            "description": "Current transaction initiation timestamp in ISO 8601 format with timezone designation (e.g., 2025-04-18T10:15:30Z). Used as the reference point for expiry comparison."
+          },
+          "previous_risk_profile": {
+            "type": ["string", "null"],
+            "enum": ["Conservative", "Balanced", "Aggressive", null],
+            "description": "The client's existing risk profile classification if one exists, or null if no prior assessment has been completed. Values: Conservative (low risk tolerance), Balanced (moderate risk tolerance), Aggressive (high risk tolerance)."
+          },
+          "previous_risk_profile_expiry_date": {
+            "type": ["string", "null"],
+            "description": "The expiration date of the existing risk profile in ISO 8601 format, or null if no prior assessment exists. Profiles are typically valid for 730 days (2 years) from assessment date."
+          }
+        },
+        "required": ["client_id", "transaction_timestamp"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "AdministerRiskQuestionnaire",
+    "description": "Administers the regulatory-mandated Risk Tolerance Questionnaire to the client, collecting structured responses across multiple dimensions including age bracket, income stability, investment horizon, loss tolerance, and prior investment experience. Applies weighted scoring algorithm based on questionnaire responses to generate a numerical risk_questionnaire_total_score ranging from 0 to 100 points for subsequent risk profile classification. Only executes when ValidateExistingRiskProfile returns requires_new_assessment = TRUE.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Unique identifier for the client completing the risk tolerance questionnaire. Must match the client_id from ValidateExistingRiskProfile."
+          },
+          "client_age": {
+            "type": "integer",
+            "description": "Client's age in years, used for age bracket scoring. Valid range: 1-120. Age brackets: 18-30 (0 points), 31-40 (5 points), 41-50 (10 points), 51-60 (15 points), 61+ (20 points)."
+          },
+          "client_annual_income": {
+            "type": "number",
+            "description": "Client's declared annual income in USD, used for income stability evaluation. Must be a positive number."
+          },
+          "client_investment_experience_years": {
+            "type": "integer",
+            "description": "Number of years of investment experience. Valid range: 0-99. Scoring: 0 years (0 points), 1-3 years (5 points), 4-7 years (10 points), 8-15 years (15 points), 15+ years (20 points)."
+          },
+          "client_liquidity_needs": {
+            "type": "string",
+            "enum": ["Low", "Medium", "High"],
+            "description": "Client's liquidity requirements classification. Low indicates minimal need for quick access to funds, Medium indicates moderate liquidity needs, High indicates significant near-term liquidity requirements."
+          },
+          "risk_questionnaire_responses": {
+            "type": "object",
+            "description": "JSON object containing structured questionnaire answers across all dimensions including age_bracket, income_stability, investment_horizon, loss_tolerance, and previous_investments. Each response contributes to the weighted total score calculation."
+          }
+        },
+        "required": ["client_id", "client_age", "client_annual_income", "client_investment_experience_years", "client_liquidity_needs", "risk_questionnaire_responses"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "CalculateRiskProfile",
+    "description": "Applies deterministic mapping algorithm to convert numerical risk_questionnaire_total_score into categorical risk profile classification using regulatory-defined score ranges: Conservative (0-35 points), Balanced (36-65 points), and Aggressive (66-100 points). This classification serves as the foundation for all subsequent product suitability matching operations. Depends on the risk_questionnaire_total_score output from AdministerRiskQuestionnaire.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "risk_questionnaire_total_score": {
+            "type": "integer",
+            "description": "Total numerical score from risk tolerance questionnaire ranging from 0 to 100 points. Score ranges: 0-35 maps to Conservative, 36-65 maps to Balanced, 66-100 maps to Aggressive. Boundary values use inclusive lower bound rule (e.g., 35 = Conservative, 65 = Balanced)."
+          }
+        },
+        "required": ["risk_questionnaire_total_score"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "AuthorizeAndActivateRiskProfile",
+    "description": "Presents the calculated risk profile to the client for review and explicit consent, captures client authorization via configured method (OTP, Biometric, Physical_Signature, or Digital_Signature), computes risk profile expiry date by adding 730 days to current timestamp, and updates client master record to set investable_status to 'Active' thereby enabling investment transaction processing. Requires the calculated_risk_profile output from CalculateRiskProfile.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Unique identifier for the client authorizing their calculated risk profile. Must match client_id used throughout the risk profiling workflow."
+          },
+          "calculated_risk_profile": {
+            "type": "string",
+            "enum": ["Conservative", "Balanced", "Aggressive"],
+            "description": "The system-calculated risk profile classification that the client is being asked to review and authorize. Conservative indicates low risk tolerance, Balanced indicates moderate risk tolerance, Aggressive indicates high risk tolerance."
+          },
+          "client_authorization_method": {
+            "type": "string",
+            "enum": ["OTP", "Biometric", "Physical_Signature", "Digital_Signature"],
+            "description": "Method used to capture legally binding client consent. OTP: One-Time Password with 300 second validity. Biometric: Fingerprint/facial recognition requiring 95% confidence match. Physical_Signature: Handwritten signature verification. Digital_Signature: PKI-based cryptographic signature."
+          },
+          "transaction_timestamp": {
+            "type": "string",
+            "description": "Current timestamp in ISO 8601 format used as the base for calculating risk_profile_expiry_date (timestamp + 730 days). Also used for audit trail purposes."
+          }
+        },
+        "required": ["client_id", "calculated_risk_profile", "client_authorization_method", "transaction_timestamp"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "RecommendSuitableProducts",
+    "description": "Queries product master database applying hierarchical suitability filters based on client calculated_risk_profile to return only investment products whose product_risk_rating aligns with or is lower than client risk tolerance according to regulatory suitability matrix. Conservative clients see Conservative and Moderate products; Balanced clients see Conservative, Moderate, and Balanced products; Aggressive clients see all product categories. Requires investable_status = 'Active' from AuthorizeAndActivateRiskProfile.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Unique identifier for the client for whom suitable investment products are being recommended. Used to retrieve client profile and validate investable status."
+          },
+          "calculated_risk_profile": {
+            "type": "string",
+            "enum": ["Conservative", "Balanced", "Aggressive"],
+            "description": "Client's authorized risk profile classification used as filter criteria for product recommendations. Determines which product risk ratings are permissible per hierarchical suitability matrix."
+          },
+          "investable_status": {
+            "type": "string",
+            "enum": ["Active", "Inactive"],
+            "description": "Client's current investable status flag. Must be 'Active' to proceed with product recommendations. Set to 'Active' by AuthorizeAndActivateRiskProfile upon successful risk profile authorization."
+          }
+        },
+        "required": ["client_id", "calculated_risk_profile", "investable_status"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "CreateInvestmentOrder",
+    "description": "Creates comprehensive new transaction record with system-generated transaction_id, captures all order parameters including client identification, relationship manager, product selection, subscription amount, and settlement account. Retrieves and populates product master data including risk rating, current NAV, fee structures. Assigns compliance officer based on transaction value and complexity. Records operational metadata including branch, channel, and region for reporting purposes. Logically follows product selection from RecommendSuitableProducts.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Unique identifier for the client placing the investment order. Must have investable_status = 'Active' to proceed."
+          },
+          "relationship_manager_id": {
+            "type": "string",
+            "description": "Unique identifier for the Relationship Manager originating and sponsoring this transaction. RM must have appropriate delegation authorities and product certification credentials."
+          },
+          "product_code": {
+            "type": "string",
+            "description": "Unique product identifier code from the product master database. System will auto-populate related product_name, product_risk_rating, product_category, current_nav, and fee structures based on this code."
+          },
+          "subscription_amount": {
+            "type": "number",
+            "description": "Total investment amount in USD that the client wishes to subscribe, including all fees. Must be within product minimum and maximum investment thresholds. Must be positive and greater than zero."
+          },
+          "settlement_account_number": {
+            "type": "string",
+            "description": "Client's bank account number from which subscription funds will be debited. Must be associated with the client_id and have sufficient available balance."
+          },
+          "transaction_timestamp": {
+            "type": "string",
+            "description": "Transaction initiation timestamp in ISO 8601 format with timezone. Used to establish trade date and for audit trail purposes."
+          },
+          "branch_code": {
+            "type": "string",
+            "description": "Code identifying the originating branch location for this transaction. Used for regional reporting and performance tracking."
+          },
+          "channel": {
+            "type": "string",
+            "enum": ["Branch", "Phone_Banking", "Mobile_App", "Online_Banking"],
+            "description": "Distribution channel through which the transaction was initiated. Impacts processing workflows and service level agreements."
+          },
+          "region": {
+            "type": "string",
+            "description": "Geographic region code for the transaction. Used for regional regulatory compliance, reporting, and performance analysis."
+          }
+        },
+        "required": ["client_id", "relationship_manager_id", "product_code", "subscription_amount", "settlement_account_number", "transaction_timestamp", "branch_code", "channel", "region"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "ValidateProductSuitability",
+    "description": "Executes automated real-time suitability check by comparing product_risk_rating against client calculated_risk_profile using hierarchical matching matrix enforcing regulatory suitability rules. Determines if product exceeds client risk tolerance, sets suitability_check_passed and suitability_mismatch_flag accordingly. Triggers mismatch waiver and supervisor approval workflow when violation detected, preventing transaction progression until proper override procedures completed. Requires transaction_id from CreateInvestmentOrder and calculated_risk_profile from risk profiling workflow.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "description": "Unique system-generated transaction identifier from CreateInvestmentOrder. Used to associate suitability validation results with the specific transaction record."
+          },
+          "calculated_risk_profile": {
+            "type": "string",
+            "enum": ["Conservative", "Balanced", "Aggressive"],
+            "description": "Client's authorized risk profile classification used as the baseline for suitability comparison. Must be current and unexpired."
+          },
+          "product_risk_rating": {
+            "type": "string",
+            "enum": ["Conservative", "Moderate", "Balanced", "Growth", "Aggressive"],
+            "description": "Risk rating of the selected investment product from product master database. Compared against client risk profile using hierarchical suitability matrix. Conservative suitable for all, Moderate for Balanced/Aggressive, Balanced for Balanced/Aggressive, Growth for Aggressive only, Aggressive for Aggressive only."
+          }
+        },
+        "required": ["transaction_id", "calculated_risk_profile", "product_risk_rating"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "ExecuteAMLSanctionsScreening",
+    "description": "Interfaces with enterprise AML monitoring platform to perform real-time sanctions list screening of client_id and client_name against all relevant sanctions databases including OFAC SDN list, EU consolidated sanctions, UN Security Council sanctions, and applicable national registries. Returns screening status indicating Clear (no matches), Flagged (potential match requiring manual review), or Pending (screening in progress). Requires transaction_id from CreateInvestmentOrder. Part of parallel pre-trade compliance validation.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "Unique client identifier to be screened against sanctions databases. Retrieved from the transaction record created by CreateInvestmentOrder."
+          },
+          "client_name": {
+            "type": "string",
+            "description": "Client's full legal name to be screened against sanctions lists. Used for name-based matching algorithms in AML platform."
+          },
+          "transaction_id": {
+            "type": "string",
+            "description": "Unique transaction identifier from CreateInvestmentOrder. Used to associate AML screening results with the specific transaction for audit trail and compliance tracking."
+          }
+        },
+        "required": ["client_id", "client_name", "transaction_id"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "ValidateThresholdAndSOW",
+    "description": "Compares subscription_amount against configured monitoring_threshold_amount (typically $100,000) to determine if transaction exceeds regulatory large-transaction threshold requiring enhanced due diligence. When threshold exceeded, validates that source_of_wealth_documented flag is TRUE indicating current and valid Source of Wealth documentation is on file. Blocks execution if SOW documentation missing for threshold-exceeding transactions. Requires subscription_amount from CreateInvestmentOrder. Part of parallel pre-trade compliance validation.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "subscription_amount": {
+            "type": "number",
+            "description": "Total investment subscription amount in USD from CreateInvestmentOrder. Compared against monitoring_threshold_amount to determine if enhanced due diligence required. Boundary condition: amount exactly equal to threshold is treated as exceeding threshold (inclusive rule)."
+          },
+          "monitoring_threshold_amount": {
+            "type": "number",
+            "description": "Configured regulatory monitoring threshold in USD, typically $100,000.00. Transactions at or above this amount require Source of Wealth documentation verification."
+          },
+          "source_of_wealth_documented": {
+            "type": "boolean",
+            "description": "Boolean flag indicating whether current and valid Source of Wealth documentation is on file for this client. Must be TRUE for transactions exceeding threshold to pass validation. Documentation may include employment contracts, business ownership records, inheritance documents, or investment liquidation statements."
+          }
+        },
+        "required": ["subscription_amount", "monitoring_threshold_amount", "source_of_wealth_documented"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "VerifyFundsAvailability",
+    "description": "Queries Core Banking System to retrieve real-time available_balance for specified settlement_account_number. Compares retrieved available_balance against subscription_amount to confirm sufficient liquid funds exist for transaction settlement without creating overdraft condition. Returns funds_availability_verified as TRUE only when available_balance >= subscription_amount. Requires settlement_account_number and subscription_amount from CreateInvestmentOrder. Part of parallel pre-trade compliance validation.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "settlement_account_number": {
+            "type": "string",
+            "description": "Client's bank account number from CreateInvestmentOrder from which subscription funds will be debited. Must be valid, active account associated with the client."
+          },
+          "subscription_amount": {
+            "type": "number",
+            "description": "Total investment subscription amount in USD from CreateInvestmentOrder. Compared against available account balance to verify sufficient funds. Boundary condition: available balance exactly equal to subscription amount passes verification."
+          }
+        },
+        "required": ["settlement_account_number", "subscription_amount"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "AggregateComplianceChecks",
+    "description": "Aggregates validation results from all parallel pre-trade compliance checks including suitability validation, AML sanctions screening, threshold/SOW validation, and funds availability verification. Applies boolean AND logic across all validation outcomes to produce consolidated pre_trade_compliance_passed flag. Transaction may proceed to execution only when ALL compliance checks return successful status. Depends on outputs from ValidateProductSuitability, ExecuteAMLSanctionsScreening, ValidateThresholdAndSOW, and VerifyFundsAvailability.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "suitability_check_passed": {
+            "type": "boolean",
+            "description": "Boolean result from ValidateProductSuitability indicating whether product risk rating is appropriate for client risk profile. TRUE if suitable or approved override exists, FALSE if mismatch without proper waiver."
+          },
+          "aml_sanctions_screening_status": {
+            "type": "string",
+            "enum": ["Clear", "Flagged", "Pending"],
+            "description": "Status from ExecuteAMLSanctionsScreening. Clear (no matches, passes check), Flagged (potential match, fails check), Pending (screening in progress, check not yet complete)."
+          },
+          "transaction_threshold_exceeded": {
+            "type": "boolean",
+            "description": "Boolean from ValidateThresholdAndSOW indicating whether subscription amount exceeds monitoring threshold. TRUE if amount >= threshold, FALSE otherwise."
+          },
+          "source_of_wealth_documented": {
+            "type": "boolean",
+            "description": "Boolean from ValidateThresholdAndSOW indicating whether SOW documentation is on file. When transaction_threshold_exceeded = TRUE, this must also be TRUE to pass aggregated compliance."
+          },
+          "funds_availability_verified": {
+            "type": "boolean",
+            "description": "Boolean result from VerifyFundsAvailability. TRUE if settlement account has sufficient available balance >= subscription_amount, FALSE if insufficient funds."
+          }
+        },
+        "required": ["suitability_check_passed", "aml_sanctions_screening_status", "transaction_threshold_exceeded", "source_of_wealth_documented", "funds_availability_verified"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "CalculateTransactionFinancials",
+    "description": "Computes comprehensive transaction financial metrics with regulatory precision: front_end_load_amount (subscription_amount × front_end_load_percentage / 100), net_investment_amount (subscription_amount - front_end_load_amount), estimated_units (net_investment_amount / current_nav for mutual funds with 4 decimal precision), and annual_management_fee_amount (net_investment_amount × annual_management_fee_percentage / 100). Provides transparent fee disclosure enabling client understanding of all costs and actual invested capital. Only executes when pre_trade_compliance_passed = TRUE from AggregateComplianceChecks. Requires financial data from CreateInvestmentOrder.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "subscription_amount": {
+            "type": "number",
+            "description": "Total investment amount in USD from CreateInvestmentOrder including all fees. Base amount for all financial calculations. Must be positive and greater than zero."
+          },
+          "front_end_load_percentage": {
+            "type": "number",
+            "description": "Sales charge percentage from product master database. Applied at point of purchase. Typical range: 0.0 to 5.0 percent. Used to calculate front_end_load_amount."
+          },
+          "annual_management_fee_percentage": {
+            "type": "number",
+            "description": "Ongoing annual management fee percentage from product master database. Typical range: 0.0 to 3.0 percent. Used to calculate estimated first-year annual_management_fee_amount."
+          },
+          "current_nav": {
+            "type": "number",
+            "description": "Current Net Asset Value per unit for mutual fund products. Retrieved from product master database or market data source. Required for Mutual_Fund category to calculate estimated_units. Must be positive. Set to 0 or null for non-NAV products like structured notes."
+          },
+          "product_category": {
+            "type": "string",
+            "enum": ["Mutual_Fund", "Bond", "Structured_Note", "Dual_Currency_Investment", "Principal_Protected_Note"],
+            "description": "Product classification from CreateInvestmentOrder. Determines which financial calculations are applicable. NAV-based unit calculations only apply to Mutual_Fund category."
+          },
+          "pre_trade_compliance_passed": {
+            "type": "boolean",
+            "description": "Consolidated compliance validation result from AggregateComplianceChecks. Must be TRUE for financial calculations to proceed. Acts as state dependency gate."
+          }
+        },
+        "required": ["subscription_amount", "front_end_load_percentage", "annual_management_fee_percentage", "current_nav", "product_category", "pre_trade_compliance_passed"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "ManageCoolingOffPeriod",
+    "description": "Evaluates product_category against cooling-off period requirements to determine applicability (TRUE for Structured_Note, Dual_Currency_Investment, Principal_Protected_Note). When applicable, calculates cooling-off expiry timestamp by adding cooling_off_period_hours to client_authorization_timestamp. Sets transaction_status to 'Pending_Cooling_Off' if cooling-off applies and period not elapsed, or 'Ready_for_Execution' if cooling-off not required or period completed. Executes after CalculateTransactionFinancials completes.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "description": "Unique transaction identifier from CreateInvestmentOrder. Used to update transaction status based on cooling-off period evaluation."
+          },
+          "product_category": {
+            "type": "string",
+            "enum": ["Mutual_Fund", "Bond", "Structured_Note", "Dual_Currency_Investment", "Principal_Protected_Note"],
+            "description": "Product classification from CreateInvestmentOrder. Determines cooling-off period applicability. Cooling-off required for Structured_Note, Dual_Currency_Investment, and Principal_Protected_Note categories."
+          },
+          "cooling_off_period_required": {
+            "type": "boolean",
+            "description": "Boolean flag indicating whether regulatory cooling-off period applies to this product. TRUE for complex structured products, FALSE for standard mutual funds and bonds."
+          },
+          "cooling_off_period_hours": {
+            "type": "integer",
+            "description": "Duration of cooling-off period in hours. Typically 24 hours for some structured products or 48 hours for higher complexity instruments. Set to 0 if cooling_off_period_required = FALSE. Valid range: 0 to 168 hours (7 days)."
+          },
+          "client_authorization_timestamp": {
+            "type": "string",
+            "description": "ISO 8601 timestamp when client authorized the transaction. Used as the starting point for calculating cooling-off expiry. Added to cooling_off_period_hours to determine expiry_timestamp."
+          }
+        },
+        "required": ["transaction_id", "product_category", "cooling_off_period_required", "cooling_off_period_hours", "client_authorization_timestamp"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "ExecuteInvestmentTransaction",
+    "description": "Final execution step consummating investment transaction through appropriate channel routing. For Mutual_Fund products, transmits electronic purchase order to fund house gateway with client and product details, receives trade_reference_number. For structured products, routes order to Treasury/Global Markets desk, receives contract_note_number. Instructs Core Banking System to debit settlement_account_number for full subscription_amount. Sets transaction_status to 'Executed', records execution_timestamp, calculates settlement_date based on product-specific T+1 or T+2 cycles. Only executes when transaction_status = 'Ready_for_Execution' from ManageCoolingOffPeriod.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "description": "Unique transaction identifier from CreateInvestmentOrder. Used to update transaction status to 'Executed' and associate execution details including trade_reference_number or contract_note_number."
+          },
+          "product_category": {
+            "type": "string",
+            "enum": ["Mutual_Fund", "Bond", "Structured_Note", "Dual_Currency_Investment", "Principal_Protected_Note"],
+            "description": "Product classification determining execution routing. Mutual_Fund routes to fund house gateway, structured products route to Treasury/Global Markets desk."
+          },
+          "product_code": {
+            "type": "string",
+            "description": "Unique product identifier from CreateInvestmentOrder. Used in order transmission to fund house or Treasury desk to specify the investment instrument being purchased."
+          },
+          "net_investment_amount": {
+            "type": "number",
+            "description": "Actual capital deployed into investment product after deducting front-end load fees. Calculated by CalculateTransactionFinancials. Used in fund house order for unit allocation."
+          },
+          "settlement_account_number": {
+            "type": "string",
+            "description": "Client's bank account from CreateInvestmentOrder. Core Banking System debits full subscription_amount from this account for settlement."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "Unique client identifier from CreateInvestmentOrder. Used in order transmission to map to fund house investor account number or Treasury desk client records."
+          },
+          "transaction_status": {
+            "type": "string",
+            "enum": ["Ready_for_Execution", "Pending_Cooling_Off"],
+            "description": "Current transaction status from ManageCoolingOffPeriod. Must be 'Ready_for_Execution' for execution to proceed. Status 'Pending_Cooling_Off' blocks execution until cooling-off period elapses."
+          },
+          "subscription_amount": {
+            "type": "number",
+            "description": "Total gross investment amount from CreateInvestmentOrder including all fees. Full amount debited from settlement account by Core Banking System."
+          }
+        },
+        "required": ["transaction_id", "product_category", "product_code", "net_investment_amount", "settlement_account_number", "client_id", "transaction_status", "subscription_amount"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "CalculateSTPFlag",
+    "description": "Evaluates entire transaction lifecycle to determine if straight-through processing was achieved by checking for any manual intervention indicators including suitability mismatch requiring waiver, supervisor approval requirements, AML screening flags, or back-office corrections. Sets straight_through_processing_flag to TRUE only for zero-touch transactions completing without human intervention, providing key operational efficiency metric for STP rate KPI reporting. Executes after ExecuteInvestmentTransaction completes to evaluate complete transaction lifecycle.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "description": "Unique transaction identifier from CreateInvestmentOrder. Used to retrieve complete audit trail for STP evaluation and update transaction record with straight_through_processing_flag."
+          },
+          "suitability_mismatch_flag": {
+            "type": "boolean",
+            "description": "Boolean from ValidateProductSuitability indicating whether product risk exceeded client tolerance requiring manual waiver. TRUE indicates mismatch occurred, preventing STP classification. FALSE indicates no mismatch."
+          },
+          "supervisor_approval_required": {
+            "type": "boolean",
+            "description": "Boolean indicating whether transaction required supervisor approval override. TRUE indicates manual approval touchpoint occurred, preventing STP classification. FALSE indicates no supervisor intervention."
+          },
+          "aml_sanctions_screening_status": {
+            "type": "string",
+            "enum": ["Clear", "Flagged", "Pending"],
+            "description": "AML screening outcome from ExecuteAMLSanctionsScreening. Only 'Clear' status supports STP classification. 'Flagged' or 'Pending' indicate manual review touchpoint preventing STP."
+          }
+        },
+        "required": ["transaction_id", "suitability_mismatch_flag", "supervisor_approval_required", "aml_sanctions_screening_status"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "ExecutePostTradeComplianceReview",
+    "description": "Performs post-execution quality assurance and regulatory compliance verification by reviewing transaction against standardized compliance checklist. Validates documentation completeness (disclosure_documents_presented), reviews audio_video_recording_id content quality for complex products, verifies suitability mismatch waiver documentation, and assesses overall transaction coherence relative to client profile. Documents findings in compliance_review_notes, sets compliance_defect_flag if violations or deficiencies identified requiring corrective action. Only executes after transaction_status = 'Executed' from ExecuteInvestmentTransaction.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "description": "Unique transaction identifier from CreateInvestmentOrder. Used to retrieve complete transaction details, documentation records, and update with compliance review results including compliance_defect_flag and compliance_review_notes."
+          },
+          "audio_video_recording_id": {
+            "type": ["string", "null"],
+            "description": "Unique identifier for audio/video recording of sales interaction from Sales Compliance Recording System (SCRS). Required for complex structured products where audio_video_recording_required = TRUE. Null for standard mutual fund transactions. Used to access recording for quality and mis-selling review."
+          },
+          "suitability_mismatch_flag": {
+            "type": "boolean",
+            "description": "Boolean from ValidateProductSuitability. TRUE indicates risk override occurred requiring verification that proper mismatch_waiver_document_id and supervisor approval were obtained. FALSE indicates standard suitability match."
+          },
+          "transaction_threshold_exceeded": {
+            "type": "boolean",
+            "description": "Boolean from ValidateThresholdAndSOW. TRUE indicates large-value transaction requiring verification of Source of Wealth documentation completeness. FALSE indicates standard transaction below threshold."
+          },
+          "disclosure_documents_presented": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of document types presented to client from CreateInvestmentOrder. Must include all mandatory documents for product_category: Fund_Fact_Sheet, Prospectus, KID for mutual funds; additional Term_Sheet, Risk_Disclosure, Scenario_Analysis for structured products. Reviewed for completeness."
+          }
+        },
+        "required": ["transaction_id", "suitability_mismatch_flag", "transaction_threshold_exceeded", "disclosure_documents_presented"]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "CalculateProcessingMetrics",
+    "description": "Computes end-to-end transaction processing efficiency metrics by calculating total_processing_time_minutes as elapsed time between transaction_timestamp (initiation) and execution_timestamp (completion). Provides quantitative measure enabling monitoring of processing efficiency, cycle time analysis, identification of bottlenecks, and trend analysis for continuous process improvement initiatives. Requires execution_timestamp from ExecuteInvestmentTransaction.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "transaction_timestamp": {
+            "type": "string",
+            "description": "Transaction initiation timestamp in ISO 8601 format from CreateInvestmentOrder. Represents the start point for processing time calculation. Must be in UTC timezone for consistency."
+          },
+          "execution_timestamp": {
+            "type": "string",
+            "description": "Transaction execution completion timestamp in ISO 8601 format from ExecuteInvestmentTransaction. Represents the end point for processing time calculation. Must be in UTC timezone. Must be chronologically after transaction_timestamp."
+          }
+        },
+        "required": ["transaction_timestamp", "execution_timestamp"]
+      }
+    }
+  }
+}
+</SCHEMA>

@@ -1,0 +1,97 @@
+# prompts:
+#   name: generate_dataset_schema
+#   parameters: [sop_title, additional_context]
+#   text: |
+#     你是一个专门基于标准操作程序（SOP）生成合成数据集架构的专家 AI 助手。你将使用所提供的标准操作程序（SOP）文本来生成一个数据集架构说明。
+
+#     首先，请认真阅读以下 SOP 标题：
+
+#     <sop_title>
+#       {{sop_title}}
+#     </sop_title>
+
+#     {
+#     以下是你在生成 SOP 过程中必须遵守的额外上下文说明：
+#       <additional_context>
+#       {{additional_context}}
+#       </additional_context>
+#     {
+
+#     下面是一个视频信息schema的示例，你必须使用模仿以下格式输出，但***如果实际任务与视频无关，不要输出模板中的这些信息***：
+#     <schema>
+#       <Existing_fields>
+#         video_id - string, 视频的唯一标识符（例如："vid_00123"）。
+#         video_path - string, 视频文件路径或 URI（例如："/data/videos/vid_00123.mp4"）。
+#         upload_timestamp - datetime, 视频上传时间（例如："2025-04-18 T15:32:10Z"）。
+#         uploader_id - string, 匿名化的用户标识符（例如："user_487"）。
+#         video_language - string, 视频音频的检测或声明语言（例如："en", "es"）。
+#         region - string, 与视频或上传者相关的地区（例如："US", "IN"）。
+#         metadata_tags - list[string], 从视频元数据中提取的关键词或标签（例如：["protest", "crowd", "chanting"]）。
+#         duration_seconds - integer, 视频总时长（秒）（例如：312）。
+#       </Existing_fields>
+#       <Field_to_be_obtained>
+#         format_validated - boolean, 视频是否通过格式检查（例如：True）。
+#       </Field_to_be_obtained>
+#     </schema>
+
+
+#     现在，请结合上述 SOP 标题和额外上下文，在 <schema></schema> 标签中按照指定格式生成一个数据集架构。
+#     <requirements>
+#     1. 定义数据集架构字段，包括每个字段的：
+#       - 名称
+#       - 类型 （如 string、integer、float、boolean、datetime、enum、list 等）
+#       - 描述（该字段表示什么）
+#       - 示例值
+#     2. 在适用的地方，包含数据值范围和可选项。要适当有一些类似资金数值（30万）、时间等独立字段。
+#     3. 必须把审批前已有数据包裹在<Existing_fields></Existing_fields>内部，而需要经过处理、审批等得到的数据如计算得到的信用分、审批结果是否通过等字段要包裹在<Field_to_be_obtained></Field_to_be_obtained>内部。
+#     4. 如果有字段的值格式为JSON，必须确定其中的所有子字段。
+#     </requirements>
+
+prompts:
+  name: generate_dataset_schema
+  parameters: [sop_title, additional_context]
+  text: |
+    You are an expert AI assistant specialized in generating synthetic dataset schemas based on Standard Operating Procedures (SOPs). You will use the provided SOP text to generate a dataset schema description.
+    ***The number of fields in the schema must be designed to be within 50.***
+    First, please carefully read the following SOP title:
+
+    <sop_title>
+      {{sop_title}}
+    </sop_title>
+
+    {
+    Here are the additional contextual instructions you must follow during the SOP generation process:
+      <additional_context>
+      {{additional_context}}
+      </additional_context>
+    {
+
+    Below is an example of a video information schema. You must mimic the following format for output, but ***if the actual task is not related to video, do not output these template information***:
+    <schema>
+      <Existing_fields>
+        video_id - string, unique identifier for the video (e.g., "vid_00123").
+        video_path - string, file path or URI of the video (e.g., "/data/videos/vid_00123.mp4").
+        upload_timestamp - datetime, time of video upload (e.g., "2025-04-18T15:32:10Z").
+        uploader_id - string, anonymized user identifier (e.g., "user_487").
+        video_language - string, detected or declared language of video audio (e.g., "en", "es").
+        region - string, region associated with the video or uploader (e.g., "US", "IN").
+        metadata_tags - list[string], keywords or tags extracted from video metadata (e.g., ["protest", "crowd", "chanting"]).
+        duration_seconds - integer, total duration of the video in seconds (e.g., 312).
+      </Existing_fields>
+      <Field_to_be_obtained>
+        format_validated - boolean, whether the video passed format validation (e.g., True).
+      </Field_to_be_obtained>
+    </schema>
+
+
+    Now, please combine the above SOP title and additional context to generate a dataset schema within the <schema></schema> tags, following the specified format.
+    <requirements>
+    1. Define the dataset schema fields, including for each field:
+      - Name
+      - Type (e.g., string, integer, float, boolean, datetime, enum, list, etc.)
+      - Description (what this field represents)
+      - Example value
+    2. Where applicable, include data value ranges and options. Appropriately include independent fields such as funding amounts (300,000), time, etc.
+    3. Existing data before approval must be wrapped inside <Existing_fields></Existing_fields>, while fields that need to be obtained through processes like calculation, approval, etc., such as credit scores calculated, approval results (whether passed), must be wrapped inside <Field_to_be_obtained></Field_to_be_obtained>.
+    4. If a field's value format is JSON, all sub-fields within it must be determined.
+    </requirements>

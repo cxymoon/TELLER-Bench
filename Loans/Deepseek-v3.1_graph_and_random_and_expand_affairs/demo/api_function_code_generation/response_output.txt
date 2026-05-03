@@ -1,0 +1,2148 @@
+# Mortgage Origination API Implementation
+
+<code>
+
+```python
+import math
+from typing import Dict, Any, Optional, List
+from datetime import datetime, timedelta
+from pydantic import BaseModel, Field
+from langchain.tools import StructuredTool
+
+# Global data storage - parse sample_data into structured format
+MORTGAGE_DATA = []
+
+def parse_sample_data():
+    """Parse the sample data into structured dictionaries"""
+    global MORTGAGE_DATA
+    
+    sample_data_raw = [
+        ['application_id:MLN-2025-048732', 'application_timestamp:2025-04-18T10:15:30Z', 'loan_officer_id:LO-8492', 'applicant_name:John Michael Smith', 'applicant_ssn:***-**-4829', 'applicant_dob:1985-06-15', 'applicant_address:1234 Oak Street, Springfield, IL 62704', 'co_applicant_name:Jane Elizabeth Smith', 'co_applicant_ssn:***-**-7391', 'employment_status:Full-Time', 'employer_name:Acme Corporation', 'employment_years:5.5', 'gross_monthly_income:8500.00', 'additional_income_monthly:1200.00', 'liquid_assets:75000.00', 'retirement_accounts:150000.00', 'requested_loan_amount:380000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:5678 Elm Avenue, Springfield, IL 62705', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:450000.00', 'down_payment_amount:90000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-18T10:22:45Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-20T14:30:00Z', 'credit_pull_timestamp:2025-04-18T10:25:00Z', 'fico_score_equifax:742', 'fico_score_experian:738', 'fico_score_transunion:745', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2800.00', 'appraisal_order_timestamp:2025-04-21T09:00:00Z', 'appraiser_id:APR-3291', 'appraisal_company:National Valuation Services', 'site_inspection_timestamp:2025-04-23T13:00:00Z', 'property_square_footage:2400', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-6174', 'processor_id:LP-2938', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-049103', 'application_timestamp:2025-04-19T09:30:15Z', 'loan_officer_id:LO-7234', 'applicant_name:Maria Garcia Rodriguez', 'applicant_ssn:***-**-6721', 'applicant_dob:1982-03-22', 'applicant_address:890 Pine Road, Austin, TX 78701', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Self-Employed', 'employer_name:MG Consulting LLC', 'employment_years:8.0', 'gross_monthly_income:11200.00', 'additional_income_monthly:2400.00', 'liquid_assets:125000.00', 'retirement_accounts:220000.00', 'requested_loan_amount:525000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:3456 Maple Drive, Austin, TX 78702', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:625000.00', 'down_payment_amount:125000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-19T09:45:30Z', 'pay_stubs_uploaded:False', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:False', 'document_verification_timestamp:2025-04-22T11:15:00Z', 'credit_pull_timestamp:2025-04-19T09:50:00Z', 'fico_score_equifax:798', 'fico_score_experian:805', 'fico_score_transunion:792', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:1850.00', 'appraisal_order_timestamp:2025-04-23T10:30:00Z', 'appraiser_id:APR-4512', 'appraisal_company:Premier Appraisal Group', 'site_inspection_timestamp:2025-04-26T14:00:00Z', 'property_square_footage:3200', 'property_condition:Excellent', 'comparable_properties_count:4', 'underwriter_id:UW-8823', 'processor_id:LP-4621', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-049287', 'application_timestamp:2025-04-20T14:20:00Z', 'loan_officer_id:LO-5639', 'applicant_name:Robert James Thompson', 'applicant_ssn:***-**-9182', 'applicant_dob:1978-11-08', 'applicant_address:2345 Cedar Lane, Denver, CO 80202', 'co_applicant_name:Susan Marie Thompson', 'co_applicant_ssn:***-**-3047', 'employment_status:Full-Time', 'employer_name:TechCorp Industries', 'employment_years:12.0', 'gross_monthly_income:14500.00', 'additional_income_monthly:800.00', 'liquid_assets:185000.00', 'retirement_accounts:425000.00', 'requested_loan_amount:640000.00', 'loan_purpose:Cash-Out Refinance', 'loan_term_months:360', 'property_address:2345 Cedar Lane, Denver, CO 80202', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:800000.00', 'down_payment_amount:0.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-20T14:35:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-23T09:45:00Z', 'credit_pull_timestamp:2025-04-20T14:40:00Z', 'fico_score_equifax:712', 'fico_score_experian:718', 'fico_score_transunion:709', 'derogatory_marks_count:2', 'bankruptcy_history:False', 'total_monthly_debt_obligations:4200.00', 'appraisal_order_timestamp:2025-04-24T08:00:00Z', 'appraiser_id:APR-2876', 'appraisal_company:Rocky Mountain Valuations', 'site_inspection_timestamp:2025-04-27T10:30:00Z', 'property_square_footage:3800', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-5491', 'processor_id:LP-7832', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-049421', 'application_timestamp:2025-04-21T11:00:00Z', 'loan_officer_id:LO-9123', 'applicant_name:David Lee Chen', 'applicant_ssn:***-**-5438', 'applicant_dob:1990-07-14', 'applicant_address:6789 Birch Avenue, Seattle, WA 98101', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Amazon Web Services', 'employment_years:3.5', 'gross_monthly_income:9800.00', 'additional_income_monthly:500.00', 'liquid_assets:45000.00', 'retirement_accounts:68000.00', 'requested_loan_amount:420000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:1122 Spruce Court, Seattle, WA 98102', 'property_type:Condo', 'property_occupancy:Primary Residence', 'estimated_property_value:480000.00', 'down_payment_amount:60000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-21T11:15:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-24T13:20:00Z', 'credit_pull_timestamp:2025-04-21T11:20:00Z', 'fico_score_equifax:685', 'fico_score_experian:692', 'fico_score_transunion:688', 'derogatory_marks_count:3', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3600.00', 'appraisal_order_timestamp:2025-04-25T09:30:00Z', 'appraiser_id:APR-6701', 'appraisal_company:Pacific Northwest Appraisals', 'site_inspection_timestamp:2025-04-28T15:00:00Z', 'property_square_footage:1450', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-3214', 'processor_id:LP-5987', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-049634', 'application_timestamp:2025-04-22T08:45:00Z', 'loan_officer_id:LO-4728', 'applicant_name:Jennifer Ann Wilson', 'applicant_ssn:***-**-2914', 'applicant_dob:1987-01-29', 'applicant_address:4567 Willow Street, Phoenix, AZ 85001', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Banner Health System', 'employment_years:6.0', 'gross_monthly_income:7200.00', 'additional_income_monthly:0.00', 'liquid_assets:28000.00', 'retirement_accounts:82000.00', 'requested_loan_amount:295000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:7890 Aspen Way, Phoenix, AZ 85003', 'property_type:Townhouse', 'property_occupancy:Primary Residence', 'estimated_property_value:310000.00', 'down_payment_amount:31000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-22T09:00:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-25T10:30:00Z', 'credit_pull_timestamp:2025-04-22T09:05:00Z', 'fico_score_equifax:728', 'fico_score_experian:735', 'fico_score_transunion:731', 'derogatory_marks_count:1', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2400.00', 'appraisal_order_timestamp:2025-04-26T11:00:00Z', 'appraiser_id:APR-8934', 'appraisal_company:Desert Valley Appraisals', 'site_inspection_timestamp:2025-04-29T09:30:00Z', 'property_square_footage:1850', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-7652', 'processor_id:LP-3401', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-049852', 'application_timestamp:2025-04-23T13:30:00Z', 'loan_officer_id:LO-6182', 'applicant_name:Michael Patrick O Brien', 'applicant_ssn:***-**-7256', 'applicant_dob:1975-09-03', 'applicant_address:3210 Redwood Drive, Portland, OR 97201', 'co_applicant_name:Katherine Lynn O Brien', 'co_applicant_ssn:***-**-4893', 'employment_status:Self-Employed', 'employer_name:O Brien Architecture PLLC', 'employment_years:15.0', 'gross_monthly_income:13800.00', 'additional_income_monthly:3200.00', 'liquid_assets:210000.00', 'retirement_accounts:580000.00', 'requested_loan_amount:720000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:5432 Fir Lane, Portland, OR 97202', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:900000.00', 'down_payment_amount:225000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-23T13:45:00Z', 'pay_stubs_uploaded:False', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:False', 'document_verification_timestamp:2025-04-26T15:00:00Z', 'credit_pull_timestamp:2025-04-23T13:50:00Z', 'fico_score_equifax:815', 'fico_score_experian:808', 'fico_score_transunion:822', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2100.00', 'appraisal_order_timestamp:2025-04-27T08:30:00Z', 'appraiser_id:APR-1529', 'appraisal_company:Northwest Property Valuations', 'site_inspection_timestamp:2025-04-30T11:00:00Z', 'property_square_footage:4200', 'property_condition:Excellent', 'comparable_properties_count:4', 'underwriter_id:UW-9245', 'processor_id:LP-6738', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-050078', 'application_timestamp:2025-04-24T10:00:00Z', 'loan_officer_id:LO-8371', 'applicant_name:Angela Marie Washington', 'applicant_ssn:***-**-3678', 'applicant_dob:1992-05-18', 'applicant_address:8901 Magnolia Boulevard, Atlanta, GA 30301', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Delta Airlines Inc', 'employment_years:4.0', 'gross_monthly_income:6800.00', 'additional_income_monthly:1100.00', 'liquid_assets:35000.00', 'retirement_accounts:47000.00', 'requested_loan_amount:285000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:2468 Peachtree Circle, Atlanta, GA 30302', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:300000.00', 'down_payment_amount:30000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-24T10:15:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-27T11:45:00Z', 'credit_pull_timestamp:2025-04-24T10:20:00Z', 'fico_score_equifax:652', 'fico_score_experian:648', 'fico_score_transunion:655', 'derogatory_marks_count:4', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2900.00', 'appraisal_order_timestamp:2025-04-28T09:00:00Z', 'appraiser_id:APR-5647', 'appraisal_company:Southern Regional Appraisals', 'site_inspection_timestamp:2025-05-01T14:30:00Z', 'property_square_footage:1650', 'property_condition:Fair', 'comparable_properties_count:3', 'underwriter_id:UW-4823', 'processor_id:LP-9156', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-050241', 'application_timestamp:2025-04-25T15:20:00Z', 'loan_officer_id:LO-2947', 'applicant_name:Thomas Edward Martinez', 'applicant_ssn:***-**-8429', 'applicant_dob:1980-12-11', 'applicant_address:1357 Sycamore Street, Miami, FL 33101', 'co_applicant_name:Carmen Isabel Martinez', 'co_applicant_ssn:***-**-5762', 'employment_status:Full-Time', 'employer_name:Baptist Health South Florida', 'employment_years:9.5', 'gross_monthly_income:10500.00', 'additional_income_monthly:900.00', 'liquid_assets:62000.00', 'retirement_accounts:145000.00', 'requested_loan_amount:465000.00', 'loan_purpose:Refinance', 'loan_term_months:360', 'property_address:1357 Sycamore Street, Miami, FL 33101', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:550000.00', 'down_payment_amount:0.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-25T15:35:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-28T14:00:00Z', 'credit_pull_timestamp:2025-04-25T15:40:00Z', 'fico_score_equifax:758', 'fico_score_experian:762', 'fico_score_transunion:755', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3100.00', 'appraisal_order_timestamp:2025-04-29T10:30:00Z', 'appraiser_id:APR-7283', 'appraisal_company:Sunshine State Valuations', 'site_inspection_timestamp:2025-05-02T13:00:00Z', 'property_square_footage:2650', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-6417', 'processor_id:LP-8029', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-050463', 'application_timestamp:2025-04-26T09:15:00Z', 'loan_officer_id:LO-5184', 'applicant_name:Sarah Elizabeth Brown', 'applicant_ssn:***-**-9341', 'applicant_dob:1988-08-25', 'applicant_address:9876 Oakridge Avenue, Boston, MA 02101', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Massachusetts General Hospital', 'employment_years:7.0', 'gross_monthly_income:12200.00', 'additional_income_monthly:1500.00', 'liquid_assets:95000.00', 'retirement_accounts:178000.00', 'requested_loan_amount:580000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:6543 Commonwealth Drive, Boston, MA 02102', 'property_type:Condo', 'property_occupancy:Primary Residence', 'estimated_property_value:650000.00', 'down_payment_amount:97500.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-26T09:30:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-29T10:15:00Z', 'credit_pull_timestamp:2025-04-26T09:35:00Z', 'fico_score_equifax:776', 'fico_score_experian:782', 'fico_score_transunion:779', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2700.00', 'appraisal_order_timestamp:2025-04-30T08:00:00Z', 'appraiser_id:APR-3928', 'appraisal_company:New England Property Assessors', 'site_inspection_timestamp:2025-05-03T10:00:00Z', 'property_square_footage:1950', 'property_condition:Excellent', 'comparable_properties_count:4', 'underwriter_id:UW-2735', 'processor_id:LP-4892', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-050697', 'application_timestamp:2025-04-27T12:45:00Z', 'loan_officer_id:LO-7562', 'applicant_name:Kevin James Anderson', 'applicant_ssn:***-**-1825', 'applicant_dob:1983-02-17', 'applicant_address:7531 Elmwood Terrace, Chicago, IL 60601', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:United Airlines Holdings', 'employment_years:2.0', 'gross_monthly_income:8900.00', 'additional_income_monthly:600.00', 'liquid_assets:42000.00', 'retirement_accounts:55000.00', 'requested_loan_amount:340000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:2109 Lakeview Avenue, Chicago, IL 60602', 'property_type:Condo', 'property_occupancy:Investment Property', 'estimated_property_value:380000.00', 'down_payment_amount:95000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-27T13:00:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-04-30T11:30:00Z', 'credit_pull_timestamp:2025-04-27T13:05:00Z', 'fico_score_equifax:698', 'fico_score_experian:705', 'fico_score_transunion:702', 'derogatory_marks_count:2', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3200.00', 'appraisal_order_timestamp:2025-05-01T09:00:00Z', 'appraiser_id:APR-4651', 'appraisal_company:Midwest Appraisal Services', 'site_inspection_timestamp:2025-05-04T14:00:00Z', 'property_square_footage:1550', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-8164', 'processor_id:LP-5237', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-050829', 'application_timestamp:2025-04-28T08:30:00Z', 'loan_officer_id:LO-3698', 'applicant_name:Lisa Ann Johnson', 'applicant_ssn:***-**-4972', 'applicant_dob:1979-06-30', 'applicant_address:4682 Poplar Street, Nashville, TN 37201', 'co_applicant_name:Mark Steven Johnson', 'co_applicant_ssn:***-**-8135', 'employment_status:Self-Employed', 'employer_name:Johnson Tax Services LLC', 'employment_years:11.0', 'gross_monthly_income:9700.00', 'additional_income_monthly:1800.00', 'liquid_assets:82000.00', 'retirement_accounts:195000.00', 'requested_loan_amount:395000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:8024 Hickory Lane, Nashville, TN 37202', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:460000.00', 'down_payment_amount:92000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-28T08:45:00Z', 'pay_stubs_uploaded:False', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:False', 'document_verification_timestamp:2025-05-01T13:00:00Z', 'credit_pull_timestamp:2025-04-28T08:50:00Z', 'fico_score_equifax:744', 'fico_score_experian:738', 'fico_score_transunion:751', 'derogatory_marks_count:1', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2650.00', 'appraisal_order_timestamp:2025-05-02T10:00:00Z', 'appraiser_id:APR-9217', 'appraisal_company:Music City Valuations', 'site_inspection_timestamp:2025-05-05T11:30:00Z', 'property_square_footage:2350', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-5946', 'processor_id:LP-7418', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-051043', 'application_timestamp:2025-04-29T14:10:00Z', 'loan_officer_id:LO-8925', 'applicant_name:Christopher Alan Davis', 'applicant_ssn:***-**-6284', 'applicant_dob:1986-04-09', 'applicant_address:3197 Walnut Grove, San Diego, CA 92101', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Qualcomm Incorporated', 'employment_years:8.5', 'gross_monthly_income:11800.00', 'additional_income_monthly:700.00', 'liquid_assets:118000.00', 'retirement_accounts:245000.00', 'requested_loan_amount:685000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:5876 Pacific View Drive, San Diego, CA 92102', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:760000.00', 'down_payment_amount:114000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-29T14:25:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-02T09:45:00Z', 'credit_pull_timestamp:2025-04-29T14:30:00Z', 'fico_score_equifax:787', 'fico_score_experian:793', 'fico_score_transunion:790', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3400.00', 'appraisal_order_timestamp:2025-05-03T08:30:00Z', 'appraiser_id:APR-6832', 'appraisal_company:Southern California Appraisers', 'site_inspection_timestamp:2025-05-06T10:00:00Z', 'property_square_footage:3100', 'property_condition:Excellent', 'comparable_properties_count:4', 'underwriter_id:UW-4571', 'processor_id:LP-9283', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-051278', 'application_timestamp:2025-04-30T11:20:00Z', 'loan_officer_id:LO-4317', 'applicant_name:Patricia Marie Taylor', 'applicant_ssn:***-**-3519', 'applicant_dob:1991-10-12', 'applicant_address:6254 Chestnut Avenue, Philadelphia, PA 19101', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Comcast Corporation', 'employment_years:5.0', 'gross_monthly_income:7800.00', 'additional_income_monthly:400.00', 'liquid_assets:38000.00', 'retirement_accounts:72000.00', 'requested_loan_amount:315000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:1793 Liberty Court, Philadelphia, PA 19102', 'property_type:Townhouse', 'property_occupancy:Primary Residence', 'estimated_property_value:350000.00', 'down_payment_amount:52500.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-04-30T11:35:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-03T14:20:00Z', 'credit_pull_timestamp:2025-04-30T11:40:00Z', 'fico_score_equifax:671', 'fico_score_experian:678', 'fico_score_transunion:674', 'derogatory_marks_count:3', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2950.00', 'appraisal_order_timestamp:2025-05-04T09:30:00Z', 'appraiser_id:APR-5194', 'appraisal_company:Liberty Bell Appraisals', 'site_inspection_timestamp:2025-05-07T13:00:00Z', 'property_square_footage:1750', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-7382', 'processor_id:LP-2956', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-051456', 'application_timestamp:2025-05-01T09:00:00Z', 'loan_officer_id:LO-6729', 'applicant_name:Daniel Robert Miller', 'applicant_ssn:***-**-7941', 'applicant_dob:1984-01-20', 'applicant_address:9142 Riverside Drive, Minneapolis, MN 55401', 'co_applicant_name:Emily Rose Miller', 'co_applicant_ssn:***-**-4263', 'employment_status:Full-Time', 'employer_name:Target Corporation', 'employment_years:10.0', 'gross_monthly_income:9500.00', 'additional_income_monthly:1000.00', 'liquid_assets:72000.00', 'retirement_accounts:165000.00', 'requested_loan_amount:420000.00', 'loan_purpose:Refinance', 'loan_term_months:180', 'property_address:9142 Riverside Drive, Minneapolis, MN 55401', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:525000.00', 'down_payment_amount:0.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-01T09:15:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-04T10:30:00Z', 'credit_pull_timestamp:2025-05-01T09:20:00Z', 'fico_score_equifax:766', 'fico_score_experian:772', 'fico_score_transunion:769', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2500.00', 'appraisal_order_timestamp:2025-05-05T08:00:00Z', 'appraiser_id:APR-8376', 'appraisal_company:North Star Valuations', 'site_inspection_timestamp:2025-05-08T11:00:00Z', 'property_square_footage:2800', 'property_condition:Excellent', 'comparable_properties_count:3', 'underwriter_id:UW-3619', 'processor_id:LP-6842', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-051683', 'application_timestamp:2025-05-02T13:40:00Z', 'loan_officer_id:LO-2854', 'applicant_name:Brian Christopher Moore', 'applicant_ssn:***-**-5628', 'applicant_dob:1989-07-05', 'applicant_address:5318 Mountain View Road, Salt Lake City, UT 84101', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Intermountain Healthcare', 'employment_years:6.5', 'gross_monthly_income:8200.00', 'additional_income_monthly:500.00', 'liquid_assets:48000.00', 'retirement_accounts:95000.00', 'requested_loan_amount:365000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:7629 Wasatch Boulevard, Salt Lake City, UT 84102', 'property_type:Single Family', 'property_occupancy:Second Home', 'estimated_property_value:425000.00', 'down_payment_amount:85000.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-02T13:55:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-05T11:20:00Z', 'credit_pull_timestamp:2025-05-02T14:00:00Z', 'fico_score_equifax:721', 'fico_score_experian:728', 'fico_score_transunion:724', 'derogatory_marks_count:1', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2800.00', 'appraisal_order_timestamp:2025-05-06T09:00:00Z', 'appraiser_id:APR-4925', 'appraisal_company:Mountain West Appraisals', 'site_inspection_timestamp:2025-05-09T10:30:00Z', 'property_square_footage:2250', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-8257', 'processor_id:LP-5124', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-051897', 'application_timestamp:2025-05-03T10:25:00Z', 'loan_officer_id:LO-9436', 'applicant_name:Rebecca Lynn Harris', 'applicant_ssn:***-**-2174', 'applicant_dob:1993-11-28', 'applicant_address:4821 Palmetto Drive, Charlotte, NC 28201', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Bank of America', 'employment_years:4.5', 'gross_monthly_income:7400.00', 'additional_income_monthly:300.00', 'liquid_assets:32000.00', 'retirement_accounts:58000.00', 'requested_loan_amount:280000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:9517 Carolina Avenue, Charlotte, NC 28202', 'property_type:Condo', 'property_occupancy:Primary Residence', 'estimated_property_value:295000.00', 'down_payment_amount:29500.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-03T10:40:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-06T13:00:00Z', 'credit_pull_timestamp:2025-05-03T10:45:00Z', 'fico_score_equifax:641', 'fico_score_experian:638', 'fico_score_transunion:644', 'derogatory_marks_count:5', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3100.00', 'appraisal_order_timestamp:2025-05-07T10:00:00Z', 'appraiser_id:APR-7148', 'appraisal_company:Queen City Valuations', 'site_inspection_timestamp:2025-05-10T14:00:00Z', 'property_square_footage:1350', 'property_condition:Fair', 'comparable_properties_count:3', 'underwriter_id:UW-6923', 'processor_id:LP-3785', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-052114', 'application_timestamp:2025-05-04T15:15:00Z', 'loan_officer_id:LO-5762', 'applicant_name:Gregory Paul White', 'applicant_ssn:***-**-8396', 'applicant_dob:1981-04-16', 'applicant_address:8374 Riverfront Plaza, St Louis, MO 63101', 'co_applicant_name:Amanda Jane White', 'co_applicant_ssn:***-**-1529', 'employment_status:Self-Employed', 'employer_name:White Consulting Group LLC', 'employment_years:13.0', 'gross_monthly_income:15200.00', 'additional_income_monthly:2800.00', 'liquid_assets:245000.00', 'retirement_accounts:630000.00', 'requested_loan_amount:820000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:2846 Gateway Terrace, St Louis, MO 63102', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:1025000.00', 'down_payment_amount:256250.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-04T15:30:00Z', 'pay_stubs_uploaded:False', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:False', 'document_verification_timestamp:2025-05-07T14:45:00Z', 'credit_pull_timestamp:2025-05-04T15:35:00Z', 'fico_score_equifax:832', 'fico_score_experian:825', 'fico_score_transunion:838', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2350.00', 'appraisal_order_timestamp:2025-05-08T08:30:00Z', 'appraiser_id:APR-3681', 'appraisal_company:Gateway Arch Appraisals', 'site_inspection_timestamp:2025-05-11T10:00:00Z', 'property_square_footage:4800', 'property_condition:Excellent', 'comparable_properties_count:4', 'underwriter_id:UW-9574', 'processor_id:LP-8216', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-052348', 'application_timestamp:2025-05-05T08:50:00Z', 'loan_officer_id:LO-4183', 'applicant_name:Nicole Marie Clark', 'applicant_ssn:***-**-6742', 'applicant_dob:1994-09-02', 'applicant_address:6195 Highland Park, Pittsburgh, PA 15201', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:UPMC Health System', 'employment_years:3.0', 'gross_monthly_income:6500.00', 'additional_income_monthly:200.00', 'liquid_assets:22000.00', 'retirement_accounts:35000.00', 'requested_loan_amount:245000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:4729 Steel City Lane, Pittsburgh, PA 15202', 'property_type:Townhouse', 'property_occupancy:Primary Residence', 'estimated_property_value:258000.00', 'down_payment_amount:25800.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-05T09:05:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-08T11:30:00Z', 'credit_pull_timestamp:2025-05-05T09:10:00Z', 'fico_score_equifax:612', 'fico_score_experian:608', 'fico_score_transunion:615', 'derogatory_marks_count:6', 'bankruptcy_history:True', 'total_monthly_debt_obligations:2700.00', 'appraisal_order_timestamp:2025-05-09T09:00:00Z', 'appraiser_id:APR-5293', 'appraisal_company:Three Rivers Appraisals', 'site_inspection_timestamp:2025-05-12T13:00:00Z', 'property_square_footage:1450', 'property_condition:Fair', 'comparable_properties_count:3', 'underwriter_id:UW-7485', 'processor_id:LP-2619', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-052571', 'application_timestamp:2025-05-06T12:30:00Z', 'loan_officer_id:LO-8649', 'applicant_name:Andrew Thomas Lewis', 'applicant_ssn:***-**-9517', 'applicant_dob:1985-12-19', 'applicant_address:9638 Desert Bloom Road, Las Vegas, NV 89101', 'co_applicant_name:Michelle Lynn Lewis', 'co_applicant_ssn:***-**-3842', 'employment_status:Full-Time', 'employer_name:MGM Resorts International', 'employment_years:7.0', 'gross_monthly_income:10100.00', 'additional_income_monthly:1300.00', 'liquid_assets:88000.00', 'retirement_accounts:135000.00', 'requested_loan_amount:485000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:5213 Vegas Valley Drive, Las Vegas, NV 89102', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:550000.00', 'down_payment_amount:82500.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-06T12:45:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-09T10:15:00Z', 'credit_pull_timestamp:2025-05-06T12:50:00Z', 'fico_score_equifax:753', 'fico_score_experian:747', 'fico_score_transunion:760', 'derogatory_marks_count:0', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3050.00', 'appraisal_order_timestamp:2025-05-10T08:00:00Z', 'appraiser_id:APR-6418', 'appraisal_company:Silver State Valuations', 'site_inspection_timestamp:2025-05-13T11:00:00Z', 'property_square_footage:2750', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-5198', 'processor_id:LP-9437', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-052796', 'application_timestamp:2025-05-07T14:00:00Z', 'loan_officer_id:LO-3527', 'applicant_name:Stephanie Rose Walker', 'applicant_ssn:***-**-4186', 'applicant_dob:1990-03-07', 'applicant_address:7412 Bayshore Boulevard, Tampa, FL 33601', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Raymond James Financial', 'employment_years:5.5', 'gross_monthly_income:9200.00', 'additional_income_monthly:800.00', 'liquid_assets:65000.00', 'retirement_accounts:112000.00', 'requested_loan_amount:390000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:3857 Gulf Coast Drive, Tampa, FL 33602', 'property_type:Condo', 'property_occupancy:Primary Residence', 'estimated_property_value:435000.00', 'down_payment_amount:65250.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-07T14:15:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-10T12:30:00Z', 'credit_pull_timestamp:2025-05-07T14:20:00Z', 'fico_score_equifax:734', 'fico_score_experian:741', 'fico_score_transunion:737', 'derogatory_marks_count:1', 'bankruptcy_history:False', 'total_monthly_debt_obligations:2850.00', 'appraisal_order_timestamp:2025-05-11T09:00:00Z', 'appraiser_id:APR-9527', 'appraisal_company:Tampa Bay Appraisals', 'site_inspection_timestamp:2025-05-14T10:30:00Z', 'property_square_footage:1850', 'property_condition:Excellent', 'comparable_properties_count:4', 'underwriter_id:UW-4362', 'processor_id:LP-7195', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-053019', 'application_timestamp:2025-05-08T09:45:00Z', 'loan_officer_id:LO-7894', 'applicant_name:Jonathan David Hall', 'applicant_ssn:***-**-5924', 'applicant_dob:1987-08-11', 'applicant_address:5927 Northside Parkway, Indianapolis, IN 46201', 'co_applicant_name:', 'co_applicant_ssn:', 'employment_status:Full-Time', 'employer_name:Eli Lilly and Company', 'employment_years:9.0', 'gross_monthly_income:11400.00', 'additional_income_monthly:600.00', 'liquid_assets:102000.00', 'retirement_accounts:225000.00', 'requested_loan_amount:495000.00', 'loan_purpose:Cash-Out Refinance', 'loan_term_months:360', 'property_address:5927 Northside Parkway, Indianapolis, IN 46201', 'property_type:Single Family', 'property_occupancy:Primary Residence', 'estimated_property_value:660000.00', 'down_payment_amount:0.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-08T10:00:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-11T13:15:00Z', 'credit_pull_timestamp:2025-05-08T10:05:00Z', 'fico_score_equifax:719', 'fico_score_experian:726', 'fico_score_transunion:722', 'derogatory_marks_count:2', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3700.00', 'appraisal_order_timestamp:2025-05-12T08:30:00Z', 'appraiser_id:APR-2746', 'appraisal_company:Hoosier State Appraisals', 'site_inspection_timestamp:2025-05-15T09:00:00Z', 'property_square_footage:3200', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-8641', 'processor_id:LP-4523', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:'],
+        ['application_id:MLN-2025-053247', 'application_timestamp:2025-05-09T11:10:00Z', 'loan_officer_id:LO-6215', 'applicant_name:Rachel Marie Young', 'applicant_ssn:***-**-7318', 'applicant_dob:1995-06-23', 'applicant_address:8146 Mountain Ridge, Raleigh, NC 27601', 'co_applicant_name:Joshua Allen Young', 'co_applicant_ssn:***-**-2954', 'employment_status:Full-Time', 'employer_name:Cisco Systems', 'employment_years:2.5', 'gross_monthly_income:8600.00', 'additional_income_monthly:400.00', 'liquid_assets:41000.00', 'retirement_accounts:62000.00', 'requested_loan_amount:335000.00', 'loan_purpose:Purchase', 'loan_term_months:360', 'property_address:4295 Research Park Drive, Raleigh, NC 27602', 'property_type:Townhouse', 'property_occupancy:Primary Residence', 'estimated_property_value:375000.00', 'down_payment_amount:56250.00', 'credit_consent_signed:True', 'credit_consent_timestamp:2025-05-09T11:25:00Z', 'pay_stubs_uploaded:True', 'tax_returns_uploaded:True', 'bank_statements_uploaded:True', 'w2_forms_uploaded:True', 'document_verification_timestamp:2025-05-12T14:00:00Z', 'credit_pull_timestamp:2025-05-09T11:30:00Z', 'fico_score_equifax:695', 'fico_score_experian:702', 'fico_score_transunion:698', 'derogatory_marks_count:2', 'bankruptcy_history:False', 'total_monthly_debt_obligations:3150.00', 'appraisal_order_timestamp:2025-05-13T09:30:00Z', 'appraiser_id:APR-8164', 'appraisal_company:Triangle Area Valuations', 'site_inspection_timestamp:2025-05-16T11:00:00Z', 'property_square_footage:1900', 'property_condition:Good', 'comparable_properties_count:3', 'underwriter_id:UW-3956', 'processor_id:LP-6287', 'application_status:', 'prequalification_decision:', 'max_loan_amount_prequalified:', 'estimated_interest_rate_prequalification:', 'verified_gross_monthly_income:', 'debt_to_income_ratio:', 'debt_service_coverage_ratio:', 'probability_of_default_score:', 'compensating_factors_present:', 'credit_score_grade:', 'final_risk_adjusted_interest_rate:', 'final_appraised_value:', 'avm_estimated_value:', 'appraisal_avm_variance_percent:', 'second_review_triggered:', 'loan_to_value_ratio:', 'final_decision:', 'final_decision_timestamp:', 'approved_loan_amount:', 'approved_interest_rate:', 'approved_loan_term_months:', 'conditions_count:', 'decline_reason:', 'turnaround_time_days:', 'first_pass_yield:', 'funded_status:', 'funding_date:', 'fair_lending_audit_flag:']
+    ]
+    
+    for row in sample_data_raw:
+        record = {}
+        for item in row:
+            if ':' in item:
+                key, value = item.split(':', 1)
+                record[key] = value if value else None
+        MORTGAGE_DATA.append(record)
+
+# Initialize data
+parse_sample_data()
+
+def get_application_data(application_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieve application data by application_id"""
+    for record in MORTGAGE_DATA:
+        if record.get('application_id') == application_id:
+            return record
+    return None
+
+def update_application_data(application_id: str, updates: Dict[str, Any]) -> bool:
+    """Update application data with new values"""
+    for record in MORTGAGE_DATA:
+        if record.get('application_id') == application_id:
+            record.update(updates)
+            return True
+    return False
+
+def convert_value(value: str, target_type: str):
+    """Convert string value to appropriate type"""
+    if value is None or value == '':
+        return None
+    
+    if target_type == 'bool':
+        return value.lower() == 'true'
+    elif target_type == 'int':
+        return int(float(value))
+    elif target_type == 'float':
+        return float(value)
+    else:
+        return value
+
+# API 1: ValidateApplicantIdentity
+def ValidateApplicantIdentity(
+    application_id: str,
+    applicant_name: str,
+    applicant_ssn: str,
+    applicant_dob: str,
+    applicant_address: str,
+    co_applicant_name: Optional[str] = None,
+    co_applicant_ssn: Optional[str] = None
+) -> Dict[str, Any]:
+    """Validates applicant identity and performs OFAC screening"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Validate SSN pattern (masked format ***-**-NNNN)
+    ssn_pattern_valid = len(applicant_ssn) == 11 and applicant_ssn[0:7] == "***-**-"
+    
+    # OFAC screening simulation - always pass for valid SSN patterns
+    ofac_clear = ssn_pattern_valid
+    
+    # Identity verification
+    identity_verified = True
+    verification_issues = []
+    
+    if not ssn_pattern_valid:
+        identity_verified = False
+        verification_issues.append("Invalid SSN format")
+    
+    # Co-applicant verification if present
+    co_applicant_verified = True
+    if co_applicant_name and co_applicant_ssn:
+        co_ssn_pattern_valid = len(co_applicant_ssn) == 11 and co_applicant_ssn[0:7] == "***-**-"
+        if not co_ssn_pattern_valid:
+            co_applicant_verified = False
+            verification_issues.append("Invalid co-applicant SSN format")
+    
+    result = {
+        "application_id": application_id,
+        "identity_verification_status": "Verified" if identity_verified and co_applicant_verified else "Failed",
+        "ofac_screening_status": "Clear" if ofac_clear else "Flagged",
+        "verified_applicant_name": applicant_name if identity_verified else None,
+        "verified_applicant_ssn": applicant_ssn if identity_verified else None,
+        "verified_applicant_dob": applicant_dob if identity_verified else None,
+        "verification_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "verification_issues": verification_issues
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "identity_verification_status": result["identity_verification_status"],
+        "ofac_screening_status": result["ofac_screening_status"]
+    })
+    
+    return result
+
+# API 2: ValidateEmploymentAndIncome
+def ValidateEmploymentAndIncome(
+    application_id: str,
+    employment_status: str,
+    gross_monthly_income: float,
+    pay_stubs_uploaded: bool,
+    w2_forms_uploaded: bool,
+    employer_name: Optional[str] = None,
+    employment_years: Optional[float] = None,
+    additional_income_monthly: Optional[float] = None,
+    tax_returns_uploaded: Optional[bool] = None
+) -> Dict[str, Any]:
+    """Validates employment and income information"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    validation_passed = True
+    validation_issues = []
+    
+    # Check document requirements
+    if employment_status in ["Full-Time", "Part-Time"]:
+        if not pay_stubs_uploaded or not w2_forms_uploaded:
+            validation_passed = False
+            validation_issues.append("Missing required income documents for W-2 employment")
+    
+    if employment_status == "Self-Employed":
+        if not tax_returns_uploaded:
+            validation_passed = False
+            validation_issues.append("Missing tax returns for self-employed status")
+    
+    # Calculate preliminary income
+    preliminary_monthly_income = gross_monthly_income
+    if additional_income_monthly:
+        preliminary_monthly_income += additional_income_monthly
+    
+    # Income stability assessment
+    income_stability_rating = "Stable"
+    if employment_years and employment_years < 2.0:
+        income_stability_rating = "Moderate"
+        validation_issues.append("Employment tenure less than 2 years")
+    elif employment_years and employment_years >= 5.0:
+        income_stability_rating = "Strong"
+    
+    result = {
+        "application_id": application_id,
+        "income_validation_status": "Passed" if validation_passed else "Failed",
+        "preliminary_gross_monthly_income": round(preliminary_monthly_income, 2),
+        "income_stability_rating": income_stability_rating,
+        "employment_verification_required": employment_status in ["Full-Time", "Part-Time"],
+        "validation_issues": validation_issues,
+        "validation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "preliminary_gross_monthly_income": result["preliminary_gross_monthly_income"],
+        "income_validation_status": result["income_validation_status"]
+    })
+    
+    return result
+
+# API 3: ValidateLiquidAssets
+def ValidateLiquidAssets(
+    application_id: str,
+    liquid_assets: float,
+    bank_statements_uploaded: bool,
+    down_payment_amount: float,
+    requested_loan_amount: float,
+    applicant_dob: str,
+    retirement_accounts: Optional[float] = None
+) -> Dict[str, Any]:
+    """Validates liquid assets and calculates reserves"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    validation_passed = True
+    validation_issues = []
+    
+    if not bank_statements_uploaded:
+        validation_passed = False
+        validation_issues.append("Bank statements not uploaded")
+    
+    # Calculate applicant age for retirement account discount
+    birth_date = datetime.strptime(applicant_dob, "%Y-%m-%d")
+    current_date = datetime.utcnow()
+    age = current_date.year - birth_date.year - ((current_date.month, current_date.day) < (birth_date.month, birth_date.day))
+    
+    # Apply retirement account discount
+    retirement_discount_factor = 0.75 if age < 59.5 else 0.90  # 25% or 10% discount
+    discounted_retirement = (retirement_accounts * retirement_discount_factor) if retirement_accounts else 0.0
+    
+    # Calculate total available assets
+    total_available_assets = liquid_assets + discounted_retirement
+    
+    # Estimate closing costs (3% of loan amount)
+    estimated_closing_costs = requested_loan_amount * 0.03
+    
+    # Calculate reserves after down payment and closing costs
+    reserves_after_purchase = total_available_assets - down_payment_amount - estimated_closing_costs
+    
+    # Check asset sufficiency
+    if total_available_assets < (down_payment_amount + estimated_closing_costs):
+        validation_passed = False
+        validation_issues.append("Insufficient assets for down payment and closing costs")
+    
+    result = {
+        "application_id": application_id,
+        "asset_validation_status": "Passed" if validation_passed else "Failed",
+        "verified_liquid_assets": round(liquid_assets, 2),
+        "discounted_retirement_accounts": round(discounted_retirement, 2),
+        "total_available_assets": round(total_available_assets, 2),
+        "estimated_closing_costs": round(estimated_closing_costs, 2),
+        "reserves_after_purchase": round(reserves_after_purchase, 2),
+        "applicant_age": age,
+        "retirement_discount_factor": retirement_discount_factor,
+        "validation_issues": validation_issues,
+        "validation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "asset_validation_status": result["asset_validation_status"],
+        "verified_liquid_assets": result["verified_liquid_assets"]
+    })
+    
+    return result
+
+# API 4: PullCreditReports
+def PullCreditReports(
+    application_id: str,
+    verified_applicant_name: str,
+    verified_applicant_ssn: str,
+    verified_applicant_dob: str,
+    applicant_address: str,
+    credit_consent_signed: bool,
+    credit_consent_timestamp: str,
+    co_applicant_name: Optional[str] = None,
+    co_applicant_ssn: Optional[str] = None
+) -> Dict[str, Any]:
+    """Pulls tri-bureau credit reports"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    if not credit_consent_signed:
+        return {"error": "Credit consent not signed - cannot pull credit reports"}
+    
+    # Retrieve credit scores from application data
+    fico_score_equifax = convert_value(app_data.get('fico_score_equifax'), 'int')
+    fico_score_experian = convert_value(app_data.get('fico_score_experian'), 'int')
+    fico_score_transunion = convert_value(app_data.get('fico_score_transunion'), 'int')
+    derogatory_marks_count = convert_value(app_data.get('derogatory_marks_count'), 'int')
+    bankruptcy_history = convert_value(app_data.get('bankruptcy_history'), 'bool')
+    total_monthly_debt_obligations = convert_value(app_data.get('total_monthly_debt_obligations'), 'float')
+    
+    # If co-applicant exists, would pull their reports too
+    co_applicant_fico_equifax = None
+    co_applicant_fico_experian = None
+    co_applicant_fico_transunion = None
+    
+    result = {
+        "application_id": application_id,
+        "credit_pull_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "fico_score_equifax": fico_score_equifax,
+        "fico_score_experian": fico_score_experian,
+        "fico_score_transunion": fico_score_transunion,
+        "co_applicant_fico_equifax": co_applicant_fico_equifax,
+        "co_applicant_fico_experian": co_applicant_fico_experian,
+        "co_applicant_fico_transunion": co_applicant_fico_transunion,
+        "derogatory_marks_count": derogatory_marks_count,
+        "bankruptcy_history": bankruptcy_history,
+        "total_monthly_debt_obligations": round(total_monthly_debt_obligations, 2) if total_monthly_debt_obligations else 0.0,
+        "credit_report_full_data": {
+            "applicant": {
+                "equifax_score": fico_score_equifax,
+                "experian_score": fico_score_experian,
+                "transunion_score": fico_score_transunion,
+                "derogatory_marks": derogatory_marks_count,
+                "bankruptcy": bankruptcy_history
+            }
+        }
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "credit_pull_timestamp": result["credit_pull_timestamp"],
+        "fico_score_equifax": fico_score_equifax,
+        "fico_score_experian": fico_score_experian,
+        "fico_score_transunion": fico_score_transunion
+    })
+    
+    return result
+
+# API 5: CalculateRepresentativeCreditScore
+def CalculateRepresentativeCreditScore(
+    application_id: str,
+    fico_score_equifax: Optional[int] = None,
+    fico_score_experian: Optional[int] = None,
+    fico_score_transunion: Optional[int] = None,
+    co_applicant_fico_equifax: Optional[int] = None,
+    co_applicant_fico_experian: Optional[int] = None,
+    co_applicant_fico_transunion: Optional[int] = None
+) -> Dict[str, Any]:
+    """Calculates representative credit score using tri-merge methodology"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Collect applicant scores
+    applicant_scores = []
+    if fico_score_equifax:
+        applicant_scores.append(fico_score_equifax)
+    if fico_score_experian:
+        applicant_scores.append(fico_score_experian)
+    if fico_score_transunion:
+        applicant_scores.append(fico_score_transunion)
+    
+    # Calculate representative score for applicant
+    if len(applicant_scores) == 0:
+        return {"error": "No credit scores available"}
+    elif len(applicant_scores) == 1:
+        applicant_representative_score = applicant_scores[0]
+    elif len(applicant_scores) == 2:
+        applicant_representative_score = min(applicant_scores)
+    else:  # 3 scores
+        applicant_scores_sorted = sorted(applicant_scores)
+        applicant_representative_score = applicant_scores_sorted[1]  # Middle score
+    
+    # Calculate co-applicant representative score if exists
+    co_applicant_representative_score = None
+    if co_applicant_fico_equifax or co_applicant_fico_experian or co_applicant_fico_transunion:
+        co_scores = []
+        if co_applicant_fico_equifax:
+            co_scores.append(co_applicant_fico_equifax)
+        if co_applicant_fico_experian:
+            co_scores.append(co_applicant_fico_experian)
+        if co_applicant_fico_transunion:
+            co_scores.append(co_applicant_fico_transunion)
+        
+        if len(co_scores) == 1:
+            co_applicant_representative_score = co_scores[0]
+        elif len(co_scores) == 2:
+            co_applicant_representative_score = min(co_scores)
+        else:
+            co_scores_sorted = sorted(co_scores)
+            co_applicant_representative_score = co_scores_sorted[1]
+    
+    # Final representative score (lower of the two if co-applicant exists)
+    if co_applicant_representative_score:
+        representative_credit_score = min(applicant_representative_score, co_applicant_representative_score)
+    else:
+        representative_credit_score = applicant_representative_score
+    
+    result = {
+        "application_id": application_id,
+        "applicant_representative_score": applicant_representative_score,
+        "co_applicant_representative_score": co_applicant_representative_score,
+        "representative_credit_score": representative_credit_score,
+        "tri_merge_methodology": "Middle score of three bureaus, or lower of two, or single score if only one available",
+        "calculation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "representative_credit_score": representative_credit_score
+    })
+    
+    return result
+
+# API 6: ExecutePrequalificationAnalysis
+def ExecutePrequalificationAnalysis(
+    application_id: str,
+    representative_credit_score: int,
+    preliminary_gross_monthly_income: float,
+    total_monthly_debt_obligations: float,
+    requested_loan_amount: float,
+    loan_term_months: int,
+    estimated_property_value: float,
+    down_payment_amount: float,
+    property_type: str,
+    property_occupancy: str,
+    loan_purpose: str
+) -> Dict[str, Any]:
+    """Executes pre-qualification analysis"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Check minimum credit score requirement
+    if representative_credit_score < 620:
+        result = {
+            "application_id": application_id,
+            "prequalification_decision": "Not Qualified",
+            "decline_reason": "Credit score below minimum threshold of 620",
+            "representative_credit_score": representative_credit_score
+        }
+        update_application_data(application_id, {
+            "prequalification_decision": "Not Qualified",
+            "decline_reason": "Credit score below minimum threshold of 620"
+        })
+        return result
+    
+    # Determine base interest rate based on credit score tier
+    if representative_credit_score >= 780:
+        base_rate = 6.500
+        rate_adjustment = -0.500
+    elif representative_credit_score >= 760:
+        base_rate = 6.500
+        rate_adjustment = -0.250
+    elif representative_credit_score >= 740:
+        base_rate = 6.500
+        rate_adjustment = 0.000
+    elif representative_credit_score >= 720:
+        base_rate = 6.500
+        rate_adjustment = 0.125
+    elif representative_credit_score >= 700:
+        base_rate = 6.500
+        rate_adjustment = 0.250
+    elif representative_credit_score >= 680:
+        base_rate = 6.500
+        rate_adjustment = 0.500
+    elif representative_credit_score >= 660:
+        base_rate = 6.500
+        rate_adjustment = 0.875
+    elif representative_credit_score >= 640:
+        base_rate = 6.500
+        rate_adjustment = 1.375
+    else:
+        base_rate = 6.500
+        rate_adjustment = 2.000
+    
+    # Apply property type adjustment
+    if property_type == "Condo":
+        rate_adjustment += 0.250
+    elif property_type == "Townhouse":
+        rate_adjustment += 0.375
+    elif property_type == "Multi-Family":
+        rate_adjustment += 0.625
+    
+    # Apply occupancy adjustment
+    if property_occupancy == "Second Home":
+        rate_adjustment += 0.375
+    elif property_occupancy == "Investment Property":
+        rate_adjustment += 1.000
+    
+    # Apply loan purpose adjustment
+    if loan_purpose == "Refinance":
+        rate_adjustment += 0.125
+    elif loan_purpose == "Cash-Out Refinance":
+        rate_adjustment += 0.500
+    
+    estimated_interest_rate = base_rate + rate_adjustment
+    
+    # Calculate preliminary LTV
+    preliminary_ltv = (requested_loan_amount / estimated_property_value) * 100.0
+    
+    # Calculate monthly payment (P&I only for preliminary)
+    monthly_rate = estimated_interest_rate / 100.0 / 12.0
+    n_payments = loan_term_months
+    if monthly_rate > 0:
+        monthly_pi = requested_loan_amount * (monthly_rate * math.pow(1 + monthly_rate, n_payments)) / (math.pow(1 + monthly_rate, n_payments) - 1)
+    else:
+        monthly_pi = requested_loan_amount / n_payments
+    
+    # Estimate property taxes (1.2% annually)
+    monthly_taxes = (estimated_property_value * 0.012) / 12.0
+    
+    # Estimate insurance (0.5% annually)
+    monthly_insurance = (estimated_property_value * 0.005) / 12.0
+    
+    # Estimate MI if LTV > 80%
+    monthly_mi = 0.0
+    if preliminary_ltv > 80.0:
+        # Simple MI calculation based on LTV and credit
+        if representative_credit_score >= 760:
+            mi_rate = 0.005
+        elif representative_credit_score >= 700:
+            mi_rate = 0.007
+        else:
+            mi_rate = 0.010
+        monthly_mi = (requested_loan_amount * mi_rate) / 12.0
+    
+    # Total housing payment
+    monthly_housing_payment = monthly_pi + monthly_taxes + monthly_insurance + monthly_mi
+    
+    # Calculate DTI
+    total_monthly_obligations = monthly_housing_payment + total_monthly_debt_obligations
+    debt_to_income_ratio = (total_monthly_obligations / preliminary_gross_monthly_income) * 100.0
+    
+    # Determine prequalification decision
+    if debt_to_income_ratio <= 43.0:
+        prequalification_decision = "Qualified"
+    elif debt_to_income_ratio <= 50.0:
+        prequalification_decision = "Conditionally Qualified"
+    else:
+        prequalification_decision = "Not Qualified"
+    
+    # Calculate max loan amount at 43% DTI
+    max_housing_payment_43 = (preliminary_gross_monthly_income * 0.43) - total_monthly_debt_obligations
+    # Reverse calculate loan amount (simplified)
+    max_loan_amount_prequalified = (max_housing_payment_43 - monthly_taxes - monthly_insurance - monthly_mi) / (monthly_rate * math.pow(1 + monthly_rate, n_payments) / (math.pow(1 + monthly_rate, n_payments) - 1)) if monthly_rate > 0 else 0.0
+    
+    result = {
+        "application_id": application_id,
+        "prequalification_decision": prequalification_decision,
+        "preliminary_debt_to_income_ratio": round(debt_to_income_ratio, 2),
+        "estimated_interest_rate_prequalification": round(estimated_interest_rate, 3),
+        "preliminary_ltv_ratio": round(preliminary_ltv, 2),
+        "estimated_monthly_payment": round(monthly_housing_payment, 2),
+        "max_loan_amount_prequalified": round(max_loan_amount_prequalified, 2),
+        "prequalification_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "prequalification_decision": prequalification_decision,
+        "preliminary_ltv_ratio": round(preliminary_ltv, 2),
+        "estimated_interest_rate_prequalification": round(estimated_interest_rate, 3),
+        "max_loan_amount_prequalified": round(max_loan_amount_prequalified, 2)
+    })
+    
+    return result
+
+# API 7: VerifyEmploymentAndIncome
+def VerifyEmploymentAndIncome(
+    application_id: str,
+    prequalification_decision: str,
+    employment_status: str,
+    gross_monthly_income: float,
+    pay_stubs_uploaded: bool,
+    w2_forms_uploaded: bool,
+    employer_name: Optional[str] = None,
+    employment_years: Optional[float] = None,
+    additional_income_monthly: Optional[float] = None,
+    tax_returns_uploaded: Optional[bool] = None
+) -> Dict[str, Any]:
+    """Verifies employment and income through VOE and document analysis"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Check prequalification gate
+    if prequalification_decision == "Not Qualified":
+        return {"error": "Cannot verify income for Not Qualified applications"}
+    
+    verification_passed = True
+    verification_issues = []
+    
+    # Simulate VOE for Full-Time/Part-Time
+    if employment_status in ["Full-Time", "Part-Time"]:
+        if not pay_stubs_uploaded or not w2_forms_uploaded:
+            verification_passed = False
+            verification_issues.append("Missing required documents")
+        
+        # VOE simulation - assume all verifications pass
+        verified_gross_monthly_income = gross_monthly_income
+        if additional_income_monthly:
+            verified_gross_monthly_income += additional_income_monthly * 0.95  # Apply 5% haircut to additional income
+    
+    # Self-employed income verification
+    elif employment_status == "Self-Employed":
+        if not tax_returns_uploaded:
+            verification_passed = False
+            verification_issues.append("Tax returns required for self-employed")
+            verified_gross_monthly_income = 0.0
+        else:
+            # Simulate tax return analysis with 2-year averaging
+            # Assume 3% year-over-year decline for complexity
+            year1_income = gross_monthly_income * 12
+            year2_income = year1_income * 0.97  # 3% decline
+            average_annual = (year1_income + year2_income) / 2
+            verified_gross_monthly_income = average_annual / 12
+            
+            if additional_income_monthly:
+                verified_gross_monthly_income += additional_income_monthly * 0.90
+    
+    else:
+        verified_gross_monthly_income = gross_monthly_income
+    
+    # Income variance check
+    income_variance_percent = ((verified_gross_monthly_income - gross_monthly_income) / gross_monthly_income * 100) if gross_monthly_income > 0 else 0
+    if abs(income_variance_percent) > 20:
+        verification_issues.append(f"Income variance exceeds 20%: {income_variance_percent:.1f}%")
+    
+    result = {
+        "application_id": application_id,
+        "income_verification_status": "Verified" if verification_passed else "Failed",
+        "verified_gross_monthly_income": round(verified_gross_monthly_income, 2),
+        "income_variance_percent": round(income_variance_percent, 2),
+        "employment_verified": verification_passed,
+        "verification_method": "VOE" if employment_status in ["Full-Time", "Part-Time"] else "Tax Return Analysis",
+        "verification_issues": verification_issues,
+        "verification_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "verified_gross_monthly_income": round(verified_gross_monthly_income, 2),
+        "income_verification_status": result["income_verification_status"]
+    })
+    
+    return result
+
+# API 8: VerifyAssetsAndReserves
+def VerifyAssetsAndReserves(
+    application_id: str,
+    prequalification_decision: str,
+    liquid_assets: float,
+    bank_statements_uploaded: bool,
+    down_payment_amount: float,
+    requested_loan_amount: float,
+    applicant_dob: str,
+    verified_gross_monthly_income: float,
+    property_type: str,
+    property_occupancy: str,
+    retirement_accounts: Optional[float] = None
+) -> Dict[str, Any]:
+    """Verifies assets and calculates reserve months"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    if prequalification_decision == "Not Qualified":
+        return {"error": "Cannot verify assets for Not Qualified applications"}
+    
+    verification_passed = True
+    verification_issues = []
+    
+    if not bank_statements_uploaded:
+        verification_passed = False
+        verification_issues.append("Bank statements not uploaded")
+    
+    # Calculate age for retirement discount
+    birth_date = datetime.strptime(applicant_dob, "%Y-%m-%d")
+    current_date = datetime.utcnow()
+    age = current_date.year - birth_date.year - ((current_date.month, current_date.day) < (birth_date.month, birth_date.day))
+    
+    retirement_discount = 0.75 if age < 59.5 else 0.90
+    discounted_retirement = (retirement_accounts * retirement_discount) if retirement_accounts else 0.0
+    
+    # Total verified assets
+    verified_liquid_assets_final = liquid_assets + discounted_retirement
+    
+    # Closing costs estimate (3%)
+    estimated_closing_costs = requested_loan_amount * 0.03
+    
+    # Calculate remaining assets after down payment and closing
+    remaining_assets = verified_liquid_assets_final - down_payment_amount - estimated_closing_costs
+    
+    # Check sufficiency
+    if remaining_assets < 0:
+        verification_passed = False
+        verification_issues.append("Insufficient assets for down payment and closing costs")
+    
+    # Estimate monthly housing payment for reserve calculation (simplified)
+    # Use 1% of loan amount as rough monthly payment estimate
+    estimated_monthly_housing = requested_loan_amount * 0.01
+    
+    # Calculate reserve months
+    reserve_months_calculated = remaining_assets / estimated_monthly_housing if estimated_monthly_housing > 0 else 0
+    
+    # Large deposit analysis - simulate checking for deposits > 50% of monthly income
+    large_deposits_flagged = []
+    # For simulation, assume no large deposits flagged
+    
+    result = {
+        "application_id": application_id,
+        "asset_verification_status": "Verified" if verification_passed else "Failed",
+        "verified_liquid_assets_final": round(verified_liquid_assets_final, 2),
+        "discounted_retirement_assets": round(discounted_retirement, 2),
+        "remaining_assets_after_closing": round(remaining_assets, 2),
+        "reserve_months_calculated": round(reserve_months_calculated, 2),
+        "large_deposits_flagged": large_deposits_flagged,
+        "verification_issues": verification_issues,
+        "verification_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "verified_liquid_assets_final": round(verified_liquid_assets_final, 2),
+        "reserve_months_calculated": round(reserve_months_calculated, 2)
+    })
+    
+    return result
+
+# API 9: AnalyzeCreditHistory
+def AnalyzeCreditHistory(
+    application_id: str,
+    credit_report_full_data: Dict[str, Any],
+    derogatory_marks_count: int,
+    bankruptcy_history: bool
+) -> Dict[str, Any]:
+    """Analyzes credit history in detail"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Detailed derogatory analysis with weighted scoring
+    # 30-day late = 1 point, 60-day = 2 points, 90+ = 3 points
+    # Simulate based on derogatory_marks_count
+    detailed_derogatory_marks_count = derogatory_marks_count
+    
+    # Payment history quality assessment
+    if derogatory_marks_count == 0:
+        payment_history_quality = "Excellent"
+    elif derogatory_marks_count <= 2:
+        payment_history_quality = "Good"
+    elif derogatory_marks_count <= 4:
+        payment_history_quality = "Fair"
+    else:
+        payment_history_quality = "Poor"
+    
+    # Credit depth rating
+    # Simulate based on credit score
+    representative_score = convert_value(app_data.get('representative_credit_score'), 'int')
+    if representative_score and representative_score >= 760:
+        credit_depth_rating = "Deep"
+    elif representative_score and representative_score >= 700:
+        credit_depth_rating = "Moderate"
+    elif representative_score and representative_score >= 640:
+        credit_depth_rating = "Thin"
+    else:
+        credit_depth_rating = "Insufficient"
+    
+    # Bankruptcy seasoning check
+    bankruptcy_seasoning_compliant = True
+    if bankruptcy_history:
+        # Assume sufficient time has passed for existing data
+        bankruptcy_seasoning_compliant = True
+    
+    # Foreclosure check (simulate from data if available)
+    foreclosure_history_compliant = True
+    
+    result = {
+        "application_id": application_id,
+        "detailed_derogatory_marks_count": detailed_derogatory_marks_count,
+        "payment_history_quality": payment_history_quality,
+        "credit_depth_rating": credit_depth_rating,
+        "bankruptcy_seasoning_compliant": bankruptcy_seasoning_compliant,
+        "foreclosure_history_compliant": foreclosure_history_compliant,
+        "collections_count": 0,  # Simplified
+        "public_records_count": 0,  # Simplified
+        "analysis_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "payment_history_quality": payment_history_quality,
+        "credit_depth_rating": credit_depth_rating,
+        "detailed_derogatory_marks_count": detailed_derogatory_marks_count
+    })
+    
+    return result
+
+# API 10: CalculateDebtRatios
+def CalculateDebtRatios(
+    application_id: str,
+    verified_gross_monthly_income: float,
+    total_monthly_debt_obligations: float,
+    requested_loan_amount: float,
+    loan_term_months: int,
+    estimated_interest_rate_prequalification: float,
+    property_address: str,
+    estimated_property_value: float,
+    representative_credit_score: int,
+    preliminary_ltv_ratio: float
+) -> Dict[str, Any]:
+    """Calculates precise debt-to-income and debt service coverage ratios"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Calculate monthly P&I payment
+    monthly_rate = estimated_interest_rate_prequalification / 100.0 / 12.0
+    n_payments = loan_term_months
+    
+    if monthly_rate > 0:
+        monthly_pi = requested_loan_amount * (monthly_rate * math.pow(1 + monthly_rate, n_payments)) / (math.pow(1 + monthly_rate, n_payments) - 1)
+    else:
+        monthly_pi = requested_loan_amount / n_payments
+    
+    # Property taxes (1.2% annually, adjusted by location - simplified to 1.2%)
+    monthly_property_tax = (estimated_property_value * 0.012) / 12.0
+    
+    # Hazard insurance (0.5% annually)
+    monthly_hazard_insurance = (estimated_property_value * 0.005) / 12.0
+    
+    # Mortgage insurance if LTV > 80%
+    monthly_mortgage_insurance = 0.0
+    if preliminary_ltv_ratio > 80.0:
+        # MI rate based on LTV and credit score
+        if representative_credit_score >= 760 and preliminary_ltv_ratio <= 85:
+            mi_annual_rate = 0.003
+        elif representative_credit_score >= 760 and preliminary_ltv_ratio <= 90:
+            mi_annual_rate = 0.005
+        elif representative_credit_score >= 700 and preliminary_ltv_ratio <= 85:
+            mi_annual_rate = 0.005
+        elif representative_credit_score >= 700 and preliminary_ltv_ratio <= 90:
+            mi_annual_rate = 0.007
+        elif representative_credit_score >= 680 and preliminary_ltv_ratio <= 90:
+            mi_annual_rate = 0.010
+        else:
+            mi_annual_rate = 0.012
+        
+        monthly_mortgage_insurance = (requested_loan_amount * mi_annual_rate) / 12.0
+    
+    # HOA dues (assume $0 for simplification unless property is condo)
+    monthly_hoa = 0.0
+    property_type = app_data.get('property_type', '')
+    if property_type == "Condo":
+        monthly_hoa = 200.0  # Assumed monthly HOA
+    
+    # Total monthly housing payment
+    monthly_housing_payment_total = monthly_pi + monthly_property_tax + monthly_hazard_insurance + monthly_mortgage_insurance + monthly_hoa
+    
+    # Calculate DTI
+    total_monthly_obligations = monthly_housing_payment_total + total_monthly_debt_obligations
+    debt_to_income_ratio = (total_monthly_obligations / verified_gross_monthly_income) * 100.0
+    
+    # Calculate DSCR
+    debt_service_coverage_ratio = verified_gross_monthly_income / total_monthly_obligations if total_monthly_obligations > 0 else 0.0
+    
+    result = {
+        "application_id": application_id,
+        "monthly_principal_and_interest": round(monthly_pi, 2),
+        "monthly_property_tax": round(monthly_property_tax, 2),
+        "monthly_hazard_insurance": round(monthly_hazard_insurance, 2),
+        "monthly_mortgage_insurance": round(monthly_mortgage_insurance, 2),
+        "monthly_hoa_dues": round(monthly_hoa, 2),
+        "monthly_housing_payment_total": round(monthly_housing_payment_total, 2),
+        "total_monthly_obligations": round(total_monthly_obligations, 2),
+        "debt_to_income_ratio": round(debt_to_income_ratio, 2),
+        "debt_service_coverage_ratio": round(debt_service_coverage_ratio, 2),
+        "calculation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "debt_to_income_ratio": round(debt_to_income_ratio, 2),
+        "debt_service_coverage_ratio": round(debt_service_coverage_ratio, 2),
+        "monthly_housing_payment_total": round(monthly_housing_payment_total, 2)
+    })
+    
+    return result
+
+# API 11: CalculateProbabilityOfDefault
+def CalculateProbabilityOfDefault(
+    application_id: str,
+    representative_credit_score: int,
+    debt_to_income_ratio: float,
+    preliminary_ltv_ratio: float,
+    reserve_months_calculated: float,
+    employment_years: float,
+    property_type: str,
+    property_occupancy: str,
+    loan_purpose: str,
+    detailed_derogatory_marks_count: int
+) -> Dict[str, Any]:
+    """Calculates probability of default using logistic regression model"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Logistic regression coefficients (institution-calibrated)
+    beta_0 = 5.0  # Intercept
+    beta_fico = -0.012
+    beta_dti = 0.08
+    beta_ltv = 0.05
+    beta_reserves = -0.15
+    beta_employment = -0.05
+    beta_property_type = 0.3 if property_type == "Multi-Family" else 0.0
+    beta_occupancy = 0.8 if property_occupancy == "Investment Property" else 0.0
+    beta_loan_purpose = 0.4 if loan_purpose == "Cash-Out Refinance" else 0.0
+    beta_derogs = 0.2
+    
+    # Calculate z
+    z = (beta_0 + 
+         beta_fico * representative_credit_score + 
+         beta_dti * debt_to_income_ratio + 
+         beta_ltv * preliminary_ltv_ratio + 
+         beta_reserves * reserve_months_calculated + 
+         beta_employment * employment_years + 
+         beta_property_type + 
+         beta_occupancy + 
+         beta_loan_purpose + 
+         beta_derogs * detailed_derogatory_marks_count)
+    
+    # Calculate PD = 1 / (1 + e^-z)
+    probability_of_default_score = 1.0 / (1.0 + math.exp(-z)) * 100.0  # Convert to percentage
+    
+    # Map to credit grade
+    if probability_of_default_score <= 2.0:
+        credit_score_grade = "A"
+    elif probability_of_default_score <= 4.0:
+        credit_score_grade = "B"
+    elif probability_of_default_score <= 7.0:
+        credit_score_grade = "C"
+    else:
+        credit_score_grade = "D"
+    
+    result = {
+        "application_id": application_id,
+        "probability_of_default_score": round(probability_of_default_score, 2),
+        "credit_score_grade": credit_score_grade,
+        "pd_model_version": "v2.1",
+        "calculation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "probability_of_default_score": round(probability_of_default_score, 2),
+        "credit_score_grade": credit_score_grade
+    })
+    
+    return result
+
+# API 12: DetermineFinalInterestRate
+def DetermineFinalInterestRate(
+    application_id: str,
+    credit_score_grade: str,
+    representative_credit_score: int,
+    preliminary_ltv_ratio: float,
+    property_type: str,
+    property_occupancy: str,
+    loan_purpose: str,
+    debt_to_income_ratio: float,
+    loan_term_months: int
+) -> Dict[str, Any]:
+    """Determines final risk-adjusted interest rate"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Base rate (current market rate)
+    base_rate = 6.500
+    
+    # Credit score adjustment
+    if representative_credit_score >= 780:
+        credit_adjustment = -0.500
+    elif representative_credit_score >= 760:
+        credit_adjustment = -0.250
+    elif representative_credit_score >= 740:
+        credit_adjustment = 0.000
+    elif representative_credit_score >= 720:
+        credit_adjustment = 0.125
+    elif representative_credit_score >= 700:
+        credit_adjustment = 0.250
+    elif representative_credit_score >= 680:
+        credit_adjustment = 0.500
+    elif representative_credit_score >= 660:
+        credit_adjustment = 0.875
+    elif representative_credit_score >= 640:
+        credit_adjustment = 1.375
+    else:
+        credit_adjustment = 2.000
+    
+    # LTV adjustment
+    if preliminary_ltv_ratio <= 60:
+        ltv_adjustment = 0.000
+    elif preliminary_ltv_ratio <= 70:
+        ltv_adjustment = 0.125
+    elif preliminary_ltv_ratio <= 80:
+        ltv_adjustment = 0.250
+    elif preliminary_ltv_ratio <= 85:
+        ltv_adjustment = 0.375
+    elif preliminary_ltv_ratio <= 90:
+        ltv_adjustment = 0.625
+    else:
+        ltv_adjustment = 1.000
+    
+    # Property type adjustment
+    if property_type == "Single Family":
+        property_adjustment = 0.000
+    elif property_type == "Condo":
+        property_adjustment = 0.250
+    elif property_type == "Townhouse":
+        property_adjustment = 0.375
+    elif property_type == "Multi-Family":
+        property_adjustment = 0.750
+    else:
+        property_adjustment = 0.000
+    
+    # Occupancy adjustment
+    if property_occupancy == "Primary Residence":
+        occupancy_adjustment = 0.000
+    elif property_occupancy == "Second Home":
+        occupancy_adjustment = 0.375
+    elif property_occupancy == "Investment Property":
+        occupancy_adjustment = 1.250
+    else:
+        occupancy_adjustment = 0.000
+    
+    # Loan purpose adjustment
+    if loan_purpose == "Purchase":
+        purpose_adjustment = 0.000
+    elif loan_purpose == "Refinance":
+        purpose_adjustment = 0.125
+    elif loan_purpose == "Cash-Out Refinance":
+        if preliminary_ltv_ratio <= 70:
+            purpose_adjustment = 0.375
+        else:
+            purpose_adjustment = 0.750
+    else:
+        purpose_adjustment = 0.000
+    
+    # DTI adjustment
+    if debt_to_income_ratio <= 36:
+        dti_adjustment = 0.000
+    elif debt_to_income_ratio <= 40:
+        dti_adjustment = 0.125
+    elif debt_to_income_ratio <= 43:
+        dti_adjustment = 0.250
+    else:
+        dti_adjustment = 0.500
+    
+    # Loan term adjustment (15-year gets discount)
+    if loan_term_months == 180:
+        term_adjustment = -0.375
+    else:
+        term_adjustment = 0.000
+    
+    # Calculate final rate
+    final_risk_adjusted_interest_rate = (base_rate + credit_adjustment + ltv_adjustment + 
+                                         property_adjustment + occupancy_adjustment + 
+                                         purpose_adjustment + dti_adjustment + term_adjustment)
+    
+    result = {
+        "application_id": application_id,
+        "base_interest_rate": round(base_rate, 3),
+        "credit_score_adjustment": round(credit_adjustment, 3),
+        "ltv_adjustment": round(ltv_adjustment, 3),
+        "property_type_adjustment": round(property_adjustment, 3),
+        "occupancy_adjustment": round(occupancy_adjustment, 3),
+        "loan_purpose_adjustment": round(purpose_adjustment, 3),
+        "dti_adjustment": round(dti_adjustment, 3),
+        "loan_term_adjustment": round(term_adjustment, 3),
+        "final_risk_adjusted_interest_rate": round(final_risk_adjusted_interest_rate, 3),
+        "rate_lock_eligible": True,
+        "pricing_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "final_risk_adjusted_interest_rate": round(final_risk_adjusted_interest_rate, 3)
+    })
+    
+    return result
+
+# API 13: EvaluateCompensatingFactors
+def EvaluateCompensatingFactors(
+    application_id: str,
+    debt_to_income_ratio: float,
+    reserve_months_calculated: float,
+    payment_history_quality: str,
+    verified_gross_monthly_income: float,
+    monthly_housing_payment_total: float,
+    total_monthly_debt_obligations: float,
+    preliminary_ltv_ratio: float,
+    employment_years: float,
+    credit_depth_rating: str,
+    applicant_address: str
+) -> Dict[str, Any]:
+    """Evaluates compensating factors for marginal applications"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    total_compensating_factor_points = 0
+    compensating_factors_list = []
+    
+    # Reserve months points
+    if reserve_months_calculated > 12:
+        points = 3
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"Reserves >12 months: {points} points")
+    elif reserve_months_calculated >= 6:
+        points = 2
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"Reserves 6-12 months: {points} points")
+    elif reserve_months_calculated >= 3:
+        points = 1
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"Reserves 3-6 months: {points} points")
+    
+    # Payment history points
+    if payment_history_quality in ["Excellent", "Good"]:
+        points = 2
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"Excellent/Good payment history: {points} points")
+    
+    # Residual income points (simplified - assume 120% of regional median is $4000/month)
+    residual_income = verified_gross_monthly_income - monthly_housing_payment_total - total_monthly_debt_obligations
+    regional_median_120_percent = 4000.0
+    if residual_income > regional_median_120_percent:
+        points = 2
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"Strong residual income: {points} points")
+    
+    # LTV position points
+    if preliminary_ltv_ratio <= 70:
+        points = 2
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"LTV ≤70% (substantial equity): {points} points")
+    
+    # Employment stability points
+    if employment_years > 5.0:
+        points = 1
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"Employment >5 years: {points} points")
+    
+    # Credit depth points
+    if credit_depth_rating == "Deep":
+        points = 1
+        total_compensating_factor_points += points
+        compensating_factors_list.append(f"Deep credit profile: {points} points")
+    
+    # Determine if compensating factors are present
+    compensating_factors_present = total_compensating_factor_points >= 5
+    
+    # Determine if sufficient for DTI exception
+    sufficient_for_dti_exception = False
+    if 43.0 < debt_to_income_ratio <= 45.0 and total_compensating_factor_points >= 5:
+        sufficient_for_dti_exception = True
+    elif 45.0 < debt_to_income_ratio <= 50.0 and total_compensating_factor_points >= 7:
+        sufficient_for_dti_exception = True
+    
+    result = {
+        "application_id": application_id,
+        "total_compensating_factor_points": total_compensating_factor_points,
+        "compensating_factors_present": compensating_factors_present,
+        "compensating_factors_list": compensating_factors_list,
+        "sufficient_for_dti_exception": sufficient_for_dti_exception,
+        "evaluation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "compensating_factors_present": compensating_factors_present,
+        "total_compensating_factor_points": total_compensating_factor_points
+    })
+    
+    return result
+
+# API 14: OrderPropertyAppraisal
+def OrderPropertyAppraisal(
+    application_id: str,
+    prequalification_decision: str,
+    property_address: str,
+    property_type: str,
+    property_occupancy: str,
+    estimated_property_value: float,
+    requested_loan_amount: float,
+    loan_purpose: str
+) -> Dict[str, Any]:
+    """Orders property appraisal"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    if prequalification_decision == "Not Qualified":
+        return {"error": "Cannot order appraisal for Not Qualified applications"}
+    
+    # Generate appraisal order number
+    appraisal_order_number = f"APR-{application_id.split('-')[-1]}-001"
+    
+    # Determine appraisal form
+    if property_type == "Single Family" or property_type == "Townhouse":
+        appraisal_form = "URAR Form 1004"
+    elif property_type == "Condo":
+        appraisal_form = "Form 1073"
+    elif property_type == "Multi-Family":
+        appraisal_form = "Form 1025"
+    else:
+        appraisal_form = "URAR Form 1004"
+    
+    # Calculate expected completion date (10 business days)
+    order_timestamp = datetime.utcnow()
+    expected_completion_date = order_timestamp + timedelta(days=14)  # Approximate 10 business days
+    
+    result = {
+        "application_id": application_id,
+        "appraisal_order_number": appraisal_order_number,
+        "appraisal_order_timestamp": order_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "property_address": property_address,
+        "appraisal_form_required": appraisal_form,
+        "estimated_property_value": round(estimated_property_value, 2),
+        "appraisal_purpose": loan_purpose,
+        "expected_completion_date": expected_completion_date.strftime("%Y-%m-%d"),
+        "appraisal_status": "Ordered"
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "appraisal_order_number": appraisal_order_number,
+        "appraisal_order_timestamp": result["appraisal_order_timestamp"],
+        "appraisal_status": "Ordered"
+    })
+    
+    return result
+
+# API 15: ConductPropertyValuation
+def ConductPropertyValuation(
+    application_id: str,
+    appraisal_order_number: str,
+    property_address: str,
+    property_type: str,
+    estimated_property_value: float
+) -> Dict[str, Any]:
+    """Conducts property valuation through appraiser site inspection"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Site inspection timestamp
+    site_inspection_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    
+    # Get property details from app data
+    property_square_footage = convert_value(app_data.get('property_square_footage'), 'int')
+    property_condition_str = app_data.get('property_condition', 'Good')
+    comparable_properties_count = convert_value(app_data.get('comparable_properties_count'), 'int')
+    
+    # Map property condition to standard scale
+    condition_mapping = {
+        "Excellent": "C1",
+        "Good": "C2",
+        "Fair": "C3",
+        "Poor": "C4"
+    }
+    property_condition = condition_mapping.get(property_condition_str, "C2")
+    
+    # Simulate final appraised value (within ±5% of estimated)
+    # Use deterministic calculation based on application_id
+    app_number = int(application_id.split('-')[-1])
+    variance_factor = 1.0 + ((app_number % 11) - 5) / 100.0  # Range: 0.95 to 1.05
+    final_appraised_value = estimated_property_value * variance_factor
+    
+    result = {
+        "application_id": application_id,
+        "appraisal_order_number": appraisal_order_number,
+        "site_inspection_timestamp": site_inspection_timestamp,
+        "property_square_footage": property_square_footage,
+        "property_condition": property_condition,
+        "comparable_properties_count": comparable_properties_count,
+        "final_appraised_value": round(final_appraised_value, 2),
+        "appraisal_completion_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "appraiser_certification": "Licensed Residential Appraiser"
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "final_appraised_value": round(final_appraised_value, 2),
+        "site_inspection_timestamp": site_inspection_timestamp,
+        "property_condition": property_condition
+    })
+    
+    return result
+
+# API 16: ValidateAppraisalWithAVM
+def ValidateAppraisalWithAVM(
+    application_id: str,
+    property_address: str,
+    final_appraised_value: float,
+    property_type: str
+) -> Dict[str, Any]:
+    """Validates appraisal using AVM"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Simulate AVM value (typically within ±8% of appraised value)
+    # Use deterministic calculation
+    app_number = int(application_id.split('-')[-1])
+    avm_variance_factor = 1.0 + ((app_number % 17) - 8) / 100.0  # Range: 0.92 to 1.08
+    avm_estimated_value = final_appraised_value * avm_variance_factor
+    
+    # Calculate variance
+    appraisal_avm_variance_percent = ((final_appraised_value - avm_estimated_value) / avm_estimated_value) * 100.0
+    
+    # Check if second review triggered (variance > ±10%)
+    second_review_triggered = abs(appraisal_avm_variance_percent) > 10.0
+    
+    result = {
+        "application_id": application_id,
+        "avm_estimated_value": round(avm_estimated_value, 2),
+        "final_appraised_value": round(final_appraised_value, 2),
+        "appraisal_avm_variance_percent": round(appraisal_avm_variance_percent, 2),
+        "second_review_triggered": second_review_triggered,
+        "avm_confidence_score": 0.85,
+        "validation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "avm_estimated_value": round(avm_estimated_value, 2),
+        "appraisal_avm_variance_percent": round(appraisal_avm_variance_percent, 2),
+        "second_review_triggered": second_review_triggered
+    })
+    
+    return result
+
+# API 17: CalculateLoanToValueRatio
+def CalculateLoanToValueRatio(
+    application_id: str,
+    final_appraised_value: float,
+    requested_loan_amount: float,
+    estimated_property_value: float,
+    loan_purpose: str,
+    representative_credit_score: int,
+    property_type: str,
+    property_occupancy: str
+) -> Dict[str, Any]:
+    """Calculates loan-to-value ratio"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Determine collateral value
+    if loan_purpose == "Purchase":
+        # Use lesser of appraised value or purchase price
+        collateral_value = min(final_appraised_value, estimated_property_value)
+    else:
+        # Refinance uses appraised value
+        collateral_value = final_appraised_value
+    
+    # Calculate LTV
+    loan_to_value_ratio = (requested_loan_amount / collateral_value) * 100.0
+    
+    # Determine max LTV policy based on credit score, property type, and occupancy
+    if property_occupancy == "Primary Residence":
+        if property_type == "Single Family":
+            if representative_credit_score >= 740:
+                max_ltv_policy = 95.0
+            elif representative_credit_score >= 700:
+                max_ltv_policy = 90.0
+            elif representative_credit_score >= 680:
+                max_ltv_policy = 85.0
+            else:
+                max_ltv_policy = 80.0
+        elif property_type == "Condo":
+            max_ltv_policy = 90.0 if representative_credit_score >= 720 else 85.0
+        else:
+            max_ltv_policy = 90.0
+    elif property_occupancy == "Second Home":
+        max_ltv_policy = 90.0
+    else:  # Investment Property
+        if property_type == "Multi-Family":
+            max_ltv_policy = 75.0
+        else:
+            max_ltv_policy = 85.0
+    
+    # Check if loan amount adjustment required
+    loan_amount_adjustment_required = loan_to_value_ratio > max_ltv_policy
+    
+    # Calculate adjusted loan amount if needed
+    if loan_amount_adjustment_required:
+        adjusted_loan_amount = collateral_value * (max_ltv_policy / 100.0)
+    else:
+        adjusted_loan_amount = requested_loan_amount
+    
+    result = {
+        "application_id": application_id,
+        "collateral_value": round(collateral_value, 2),
+        "requested_loan_amount": round(requested_loan_amount, 2),
+        "loan_to_value_ratio": round(loan_to_value_ratio, 2),
+        "max_ltv_policy_threshold": round(max_ltv_policy, 2),
+        "loan_amount_adjustment_required": loan_amount_adjustment_required,
+        "adjusted_loan_amount": round(adjusted_loan_amount, 2),
+        "calculation_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "loan_to_value_ratio": round(loan_to_value_ratio, 2),
+        "loan_amount_adjustment_required": loan_amount_adjustment_required
+    })
+    
+    return result
+
+# API 18: RenderFinalLoanDecision
+def RenderFinalLoanDecision(
+    application_id: str,
+    debt_to_income_ratio: float,
+    debt_service_coverage_ratio: float,
+    loan_to_value_ratio: float,
+    probability_of_default_score: float,
+    credit_score_grade: str,
+    final_risk_adjusted_interest_rate: float,
+    compensating_factors_present: bool,
+    property_condition: str,
+    bankruptcy_seasoning_compliant: bool,
+    foreclosure_history_compliant: bool,
+    verified_gross_monthly_income: float,
+    requested_loan_amount: float,
+    loan_term_months: int,
+    application_timestamp: str
+) -> Dict[str, Any]:
+    """Renders final loan decision"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Decision logic
+    decline_reasons = []
+    
+    # Check property condition
+    if property_condition in ["C4", "C5"]:
+        decline_reasons.append("Property condition requires repairs or is unsuitable")
+    
+    # Check bankruptcy/foreclosure seasoning
+    if not bankruptcy_seasoning_compliant:
+        decline_reasons.append("Bankruptcy seasoning period not met")
+    
+    if not foreclosure_history_compliant:
+        decline_reasons.append("Foreclosure seasoning period not met")
+    
+    # Check credit grade
+    if credit_score_grade == "D":
+        decline_reasons.append("Credit grade D requires special approval")
+    
+    # Check DTI
+    if debt_to_income_ratio > 50.0:
+        decline_reasons.append("DTI exceeds absolute maximum of 50%")
+    elif debt_to_income_ratio > 43.0 and not compensating_factors_present:
+        decline_reasons.append("DTI exceeds 43% without sufficient compensating factors")
+    
+    # Check DSCR
+    if debt_service_coverage_ratio < 1.0:
+        decline_reasons.append("Negative cash flow - DSCR below 1.0")
+    
+    # Check PD score
+    if probability_of_default_score > 10.0:
+        decline_reasons.append("Probability of default exceeds acceptable threshold")
+    
+    # Determine decision
+    if len(decline_reasons) > 0:
+        final_decision = "Declined"
+        conditions_count = 0
+        approved_loan_amount = None
+        approved_interest_rate = None
+        approved_loan_term_months = None
+    else:
+        # Check if conditions needed
+        conditions_count = 0
+        conditions_list = []
+        
+        if debt_to_income_ratio > 43.0 and compensating_factors_present:
+            conditions_count += 1
+            conditions_list.append("Verify compensating factors documentation")
+        
+        if credit_score_grade == "C":
+            conditions_count += 1
+            conditions_list.append("Additional income verification required")
+        
+        if loan_to_value_ratio > 80.0:
+            conditions_count += 1
+            conditions_list.append("Mortgage insurance approval required")
+        
+        if conditions_count > 0:
+            final_decision = "Approved with Conditions"
+        else:
+            final_decision = "Approved"
+        
+        # Get adjusted loan amount if applicable
+        loan_amount_adjustment_required = app_data.get('loan_amount_adjustment_required')
+        if loan_amount_adjustment_required == 'True':
+            # Would get adjusted amount from app data
+            approved_loan_amount = requested_loan_amount * 0.95  # Simplified
+        else:
+            approved_loan_amount = requested_loan_amount
+        
+        approved_interest_rate = final_risk_adjusted_interest_rate
+        approved_loan_term_months = loan_term_months
+    
+    # Calculate turnaround time
+    final_decision_timestamp = datetime.utcnow()
+    app_timestamp = datetime.strptime(application_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+    turnaround_time_days = (final_decision_timestamp - app_timestamp).days
+    
+    result = {
+        "application_id": application_id,
+        "final_decision": final_decision,
+        "final_decision_timestamp": final_decision_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "approved_loan_amount": round(approved_loan_amount, 2) if approved_loan_amount else None,
+        "approved_interest_rate": round(approved_interest_rate, 3) if approved_interest_rate else None,
+        "approved_loan_term_months": approved_loan_term_months,
+        "conditions_count": conditions_count,
+        "decline_reasons": decline_reasons if final_decision == "Declined" else [],
+        "turnaround_time_days": turnaround_time_days,
+        "underwriter_notes": "Decision rendered per policy guidelines"
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "final_decision": final_decision,
+        "final_decision_timestamp": result["final_decision_timestamp"],
+        "approved_loan_amount": round(approved_loan_amount, 2) if approved_loan_amount else '',
+        "approved_interest_rate": round(approved_interest_rate, 3) if approved_interest_rate else '',
+        "approved_loan_term_months": approved_loan_term_months if approved_loan_term_months else '',
+        "conditions_count": conditions_count,
+        "decline_reason": '; '.join(decline_reasons) if decline_reasons else '',
+        "turnaround_time_days": turnaround_time_days
+    })
+    
+    return result
+
+# API 19: ExecuteFairLendingMonitoring
+def ExecuteFairLendingMonitoring(
+    application_id: str,
+    final_decision: str,
+    representative_credit_score: int,
+    debt_to_income_ratio: float,
+    loan_to_value_ratio: float,
+    property_address: str,
+    approved_interest_rate: Optional[float] = None,
+    conditions_count: Optional[int] = None
+) -> Dict[str, Any]:
+    """Executes fair lending compliance monitoring"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Extract Census tract from property address (simulated)
+    # In reality, would geocode to actual Census tract
+    zip_code = property_address.split()[-1] if property_address else "00000"
+    census_tract = f"TRACT-{zip_code[:5]}"
+    
+    # Fair lending analysis (simplified)
+    # Would compare approval rates and pricing across demographics
+    fair_lending_audit_flag = False
+    
+    # Simulate statistical analysis
+    # Check for potential disparate treatment indicators
+    audit_findings = []
+    
+    # Rate variance check (if approved)
+    if approved_interest_rate:
+        # Compare to expected rate for risk profile
+        expected_rate_for_profile = 6.500  # Simplified
+        rate_variance = approved_interest_rate - expected_rate_for_profile
+        
+        if abs(rate_variance) > 1.0:
+            audit_findings.append(f"Rate variance of {rate_variance:.3f}% from expected")
+    
+    # Conditions count analysis
+    if conditions_count and conditions_count > 5:
+        audit_findings.append(f"High conditions count: {conditions_count}")
+    
+    # Decision consistency check
+    if final_decision == "Declined" and representative_credit_score > 700:
+        audit_findings.append("Decline with score >700 requires review")
+    
+    # Set audit flag if findings present
+    if len(audit_findings) > 0:
+        fair_lending_audit_flag = True
+    
+    result = {
+        "application_id": application_id,
+        "fair_lending_audit_flag": fair_lending_audit_flag,
+        "census_tract": census_tract,
+        "decision_outcome": final_decision,
+        "pricing_within_tolerance": not fair_lending_audit_flag,
+        "audit_findings": audit_findings,
+        "monitoring_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "fair_lending_audit_flag": fair_lending_audit_flag
+    })
+    
+    return result
+
+# API 20: TrackLoanPerformanceMetrics
+def TrackLoanPerformanceMetrics(
+    application_id: str,
+    application_timestamp: str,
+    final_decision: str,
+    final_decision_timestamp: str,
+    conditions_count: int,
+    approved_loan_amount: Optional[float] = None
+) -> Dict[str, Any]:
+    """Tracks loan performance metrics"""
+    
+    app_data = get_application_data(application_id)
+    if not app_data:
+        return {"error": "Application not found"}
+    
+    # Calculate turnaround time
+    app_time = datetime.strptime(application_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+    decision_time = datetime.strptime(final_decision_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+    turnaround_time_days = (decision_time - app_time).days
+    
+    # First pass yield
+    first_pass_yield = conditions_count == 0
+    
+    # Funded status (simulated - would track actual funding)
+    funded_status = False
+    funding_date = None
+    
+    if final_decision in ["Approved", "Approved with Conditions"]:
+        # Simulate funding for approved loans
+        funded_status = True
+        funding_date = (decision_time + timedelta(days=30)).strftime("%Y-%m-%d")
+    
+    # Performance against targets
+    employment_status = app_data.get('employment_status', '')
+    if employment_status == "Self-Employed":
+        target_days = 35
+    else:
+        target_days = 25
+    
+    meets_turnaround_target = turnaround_time_days <= target_days
+    
+    result = {
+        "application_id": application_id,
+        "turnaround_time_days": turnaround_time_days,
+        "target_turnaround_days": target_days,
+        "meets_turnaround_target": meets_turnaround_target,
+        "first_pass_yield": first_pass_yield,
+        "funded_status": funded_status,
+        "funding_date": funding_date,
+        "approved_volume": round(approved_loan_amount, 2) if approved_loan_amount else 0.0,
+        "tracking_timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "turnaround_time_days": turnaround_time_days,
+        "first_pass_yield": first_pass_yield,
+        "funded_status": funded_status,
+        "funding_date": funding_date if funding_date else ''
+    })
+    
+    return result
+
+# Test cases
+def test_mortgage_apis():
+    """Test the mortgage origination APIs"""
+    
+    # Test with first application
+    app_id = "MLN-2025-048732"
+    
+    print("=" * 80)
+    print(f"Testing Mortgage Origination APIs for {app_id}")
+    print("=" * 80)
+    
+    # API 1: Validate Identity
+    print("\n1. ValidateApplicantIdentity")
+    result1 = ValidateApplicantIdentity(
+        application_id=app_id,
+        applicant_name="John Michael Smith",
+        applicant_ssn="***-**-4829",
+        applicant_dob="1985-06-15",
+        applicant_address="1234 Oak Street, Springfield, IL 62704",
+        co_applicant_name="Jane Elizabeth Smith",
+        co_applicant_ssn="***-**-7391"
+    )
+    print(f"Identity Status: {result1.get('identity_verification_status')}")
+    print(f"OFAC Status: {result1.get('ofac_screening_status')}")
+    
+    # API 2: Validate Employment and Income
+    print("\n2. ValidateEmploymentAndIncome")
+    result2 = ValidateEmploymentAndIncome(
+        application_id=app_id,
+        employment_status="Full-Time",
+        employer_name="Acme Corporation",
+        employment_years=5.5,
+        gross_monthly_income=8500.00,
+        additional_income_monthly=1200.00,
+        pay_stubs_uploaded=True,
+        w2_forms_uploaded=True,
+        tax_returns_uploaded=True
+    )
+    print(f"Income Validation: {result2.get('income_validation_status')}")
+    print(f"Preliminary Income: ${result2.get('preliminary_gross_monthly_income')}")
+    
+    # API 3: Validate Assets
+    print("\n3. ValidateLiquidAssets")
+    result3 = ValidateLiquidAssets(
+        application_id=app_id,
+        liquid_assets=75000.00,
+        retirement_accounts=150000.00,
+        bank_statements_uploaded=True,
+        down_payment_amount=90000.00,
+        requested_loan_amount=380000.00,
+        applicant_dob="1985-06-15"
+    )
+    print(f"Asset Validation: {result3.get('asset_validation_status')}")
+    print(f"Total Available Assets: ${result3.get('total_available_assets')}")
+    
+    # API 4: Pull Credit Reports
+    print("\n4. PullCreditReports")
+    result4 = PullCreditReports(
+        application_id=app_id,
+        verified_applicant_name="John Michael Smith",
+        verified_applicant_ssn="***-**-4829",
+        verified_applicant_dob="1985-06-15",
+        applicant_address="1234 Oak Street, Springfield, IL 62704",
+        credit_consent_signed=True,
+        credit_consent_timestamp="2025-04-18T10:22:45Z"
+    )
+    print(f"Credit Pulled: {result4.get('credit_pull_timestamp')}")
+    print(f"FICO Scores: EQ={result4.get('fico_score_equifax')}, EX={result4.get('fico_score_experian')}, TU={result4.get('fico_score_transunion')}")
+    
+    # API 5: Calculate Representative Credit Score
+    print("\n5. CalculateRepresentativeCreditScore")
+    result5 = CalculateRepresentativeCreditScore(
+        application_id=app_id,
+        fico_score_equifax=742,
+        fico_score_experian=738,
+        fico_score_transunion=745
+    )
+    print(f"Representative Score: {result5.get('representative_credit_score')}")
+    
+    # API 6: Execute Prequalification
+    print("\n6. ExecutePrequalificationAnalysis")
+    result6 = ExecutePrequalificationAnalysis(
+        application_id=app_id,
+        representative_credit_score=742,
+        preliminary_gross_monthly_income=9700.00,
+        total_monthly_debt_obligations=2800.00,
+        requested_loan_amount=380000.00,
+        loan_term_months=360,
+        estimated_property_value=450000.00,
+        down_payment_amount=90000.00,
+        property_type="Single Family",
+        property_occupancy="Primary Residence",
+        loan_purpose="Purchase"
+    )
+    print(f"Prequalification Decision: {result6.get('prequalification_decision')}")
+    print(f"DTI: {result6.get('preliminary_debt_to_income_ratio')}%")
+    print(f"Estimated Rate: {result6.get('estimated_interest_rate_prequalification')}%")
+    
+    print("\n" + "=" * 80)
+    print("API Testing Complete")
+    print("=" * 80)
+
+if __name__ == "__main__":
+    test_mortgage_apis()
+```
+
+</code>
+
+<class>
+
+```python
+# Pydantic Models for API Tool Arguments
+
+class Tool_ValidateApplicantIdentity(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    applicant_name: str = Field(..., description="Full legal name of the primary applicant")
+    applicant_ssn: str = Field(..., description="Social Security Number in masked format ***-**-NNNN")
+    applicant_dob: str = Field(..., description="Date of birth in ISO 8601 format YYYY-MM-DD")
+    applicant_address: str = Field(..., description="Current residential address")
+    co_applicant_name: Optional[str] = Field(None, description="Full legal name of co-applicant if applicable")
+    co_applicant_ssn: Optional[str] = Field(None, description="Co-applicant SSN in masked format")
+
+class Tool_ValidateEmploymentAndIncome(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    employment_status: str = Field(..., description="Employment classification")
+    gross_monthly_income: float = Field(..., description="Self-declared gross monthly income")
+    pay_stubs_uploaded: bool = Field(..., description="Confirmation of pay stubs upload")
+    w2_forms_uploaded: bool = Field(..., description="Confirmation of W-2 forms upload")
+    employer_name: Optional[str] = Field(None, description="Name of employer")
+    employment_years: Optional[float] = Field(None, description="Years of employment")
+    additional_income_monthly: Optional[float] = Field(None, description="Additional monthly income")
+    tax_returns_uploaded: Optional[bool] = Field(None, description="Confirmation of tax returns upload")
+
+class Tool_ValidateLiquidAssets(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    liquid_assets: float = Field(..., description="Total dollar amount of liquid assets")
+    bank_statements_uploaded: bool = Field(..., description="Confirmation of bank statements upload")
+    down_payment_amount: float = Field(..., description="Dollar amount of equity contribution")
+    requested_loan_amount: float = Field(..., description="Dollar amount of mortgage financing requested")
+    applicant_dob: str = Field(..., description="Date of birth in ISO 8601 format")
+    retirement_accounts: Optional[float] = Field(None, description="Total dollar amount of retirement savings")
+
+class Tool_PullCreditReports(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    verified_applicant_name: str = Field(..., description="Identity-verified full legal name")
+    verified_applicant_ssn: str = Field(..., description="Identity-verified SSN in masked format")
+    verified_applicant_dob: str = Field(..., description="Identity-verified date of birth")
+    applicant_address: str = Field(..., description="Current residential address")
+    credit_consent_signed: bool = Field(..., description="Credit consent confirmation")
+    credit_consent_timestamp: str = Field(..., description="Credit consent timestamp")
+    co_applicant_name: Optional[str] = Field(None, description="Co-applicant name if applicable")
+    co_applicant_ssn: Optional[str] = Field(None, description="Co-applicant SSN if applicable")
+
+class Tool_CalculateRepresentativeCreditScore(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    fico_score_equifax: Optional[int] = Field(None, description="FICO Score from Equifax")
+    fico_score_experian: Optional[int] = Field(None, description="FICO Score from Experian")
+    fico_score_transunion: Optional[int] = Field(None, description="FICO Score from TransUnion")
+    co_applicant_fico_equifax: Optional[int] = Field(None, description="Co-applicant FICO from Equifax")
+    co_applicant_fico_experian: Optional[int] = Field(None, description="Co-applicant FICO from Experian")
+    co_applicant_fico_transunion: Optional[int] = Field(None, description="Co-applicant FICO from TransUnion")
+
+class Tool_ExecutePrequalificationAnalysis(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    representative_credit_score: int = Field(..., description="Qualifying FICO score")
+    preliminary_gross_monthly_income: float = Field(..., description="Preliminary validated gross monthly income")
+    total_monthly_debt_obligations: float = Field(..., description="Sum of all recurring monthly debt payments")
+    requested_loan_amount: float = Field(..., description="Dollar amount of mortgage financing requested")
+    loan_term_months: int = Field(..., description="Number of months for loan amortization")
+    estimated_property_value: float = Field(..., description="Estimated property market value")
+    down_payment_amount: float = Field(..., description="Dollar amount of equity contribution")
+    property_type: str = Field(..., description="Property structural classification")
+    property_occupancy: str = Field(..., description="Intended occupancy status")
+    loan_purpose: str = Field(..., description="Transaction type classification")
+
+class Tool_VerifyEmploymentAndIncome(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    prequalification_decision: str = Field(..., description="Pre-qualification classification outcome")
+    employment_status: str = Field(..., description="Employment classification")
+    gross_monthly_income: float = Field(..., description="Self-declared gross monthly income")
+    pay_stubs_uploaded: bool = Field(..., description="Confirmation of pay stubs upload")
+    w2_forms_uploaded: bool = Field(..., description="Confirmation of W-2 forms upload")
+    employer_name: Optional[str] = Field(None, description="Name of employer")
+    employment_years: Optional[float] = Field(None, description="Years of employment")
+    additional_income_monthly: Optional[float] = Field(None, description="Additional monthly income")
+    tax_returns_uploaded: Optional[bool] = Field(None, description="Confirmation of tax returns upload")
+
+class Tool_VerifyAssetsAndReserves(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    prequalification_decision: str = Field(..., description="Pre-qualification classification outcome")
+    liquid_assets: float = Field(..., description="Self-declared liquid assets")
+    bank_statements_uploaded: bool = Field(..., description="Confirmation of bank statements upload")
+    down_payment_amount: float = Field(..., description="Dollar amount of equity contribution")
+    requested_loan_amount: float = Field(..., description="Dollar amount of mortgage financing requested")
+    applicant_dob: str = Field(..., description="Date of birth in ISO 8601 format")
+    verified_gross_monthly_income: float = Field(..., description="Verified gross monthly income")
+    property_type: str = Field(..., description="Property structural classification")
+    property_occupancy: str = Field(..., description="Intended occupancy status")
+    retirement_accounts: Optional[float] = Field(None, description="Retirement savings")
+
+class Tool_AnalyzeCreditHistory(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    credit_report_full_data: Dict[str, Any] = Field(..., description="Complete credit report data object")
+    derogatory_marks_count: int = Field(..., description="Initial derogatory marks count")
+    bankruptcy_history: bool = Field(..., description="Bankruptcy filing indicator")
+
+class Tool_CalculateDebtRatios(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    verified_gross_monthly_income: float = Field(..., description="Verified gross monthly income")
+    total_monthly_debt_obligations: float = Field(..., description="Sum of all recurring monthly debt payments")
+    requested_loan_amount: float = Field(..., description="Dollar amount of mortgage financing requested")
+    loan_term_months: int = Field(..., description="Number of months for loan amortization")
+    estimated_interest_rate_prequalification: float = Field(..., description="Preliminary interest rate")
+    property_address: str = Field(..., description="Complete property address")
+    estimated_property_value: float = Field(..., description="Property value estimate")
+    representative_credit_score: int = Field(..., description="Qualifying FICO score")
+    preliminary_ltv_ratio: float = Field(..., description="Preliminary loan-to-value ratio")
+
+class Tool_CalculateProbabilityOfDefault(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    representative_credit_score: int = Field(..., description="Qualifying FICO score")
+    debt_to_income_ratio: float = Field(..., description="Calculated DTI percentage")
+    preliminary_ltv_ratio: float = Field(..., description="Loan-to-value ratio")
+    reserve_months_calculated: float = Field(..., description="Months of reserves")
+    employment_years: float = Field(..., description="Years of employment")
+    property_type: str = Field(..., description="Property structural classification")
+    property_occupancy: str = Field(..., description="Intended occupancy status")
+    loan_purpose: str = Field(..., description="Transaction type classification")
+    detailed_derogatory_marks_count: int = Field(..., description="Weighted derogatory marks count")
+
+class Tool_DetermineFinalInterestRate(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    credit_score_grade: str = Field(..., description="Risk classification")
+    representative_credit_score: int = Field(..., description="Qualifying FICO score")
+    preliminary_ltv_ratio: float = Field(..., description="Loan-to-value ratio")
+    property_type: str = Field(..., description="Property structural classification")
+    property_occupancy: str = Field(..., description="Intended occupancy status")
+    loan_purpose: str = Field(..., description="Transaction type classification")
+    debt_to_income_ratio: float = Field(..., description="Calculated DTI percentage")
+    loan_term_months: int = Field(..., description="Number of months for loan amortization")
+
+class Tool_EvaluateCompensatingFactors(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    debt_to_income_ratio: float = Field(..., description="Calculated DTI percentage")
+    reserve_months_calculated: float = Field(..., description="Months of reserves")
+    payment_history_quality: str = Field(..., description="Credit payment history assessment")
+    verified_gross_monthly_income: float = Field(..., description="Verified gross monthly income")
+    monthly_housing_payment_total: float = Field(..., description="Total monthly housing payment")
+    total_monthly_debt_obligations: float = Field(..., description="Sum of all recurring monthly debt payments")
+    preliminary_ltv_ratio: float = Field(..., description="Loan-to-value ratio")
+    employment_years: float = Field(..., description="Years of employment")
+    credit_depth_rating: str = Field(..., description="Credit depth assessment")
+    applicant_address: str = Field(..., description="Current residential address")
+
+class Tool_OrderPropertyAppraisal(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    prequalification_decision: str = Field(..., description="Pre-qualification classification outcome")
+    property_address: str = Field(..., description="Complete property address")
+    property_type: str = Field(..., description="Property structural classification")
+    property_occupancy: str = Field(..., description="Intended occupancy status")
+    estimated_property_value: float = Field(..., description="Property value estimate")
+    requested_loan_amount: float = Field(..., description="Dollar amount of mortgage financing requested")
+    loan_purpose: str = Field(..., description="Transaction type classification")
+
+class Tool_ConductPropertyValuation(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    appraisal_order_number: str = Field(..., description="Unique appraisal order number")
+    property_address: str = Field(..., description="Complete property address")
+    property_type: str = Field(..., description="Property structural classification")
+    estimated_property_value: float = Field(..., description="Property value estimate")
+
+class Tool_ValidateAppraisalWithAVM(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    property_address: str = Field(..., description="Complete property address")
+    final_appraised_value: float = Field(..., description="Final opinion of market value")
+    property_type: str = Field(..., description="Property structural classification")
+
+class Tool_CalculateLoanToValueRatio(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    final_appraised_value: float = Field(..., description="Validated final opinion of market value")
+    requested_loan_amount: float = Field(..., description="Dollar amount of mortgage financing requested")
+    estimated_property_value: float = Field(..., description="Property value estimate")
+    loan_purpose: str = Field(..., description="Transaction type classification")
+    representative_credit_score: int = Field(..., description="Qualifying FICO score")
+    property_type: str = Field(..., description="Property structural classification")
+    property_occupancy: str = Field(..., description="Intended occupancy status")
+
+class Tool_RenderFinalLoanDecision(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    debt_to_income_ratio: float = Field(..., description="Calculated DTI percentage")
+    debt_service_coverage_ratio: float = Field(..., description="Calculated DSCR")
+    loan_to_value_ratio: float = Field(..., description="Calculated LTV percentage")
+    probability_of_default_score: float = Field(..., description="PD score percentage")
+    credit_score_grade: str = Field(..., description="Risk classification")
+    final_risk_adjusted_interest_rate: float = Field(..., description="Final interest rate")
+    compensating_factors_present: bool = Field(..., description="Compensating factors indicator")
+    property_condition: str = Field(..., description="Property condition rating")
+    bankruptcy_seasoning_compliant: bool = Field(..., description="Bankruptcy timing compliance")
+    foreclosure_history_compliant: bool = Field(..., description="Foreclosure timing compliance")
+    verified_gross_monthly_income: float = Field(..., description="Verified gross monthly income")
+    requested_loan_amount: float = Field(..., description="Original loan amount requested")
+    loan_term_months: int = Field(..., description="Requested amortization term")
+    application_timestamp: str = Field(..., description="Application received timestamp")
+
+class Tool_ExecuteFairLendingMonitoring(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    final_decision: str = Field(..., description="Ultimate credit decision outcome")
+    representative_credit_score: int = Field(..., description="Qualifying FICO score")
+    debt_to_income_ratio: float = Field(..., description="Calculated DTI percentage")
+    loan_to_value_ratio: float = Field(..., description="Calculated LTV percentage")
+    property_address: str = Field(..., description="Complete property address")
+    approved_interest_rate: Optional[float] = Field(None, description="Final interest rate for approved loans")
+    conditions_count: Optional[int] = Field(None, description="Number of outstanding conditions")
+
+class Tool_TrackLoanPerformanceMetrics(BaseModel):
+    application_id: str = Field(..., description="Unique identifier for the mortgage loan application")
+    application_timestamp: str = Field(..., description="Application received timestamp")
+    final_decision: str = Field(..., description="Ultimate credit decision outcome")
+    final_decision_timestamp: str = Field(..., description="Final decision timestamp")
+    conditions_count: int = Field(..., description="Number of outstanding conditions")
+    approved_loan_amount: Optional[float] = Field(None, description="Approved loan amount")
+```
+
+</class>
+
+<tools>
+
+```python
+tools = [
+    StructuredTool.from_function(
+        func=ValidateApplicantIdentity,
+        name="ValidateApplicantIdentity",
+        description="Performs comprehensive Know Your Customer (KYC) verification by validating government-issued identification documents, checking applicant and co-applicant information against OFAC Specially Designated Nationals lists",
+        args_schema=Tool_ValidateApplicantIdentity
+    ),
+    StructuredTool.from_function(
+        func=ValidateEmploymentAndIncome,
+        name="ValidateEmploymentAndIncome",
+        description="Analyzes uploaded income documentation including pay stubs, W-2 forms, and tax returns to calculate preliminary gross monthly income and validates employment status",
+        args_schema=Tool_ValidateEmploymentAndIncome
+    ),
+    StructuredTool.from_function(
+        func=ValidateLiquidAssets,
+        name="ValidateLiquidAssets",
+        description="Reviews uploaded bank statements covering two consecutive months to verify declared liquid assets and retirement accounts, calculates available reserves",
+        args_schema=Tool_ValidateLiquidAssets
+    ),
+    StructuredTool.from_function(
+        func=PullCreditReports,
+        name="PullCreditReports",
+        description="Executes tri-bureau credit report acquisition by transmitting applicant and co-applicant verified identity information to credit bureau API interfaces",
+        args_schema=Tool_PullCreditReports
+    ),
+    StructuredTool.from_function(
+        func=CalculateRepresentativeCreditScore,
+        name="CalculateRepresentativeCreditScore",
+        description="Applies the FICO Score Tri-Merge Middle Score Methodology by ranking the three bureau credit scores and selecting the median value as the representative score",
+        args_schema=Tool_CalculateRepresentativeCreditScore
+    ),
+    StructuredTool.from_function(
+        func=ExecutePrequalificationAnalysis,
+        name="ExecutePrequalificationAnalysis",
+        description="Performs systematic pre-qualification screening by comparing representative credit score against institutional minimum threshold and calculates preliminary debt-to-income ratio",
+        args_schema=Tool_ExecutePrequalificationAnalysis
+    ),
+    StructuredTool.from_function(
+        func=VerifyEmploymentAndIncome,
+        name="VerifyEmploymentAndIncome",
+        description="Conducts comprehensive income verification through Verification of Employment (VOE) telephone calls or written requests to employers and performs detailed tax return analysis for Self-Employed applicants",
+        args_schema=Tool_VerifyEmploymentAndIncome
+    ),
+    StructuredTool.from_function(
+        func=VerifyAssetsAndReserves,
+        name="VerifyAssetsAndReserves",
+        description="Executes comprehensive asset verification by examining two consecutive months of bank statements for all checking, savings, and money market accounts",
+        args_schema=Tool_VerifyAssetsAndReserves
+    ),
+    StructuredTool.from_function(
+        func=AnalyzeCreditHistory,
+        name="AnalyzeCreditHistory",
+        description="Conducts forensic analysis of tri-bureau credit report narrative sections by examining each tradeline's 24-month payment history to identify and count derogatory marks",
+        args_schema=Tool_AnalyzeCreditHistory
+    ),
+    StructuredTool.from_function(
+        func=CalculateDebtRatios,
+        name="CalculateDebtRatios",
+        description="Computes precise debt-to-income ratio and debt service coverage ratio using verified financial data by first calculating exact monthly housing payment",
+        args_schema=Tool_CalculateDebtRatios
+    ),
+    StructuredTool.from_function(
+        func=CalculateProbabilityOfDefault,
+        name="CalculateProbabilityOfDefault",
+        description="Executes institution's proprietary multivariate logistic regression model to quantify default risk by computing probability of default score",
+        args_schema=Tool_CalculateProbabilityOfDefault
+    ),
+    StructuredTool.from_function(
+        func=DetermineFinalInterestRate,
+        name="DetermineFinalInterestRate",
+        description="Applies multi-dimensional risk-based pricing matrix to calculate final risk-adjusted interest rate by retrieving base interest rate and applying additive pricing adjustments",
+        args_schema=Tool_DetermineFinalInterestRate
+    ),
+    StructuredTool.from_function(
+        func=EvaluateCompensatingFactors,
+        name="EvaluateCompensatingFactors",
+        description="Conducts systematic compensating factors analysis for applications with elevated risk indicators by evaluating and scoring positive offsetting characteristics",
+        args_schema=Tool_EvaluateCompensatingFactors
+    ),
+    StructuredTool.from_function(
+        func=OrderPropertyAppraisal,
+        name="OrderPropertyAppraisal",
+        description="Initiates property valuation process by transmitting appraisal order to independent Appraisal Management Company or internal appraisal desk with comprehensive property information",
+        args_schema=Tool_OrderPropertyAppraisal
+    ),
+    StructuredTool.from_function(
+        func=ConductPropertyValuation,
+        name="ConductPropertyValuation",
+        description="Executes comprehensive property appraisal by licensed appraiser conducting site inspection to measure property square footage and assess property condition",
+        args_schema=Tool_ConductPropertyValuation
+    ),
+    StructuredTool.from_function(
+        func=ValidateAppraisalWithAVM,
+        name="ValidateAppraisalWithAVM",
+        description="Executes automated appraisal quality control by submitting property address to institution's Automated Valuation Model platform",
+        args_schema=Tool_ValidateAppraisalWithAVM
+    ),
+    StructuredTool.from_function(
+        func=CalculateLoanToValueRatio,
+        name="CalculateLoanToValueRatio",
+        description="Computes definitive loan-to-value ratio using validated final appraised value and requested loan amount by applying formula based on loan purpose",
+        args_schema=Tool_CalculateLoanToValueRatio
+    ),
+    StructuredTool.from_function(
+        func=RenderFinalLoanDecision,
+        name="RenderFinalLoanDecision",
+        description="Synthesizes all underwriting findings to render ultimate credit decision by executing comprehensive decision tree logic that evaluates debt-to-income ratio against thresholds",
+        args_schema=Tool_RenderFinalLoanDecision
+    ),
+    StructuredTool.from_function(
+        func=ExecuteFairLendingMonitoring,
+        name="ExecuteFairLendingMonitoring",
+        description="Conducts automated fair lending compliance surveillance by capturing demographic information and performing statistical analysis comparing approval rates across demographic cohorts",
+        args_schema=Tool_ExecuteFairLendingMonitoring
+    ),
+    StructuredTool.from_function(
+        func=TrackLoanPerformanceMetrics,
+        name="TrackLoanPerformanceMetrics",
+        description="Calculates operational and business performance metrics by computing turnaround time days and records first pass yield Boolean based on conditions count",
+        args_schema=Tool_TrackLoanPerformanceMetrics
+    )
+]
+```
+
+</tools>

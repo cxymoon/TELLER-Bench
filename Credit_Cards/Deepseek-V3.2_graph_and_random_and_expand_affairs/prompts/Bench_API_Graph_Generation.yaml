@@ -1,0 +1,303 @@
+# prompts:
+#   name: api_dependency_graph_generator
+#   parameters: [sop_title, additional_context, sample_schema, api_code]
+#   text: |
+#     你是一个专注于分析复杂业务流程并推导API依赖关系的专业AI系统。你的任务是基于SOP数据架构和业务上下文，根据提供给你的真实API接口生成一个详尽的API依赖有向图，该图应准确反映API之间的数据流和前置依赖关系。API接口中只有部分有效，你要筛选出所有有效API构建依赖图。另外你要在合成的有向图后面给出你所选API的class类封装和tools列表封装。
+
+#     下面是你需要分析的业务流程标题：
+#     <sop_title>
+#     {{sop_title}}
+#     </sop_title>
+
+#     {
+#     以下是你在生成依赖图时必须参考的额外业务上下文：
+#     <additional_context>
+#     {{additional_context}}
+#     </additional_context>
+#     {
+
+#     {
+#     下面是系统的数据架构定义，你应基于此推导API的输入输出参数：
+#     <sample_schema>
+#     {{sample_schema}}
+#     </sample_schema>
+#     {
+
+#     {
+#     下面是已生成的SOP流程API，你合成的API依赖图应包含其中的所有API，并正确限制各API的调用关系：
+#     <api_code>
+#     {{api_code}}
+#     </api_code>
+#     {
+
+#     在生成API依赖有向图之前，你必须进行深入的依赖分析，并在<dependency_analysis>标签中完成以下分析步骤：
+
+#     1. **业务流程解构**
+#        - 将SOP的每个操作步骤映射到潜在的API调用
+#        - 识别步骤之间的数据传递关系
+#        - 确定每个API在业务流程中的角色和定位
+
+#     2. **数据流分析**
+#        - 基于数据schema分析实体间的关联关系
+#        - 追踪每个API输入参数的来源（用户输入、其他API输出、系统状态）
+#        - 识别API输出数据的使用场景和消费者
+
+#     3. **依赖关系推导**
+#        - 分析API执行的前置条件
+#        - 识别直接依赖关系（API B的输入参数直接来源于API A的输出）
+#        - 识别间接依赖关系（API C需要API B产生的系统状态变化）
+#        - 确定依赖关系的类型（数据依赖、状态依赖、时序依赖）
+
+#     4. **复杂度评估**
+#        - 评估每个API的技术复杂度
+#        - 识别潜在的循环依赖风险
+#        - 分析依赖链的长度和复杂度
+#        - 考虑异常情况和错误处理路径
+
+#     5. **验证与优化**
+#        - 验证依赖关系的合理性和必要性
+#        - 识别可以并行执行的API
+#        - 提出依赖关系优化的建议
+
+#     完成分析后，请按照以下YAML格式生成API依赖有向图：
+
+#     <api_dependency_graph>
+#     apis:
+#       - api_name: "string"                    # API的唯一标识名称
+#         description: "string"                 # API的详细功能描述
+#         purpose: "string"                     # API在业务流程中的具体用途
+#         input_parameters:                     # 输入参数列表
+#           - name: "string"                    # 参数名称
+#             data_type: "string"               # 数据类型
+#             source: "string"                  # 参数来源：user_input、other_api、system_state
+#             required: boolean                 # 是否必需
+#         output_parameters:                    # 输出参数列表
+#           - name: "string"                    # 输出参数名称
+#             data_type: "string"               # 数据类型
+#             destination: "string"             # 参数去向：other_api、storage、ui_display
+#         direct_dependencies:                  # 直接依赖的API列表
+#           - dependent_api: "string"           # 依赖的API名称
+#             dependency_type: "string"         # 依赖类型：data_dependency、state_dependency、temporal_dependency
+#             dependency_reason: "string"       # 依赖原因描述
+#         complexity_level: "string"            # 复杂度等级：low、medium、high
+#         business_criticality: "string"        # 业务关键性：low、medium、high
+#     </api_dependency_graph>
+
+#     API依赖图生成要求：
+
+#     1. **准确性要求**
+#        - 每个依赖关系必须有明确的参数传递或状态依赖证据
+#        - 依赖关系必须基于SOP的操作顺序和数据流,并符合API代码实际情况。图中的每个API要与API代码中的函数名一致。
+#        - 输入输出参数必须与数据schema保持一致，***不能出现任何schema中未定义的属性***
+
+#     2. **完整性要求**
+#        - 覆盖SOP和API Code所有的API操作
+#        - 包含所有必要的参数映射关系
+#        - 识别所有直接依赖关系，不遗漏关键依赖链
+
+#     3. **技术深度要求**
+#        - 使用精确的技术术语描述API功能
+#        - 详细说明每个依赖关系的技术基础
+#        - 分析依赖关系的强度和必要性
+
+#     4. **业务一致性要求**
+#        - API设计必须支持SOP的业务目标
+#        - 依赖关系必须符合业务流程逻辑和API实际代码实现
+#        - 考虑业务规则和约束条件
+
+#     5. **可实施性要求**
+#        - 依赖关系图符合API代码实现
+#        - 提供足够的技术细节供开发团队使用
+#        - 考虑性能、安全和可维护性因素
+
+#     在<dependency_analysis>标签中完成详细分析后，在<api_dependency_graph>标签中一次性输出完整的API依赖有向图。
+
+#     记住：依赖关系的准确性和完整性是整个系统成功的关键，必须确保每个API的依赖关系都得到充分论证和详细说明。
+
+#     在合成依赖图完毕后，你要在后面给出你所选API的class类封装和tools列表封装。分别包裹在<class></class>和<tools><tools>中。
+#     例如，你选择了
+#             def generate_mock_cc_transaction(customer_id: str, amount: float, merchant_category: str) -> dict:
+#                 # 伪逻辑：生成交易ID “MOCKTX…”，类别 merchant_category
+#                 return {"transaction_id": f"MOCKTX{customer_id}{int(amount)}", "customer_id": customer_id, "amount": amount, "merchant_category": merchant_category}
+
+#             def compute_reward_points(customer_id: str, transactions: list[dict]) -> int:
+#                 # 伪逻辑：积分 = 交易笔数 * 10
+#                 return len(transactions) * 10      
+#      这两个API，那么对其类封装如下：
+#       <class>
+#             class Tool_generate_mock_cc_transaction(BaseModel):
+#                 customer_id: str = Field(..., description="")
+#                 amount: float = Field(..., description="")
+#                 merchant_category: str = Field(..., description="")
+
+#             class Tool_compute_reward_points(BaseModel):
+#                 customer_id: str = Field(..., description="")
+#                 transactions: List[Dict[str, Any]] = Field(..., description="")
+#       </class>
+#       对其tools列表封装如下：
+#       <tools>
+#             StructuredTool.from_function(
+#                 func=generate_mock_cc_transaction,
+#                 name="generate_mock_cc_transaction",
+#                 description="",
+#                 args_schema=Tool_generate_mock_cc_transaction
+#             ),
+#             StructuredTool.from_function(
+#                 func=compute_reward_points,
+#                 name="compute_reward_points",
+#                 description="",
+#                 args_schema=Tool_compute_reward_points
+#             )  
+#       </tools>
+
+prompts:
+  name: api_dependency_graph_generator
+  parameters: [sop_title, additional_context, sample_schema, api_code]
+  text: |
+    You are a professional AI system specializing in analyzing complex business processes and deducing API dependency relationships. Your task is to generate a comprehensive directed graph of API dependencies based on the SOP, data schema, and business context, utilizing the provided real API interfaces. Only some APIs are valid; you must filter out all valid APIs to construct the dependency graph. Additionally, you must provide the class encapsulation and tools list encapsulation for the APIs you selected after generating the directed graph.
+
+    Below is the title of the business process you need to analyze:
+    <sop_title>
+    {{sop_title}}
+    </sop_title>
+
+    {
+    Here is the additional business context you must reference during dependency graph generation:
+    <additional_context>
+    {{additional_context}}
+    </additional_context>
+    {
+
+    {
+    Below is the system's data schema definition. You should base your derivation of API input/output parameters on this:
+    <sample_schema>
+    {{sample_schema}}
+    </sample_schema>
+    {
+
+    {
+    Below is the generated SOP process API code. The API dependency graph you synthesize must include all APIs within it and correctly define the invocation relationships between them:
+    <api_code>
+    {{api_code}}
+    </api_code>
+    {
+
+    Before generating the API dependency directed graph, you must perform in-depth dependency analysis and complete the following analytical steps within the <dependency_analysis> tags:
+
+    1. **Business Process Deconstruction**
+       - Map each operational step in the SOP to potential API invocations.
+       - Identify data transfer relationships between steps.
+       - Determine the role and positioning of each API within the business process.
+
+    2. **Data Flow Analysis**
+       - Analyze association relationships between entities based on the data schema.
+       - Trace the source of each API's input parameters (user input, output from other APIs, system state).
+       - Identify usage scenarios and consumers for API output data.
+
+    3. **Dependency Relationship Deduction**
+       - Analyze the preconditions for API execution.
+       - Identify direct dependencies (API B's input parameters directly sourced from API A's output).
+       - Identify indirect dependencies (API C requires system state changes generated by API B).
+       - Determine the type of dependency relationship (data dependency, state dependency, temporal dependency).
+
+    4. **Complexity Assessment**
+       - Assess the technical complexity of each API.
+       - Identify potential cyclic dependency risks.
+       - Analyze the length and complexity of dependency chains.
+       - Consider exception cases and error handling paths.
+
+    5. **Verification and Optimization**
+       - Verify the rationality and necessity of the dependency relationships.
+       - Identify APIs that can execute in parallel.
+       - Propose suggestions for optimizing dependency relationships.
+
+    After completing the analysis, generate the API dependency directed graph in the following YAML format:
+
+    <api_dependency_graph>
+    apis:
+      - api_name: "string"                    # Unique identifier name for the API
+        description: "string"                 # Detailed functional description of the API
+        purpose: "string"                     # Specific purpose of the API within the business process
+        input_parameters:                     # List of input parameters
+          - name: "string"                    # Parameter name
+            data_type: "string"               # Data type
+            source: "string"                  # Parameter source: user_input, other_api, system_state
+            required: boolean                 # Whether it is required
+        output_parameters:                    # List of output parameters
+          - name: "string"                    # Output parameter name
+            data_type: "string"               # Data type
+            destination: "string"             # Parameter destination: other_api, storage, ui_display
+        direct_dependencies:                  # List of directly dependent APIs
+          - dependent_api: "string"           # Name of the dependent API
+            dependency_type: "string"         # Dependency type: data_dependency, state_dependency, temporal_dependency
+            dependency_reason: "string"       # Description of the dependency reason
+        complexity_level: "string"            # Complexity level: low, medium, high
+        business_criticality: "string"        # Business criticality: low, medium, high
+    </api_dependency_graph>
+
+    API Dependency Graph Generation Requirements:
+
+    1. **Accuracy Requirements**
+       - Each dependency relationship must have clear evidence of parameter passing or state dependency.
+       - Dependencies must be based on the SOP's operational sequence, data flows, and must conform to the actual API code. Every API name in the graph must match the function name in the API code.
+       - Input/output parameters must be strictly consistent with the data schema; ***no attributes not defined in the schema may appear***.
+
+    2. **Completeness Requirements**
+       - Cover all API operations present in the SOP and the provided API Code.
+       - Include all necessary parameter mapping relationships.
+       - Identify all direct dependency relationships without omitting key dependency chains.
+
+    3. **Technical Depth Requirements**
+       - Use precise technical terminology to describe API functionality.
+       - Provide a detailed explanation of the technical basis for each dependency relationship.
+       - Analyze the strength and necessity of the dependency relationships.
+
+    4. **Business Consistency Requirements**
+       - API design must support the SOP's business objectives.
+       - Dependency relationships must align with business process logic and the actual implementation in the API code.
+       - Consider business rules and constraints.
+
+    5. **Implementation Feasibility Requirements**
+       - The dependency graph must conform to the API code implementation.
+       - Provide sufficient technical details for the development team.
+       - Consider performance, security, and maintainability factors.
+
+    After completing the detailed analysis within the <dependency_analysis> tags, output the complete API dependency directed graph at once within the <api_dependency_graph> tags.
+
+    Remember: The accuracy and completeness of the dependency relationships are key to the overall system's success. You must ensure that the dependency relationships for each API are fully justified and described in detail.
+
+    After generating the dependency graph, you must provide the class encapsulation and tools list encapsulation for the APIs you selected. Wrap them in <class></class> and <tools></tools> tags respectively.
+    For example, if you selected the following two APIs:
+            def generate_mock_cc_transaction(customer_id: str, amount: float, merchant_category: str) -> dict:
+                # Mock logic: generate transaction ID "MOCKTX…", category merchant_category
+                return {"transaction_id": f"MOCKTX{customer_id}{int(amount)}", "customer_id": customer_id, "amount": amount, "merchant_category": merchant_category}
+
+            def compute_reward_points(customer_id: str, transactions: list[dict]) -> int:
+                # Mock logic: points = number of transactions * 10
+                return len(transactions) * 10      
+    Then the class encapsulation would be as follows:
+      <class>
+            class Tool_generate_mock_cc_transaction(BaseModel):
+                customer_id: str = Field(..., description="")
+                amount: float = Field(..., description="")
+                merchant_category: str = Field(..., description="")
+
+            class Tool_compute_reward_points(BaseModel):
+                customer_id: str = Field(..., description="")
+                transactions: List[Dict[str, Any]] = Field(..., description="")
+      </class>
+    And the tools list encapsulation would be as follows:
+      <tools>
+            StructuredTool.from_function(
+                func=generate_mock_cc_transaction,
+                name="generate_mock_cc_transaction",
+                description="",
+                args_schema=Tool_generate_mock_cc_transaction
+            ),
+            StructuredTool.from_function(
+                func=compute_reward_points,
+                name="compute_reward_points",
+                description="",
+                args_schema=Tool_compute_reward_points
+            )  
+      </tools>

@@ -1,0 +1,747 @@
+<sop_tool_analysis>
+
+## 1. SOP Relevance Analysis
+
+The API tools defined in the metadata directly implement the Main Procedure sections of the SOP:
+
+- **ValidateApplicationData**: Implements Section 5.1 "Application Intake and Pre-Processing Validation" - performing null checks, format validation (SSN, email, phone, ZIP), range validation (age 18-110, income $10k-$15M), and cross-field logical consistency checks.
+
+- **VerifyIdentity**: Implements Section 5.2 "Identity Verification and Know Your Customer (KYC) Compliance Execution" - executing government database cross-reference, KBA challenges, document upload with OCR/biometric matching, and device fingerprinting per USA PATRIOT Act Section 326.
+
+- **ScreenSanctionsWatchlist**: Implements Section 5.2 continuation - OFAC Specially Designated Nationals screening using fuzzy name-matching algorithms (Levenshtein, Soundex) with confidence scoring and manual review routing for potential matches.
+
+- **DetectFraudIndicators**: Implements Section 5.2 fraud detection elements - analyzing fraud_alert_flags, device fingerprints, IP geolocation, velocity metrics, and synthetic identity indicators.
+
+- **RetrieveCreditBureauData**: Implements Section 5.3 "Credit Bureau Data Retrieval and Analysis" - executing hard inquiries to Experian/TransUnion/Equifax for retail or Dun & Bradstreet for business, retrieving FICO Score 8, trade lines, utilization ratios, public records.
+
+- **CalculateDebtToIncomeRatio**: Implements Section 5.4 "Financial Analysis and Debt-to-Income Ratio Calculation" - aggregating monthly debt obligations, computing DTI ratio, handling business applications with debt service coverage and guarantor DTI.
+
+- **EvaluateCreditScorecard**: Implements Section 5.5 "Automated Credit Scorecard Evaluation and Risk Quantification" - executing proprietary scorecard with point assignments across risk tiers (prime ≥720, near-prime 660-719, subprime 600-659).
+
+- **DetermineCreditDecision**: Implements Section 5.6 "Credit Decision Determination and Decline Reason Assignment" - applying knockout rules, score-based decisioning with product-specific thresholds, routing to manual review queues.
+
+- **AssignCreditTerms**: Implements Section 5.7 "Credit Limit Assignment and APR Determination" - calculating approved_credit_limit using risk-tiered matrices constrained by affordability (income × 0.20), determining assigned_apr through risk-based pricing (13.99%-25.99%), handling secured card LTV and business cardholder distribution.
+
+- **GenerateAdverseActionNotice**: Implements Section 5.9 "Adverse Action Notice Generation and Regulatory Compliance Documentation" - producing FCRA Section 615(a) and ECOA Regulation B compliant notices with bureau disclosure, principal reasons, delivery within 30-day deadline.
+
+- **FinalizeApplicationOutputs**: Implements Section 5.8 "Account Activation Eligibility Determination and Output Generation" - calculating turnaround_time_seconds, setting auto_decision_flag, determining account_activation_eligible, computing estimated_card_delivery_date.
+
+## 2. Input Parameters by Tool
+
+**ValidateApplicationData**: All core application fields (application_id, timestamp, channel, business_type, product_type, applicant demographics, housing, employment, business entity fields for business_type, security deposit fields for secured type).
+
+**VerifyIdentity**: application_id, applicant_id, applicant_age, device_fingerprint_id, ip_address_location, fraud_alert_flags (from validation output).
+
+**ScreenSanctionsWatchlist**: application_id, applicant_id, business_entity_name, identity_verification_method (from VerifyIdentity output).
+
+**DetectFraudIndicators**: application_id, watchlist_check_result, device_fingerprint_id, ip_address_location, fraud_alert_flags (from ScreenSanctionsWatchlist output).
+
+**RetrieveCreditBureauData**: application_id, applicant_id, business_type, business_tin_ein, fraud_risk_level (from DetectFraudIndicators output).
+
+**CalculateDebtToIncomeRatio**: application_id, business_type, applicant_annual_income, applicant_monthly_housing_cost, total_outstanding_debt (from RetrieveCreditBureauData), business_annual_revenue, guarantor_personal_income.
+
+**EvaluateCreditScorecard**: application_id, business_type, credit_score, credit_utilization_ratio, debt_to_income_ratio (from CalculateDebtToIncomeRatio), number_of_open_accounts, number_of_delinquent_accounts, months_since_last_delinquency, bankruptcy_flag, applicant_years_employed, applicant_years_at_address.
+
+**DetermineCreditDecision**: application_id, business_type, product_type, internal_risk_score, scorecard_reason_codes (from EvaluateCreditScorecard), watchlist_check_result, identity_verification_method, bankruptcy_flag, fraud_alert_flags, applicant_annual_income, business_industry_code.
+
+**AssignCreditTerms**: application_id, final_decision (from DetermineCreditDecision), business_type, product_type, internal_risk_score, applicant_annual_income, business_annual_revenue, security_deposit_amount, deposit_verification_status.
+
+**GenerateAdverseActionNotice**: application_id, final_decision, decline_reason_code, applicant_id, credit_bureau_source, application_timestamp.
+
+**FinalizeApplicationOutputs**: application_id, processing_start_timestamp, final_decision, approved_credit_limit, assigned_apr, adverse_action_letter_generated, manual_review_required, underwriter_id, deposit_verification_status, fraud_alert_flags, uploaded_documents.
+
+## 3. Constraints and Special Considerations
+
+- **Sequential Dependency Chain**: Tools must execute in strict order due to data dependencies (validation → identity → sanctions → fraud → bureau → DTI → scorecard → decision → terms → adverse action → finalization).
+
+- **Business Type Routing**: Different business_types (retail, small_business, corporate, secured) trigger different validation requirements and decisioning logic.
+
+- **Regulatory Compliance**: FCRA permissible purpose, ECOA non-discrimination, USA PATRIOT Act CIP, OFAC sanctions screening, 30-day adverse action notice deadline.
+
+- **Error Handling**: Retry logic with exponential backoff for external API failures (bureau, sanctions), routing to manual review queues for ambiguous cases, routing to technical exception queues for system failures.
+
+- **Data Quality**: Null value handling, default point assignments for missing scorecard variables, estimation formulas for incomplete bureau data.
+
+- **State-Specific Constraints**: State usury law APR ceilings, state maximum lending limits.
+
+- **Audit Trail Requirements**: Immutable logging of all decisions, timestamps, reason codes for regulatory examination (25-month ECOA retention, 7-year general retention).
+
+## 4. Alignment with Overall SOP Direction
+
+The API tools implement a deterministic, regulatory-compliant, sequential credit decisioning workflow that balances:
+
+- **Risk Mitigation**: Layered fraud detection, identity verification, credit assessment, DTI calculation to prevent bad debt.
+- **Regulatory Compliance**: FCRA, ECOA, USA PATRIOT Act, OFAC compliance baked into each step.
+- **Operational Efficiency**: Auto-decisioning for 60-90% of applications (auto_decision_flag), manual review routing only for borderline/high-risk cases.
+- **Customer Experience**: Sub-60-second turnaround for auto-decisions, 7-day card delivery estimates.
+- **Audit Trail**: Complete lifecycle traceability from application intake through final disposition.
+
+## 5. Edge Cases and Limitations
+
+- **Thin File/No Hit**: Applicants with credit_score = 0 or no credit bureau match require alternative decisioning (may approve secured, decline unsecured).
+- **Security Freeze**: Credit file frozen by consumer blocks bureau inquiry, requires applicant to lift freeze.
+- **OFAC Potential Matches**: False positive name matches require manual AML analyst adjudication (watchlist_check_result = "potential_match").
+- **Income Verification**: Self-employed applicants with income exceeding occupation median trigger manual document review.
+- **State Constraint Conflicts**: Calculated APR exceeding state usury ceiling may force decline if below profitability threshold.
+- **Deposit Verification Delays**: Secured cards with deposit_verification_status = "pending" cannot activate until funds verified.
+- **Multi-Day Manual Review**: Applications in Underwriter Work Queue may take hours/days, impacting turnaround_time_seconds calculation.
+- **Aggregate Exposure Limits**: Existing customer with $45k exposure applying for $10k may receive reduced $5k limit or decline.
+
+## 6. Workflow Integration
+
+The tools form a linear pipeline with conditional branches:
+
+1. **Entry Point**: ValidateApplicationData (no dependencies)
+2. **Identity & Compliance Fork**: VerifyIdentity → ScreenSanctionsWatchlist → DetectFraudIndicators (sequential identity/fraud/sanctions screening)
+3. **Credit Assessment Branch**: RetrieveCreditBureauData → CalculateDebtToIncomeRatio → EvaluateCreditScorecard (sequential credit analysis)
+4. **Decision Point**: DetermineCreditDecision (consumes all prior outputs, determines approve/decline/manual review)
+5. **Conditional Branch A (Approved)**: AssignCreditTerms (only for final_decision = "approved")
+6. **Conditional Branch B (Declined/Less Favorable)**: GenerateAdverseActionNotice (only for final_decision = "declined" or certain approved cases)
+7. **Exit Point**: FinalizeApplicationOutputs (consolidates all outputs, determines account_activation_eligible)
+
+The workflow supports three business types with differentiated logic:
+- **Retail**: Standard consumer credit decisioning
+- **Business**: Blended commercial + personal guarantor assessment
+- **Secured**: Simplified decisioning with deposit-based limit calculation
+
+</sop_tool_analysis>
+
+<SCHEMA>
+{
+  "toolSpec": {
+    "name": "ValidateApplicationData",
+    "description": "Performs comprehensive data quality validation on submitted credit card applications including null checks for mandatory fields by business_type, format validation using regular expressions (SSN format XXX-XX-XXXX, email RFC 5322, phone (XXX) XXX-XXXX, ZIP XXXXX or XXXXX-XXXX), range validation (applicant_age 18-110 years, applicant_annual_income $10,000-$15,000,000, applicant_years_employed ≤ age-16), and cross-field logical consistency checks (applicant_monthly_housing_cost ≤ 50% of monthly income, applicant_years_at_address ≤ applicant_age) to ensure all required data elements are populated with valid values before proceeding to identity verification. Applications with validation failures are routed to data quality remediation queue with specific error descriptions. Sets validation_status flag and processing_start_timestamp upon successful validation, enabling workflow progression to identity verification stage. This is the entry point API with no dependencies.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique immutable identifier for the credit card application record in format APP_CC_YYYYMMDDXXXXX where YYYYMMDD is submission date and XXXXX is zero-padded sequential counter. Serves as primary key across all integrated systems."
+          },
+          "application_timestamp": {
+            "type": "string",
+            "description": "ISO 8601 formatted timestamp with millisecond precision in UTC (e.g., 2025-04-18T10:23:45Z) capturing exact moment of application submission. Serves as legal triggering event for ECOA 30-day adverse action notice deadline and SLA turnaround time calculations."
+          },
+          "application_channel": {
+            "type": "string",
+            "description": "Origination source channel for the application. Enumerated values: 'web' (browser-based portal), 'mobile_app' (iOS/Android native app), 'branch' (in-person with banker assistance), 'phone' (IVR or agent-assisted). Used for channel analytics but not as decisioning variable per ECOA non-discrimination requirements."
+          },
+          "business_type": {
+            "type": "string",
+            "description": "Primary workflow routing mechanism determining decisioning pathway. Required enumerated values: 'retail' (individual consumer personal-use cards), 'small_business' (business entity applications requiring blended assessment), 'corporate' (larger business entity applications), 'secured' (collateralized credit requiring deposit verification). Drives mandatory field requirements and scorecard selection."
+          },
+          "product_type": {
+            "type": "string",
+            "description": "Specific credit card offering identifier (e.g., 'Rewards Platinum', 'Cashback Gold', 'Low Interest Silver', 'Business Expense Card', 'Secured Builder Card'). Maps to product-specific credit policy parameters including minimum credit score thresholds, DTI allowances, credit limit matrices, APR pricing tiers, and annual fee structures via product catalog lookup table."
+          },
+          "applicant_id": {
+            "type": "string",
+            "description": "Hashed or encrypted reference to applicant's master customer record if existing customer, or newly generated unique customer identifier for prospective customers. Enables retrieval of relationship history, prior applications, existing credit exposure. Format typically CUST_XXXXXX."
+          },
+          "applicant_age": {
+            "type": "integer",
+            "description": "Integer representing applicant's age in years. Must be validated within range 18-110 years where 18 is minimum contractual capacity age and 110+ triggers fraud investigation for potential deceased person identity. Used for credit capacity assessment and ECOA compliance (age consideration only for legal capacity or creditworthiness when properly calibrated)."
+          },
+          "applicant_employment_status": {
+            "type": "string",
+            "description": "Current employment classification. Enumerated values: 'employed_full_time', 'employed_part_time', 'self_employed', 'unemployed', 'retired'. Self_employed triggers additional income verification requirements. Unemployed triggers heightened scrutiny of income sources to ensure sustainable ongoing income rather than temporary payments."
+          },
+          "applicant_annual_income": {
+            "type": "number",
+            "description": "Total gross annual income in USD before taxes from all sources including wages, self-employment, investment income, government benefits, alimony, child support. Must be validated within range $10,000-$15,000,000. Below $10k triggers decline for insufficient ability-to-pay. Above $15M routes to private banking channels. Serves as numerator in credit limit affordability calculations (income × 0.20) and DTI denominator (monthly income = annual / 12)."
+          },
+          "applicant_housing_status": {
+            "type": "string",
+            "description": "Residential ownership status. Enumerated values: 'own' (owns residence outright), 'mortgage' (owns with mortgage), 'rent', 'living_with_family'. Serves as stability indicator and classifies housing costs as debt obligations for DTI calculation. Own status typically results in zero housing cost unless property taxes/insurance separately quantified."
+          },
+          "applicant_monthly_housing_cost": {
+            "type": "number",
+            "description": "Monthly housing payment in USD including rent or mortgage payment (principal, interest, taxes, insurance). For 'own' status typically zero unless property taxes/insurance specified. Serves as component of total monthly debt obligations in DTI calculation. Validated to not exceed 50% of monthly income (applicant_annual_income / 12) as logical consistency check; exceeding 50% flags for verification but may allow progression with warning."
+          },
+          "applicant_years_at_address": {
+            "type": "integer",
+            "description": "Duration at current residential address in integer years. Serves as residential stability indicator with longer tenure suggesting lower flight risk and higher probability of successful mail delivery for card shipment. Validated to not exceed applicant_age (mathematically impossible)."
+          },
+          "applicant_years_employed": {
+            "type": "integer",
+            "description": "Duration with current employer in integer years. Serves as income stability proxy with longer tenure suggesting reliable income streams and lower involuntary termination risk. Validated to not exceed (applicant_age - 16) accounting for typical workforce entry age; exceeding this triggers data quality exception routing."
+          },
+          "business_entity_name": {
+            "type": "string",
+            "description": "Legal name of business entity as registered with Secretary of State or equivalent registrar. Mandatory for business_type = 'small_business' or 'corporate', null/empty for retail and secured applications. Used for commercial credit bureau inquiry and OFAC sanctions screening of business entity."
+          },
+          "business_tin_ein": {
+            "type": "string",
+            "description": "Tax Identification Number or Employer Identification Number for business entity in format XX-XXXXXXX. Mandatory for business_type = 'small_business' or 'corporate', null/empty for retail and secured. Used as primary matching key for Dun & Bradstreet commercial credit inquiry. Masked in storage to protect sensitive tax information."
+          },
+          "business_incorporation_date": {
+            "type": "string",
+            "description": "Date when business entity was legally formed in ISO 8601 format (YYYY-MM-DD). Mandatory for business applications. Entity age calculated as difference between current date and incorporation date serves as business maturity indicator, with younger businesses requiring higher personal guarantor reliance."
+          },
+          "business_annual_revenue": {
+            "type": "number",
+            "description": "Declared total gross revenue in USD for most recent fiscal year or trailing twelve months. Mandatory for business applications. Serves as denominator in business credit utilization ratios and cash flow adequacy calculations (monthly cash flow = annual revenue / 12 × industry profit margin). Used in affordability constraint (business_annual_revenue × 0.10 = max business credit line)."
+          },
+          "business_industry_code": {
+            "type": "string",
+            "description": "Six-digit NAICS (North American Industry Classification System) code identifying business's primary economic activity. Mandatory for business applications. Enables industry-specific risk assessment and identifies prohibited industries per credit policy (e.g., cannabis 111998, cryptocurrency 522320, ammunition 332994). Format: XXXXXX."
+          },
+          "guarantor_personal_income": {
+            "type": "number",
+            "description": "Personal annual income in USD of individual providing unconditional personal guarantee for business card obligations. Mandatory for business applications. Serves as secondary repayment source assessed through personal credit bureau pull and personal DTI calculation for the guarantor."
+          },
+          "security_deposit_amount": {
+            "type": "number",
+            "description": "Cash deposit amount in USD pledged as collateral for secured credit card. Mandatory for business_type = 'secured', null for other types. Must be verified in holding account before credit line approval. Determines approved_credit_limit via LTV ratio (typically credit_limit = deposit_amount × 1.00 for full collateralization)."
+          },
+          "deposit_verification_status": {
+            "type": "string",
+            "description": "Status of cash deposit verification for secured cards. Mandatory for business_type = 'secured', null otherwise. Enumerated values: 'pending' (transfer initiated but not confirmed), 'verified' (funds confirmed in holding account), 'failed' (transfer rejected or insufficient funds). Only 'verified' status permits progression to final decisioning and account activation."
+          },
+          "deposit_account_id": {
+            "type": "string",
+            "description": "Unique identifier for escrow or certificate of deposit account where security funds are held for secured cards. Mandatory for business_type = 'secured', null otherwise. Account is restricted against withdrawal by depositor and pledged to institution as security for credit card obligation. Format typically DEP_ACC_XXXXXX."
+          }
+        },
+        "required": [
+          "application_id",
+          "application_timestamp",
+          "application_channel",
+          "business_type",
+          "product_type",
+          "applicant_id",
+          "applicant_age",
+          "applicant_employment_status",
+          "applicant_annual_income",
+          "applicant_housing_status",
+          "applicant_monthly_housing_cost",
+          "applicant_years_at_address",
+          "applicant_years_employed"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "VerifyIdentity",
+    "description": "Executes multi-layered Customer Identification Program (CIP) compliant identity verification procedures per USA PATRIOT Act Section 326 to detect synthetic identity fraud, identity theft, and fabricated identities. Employs risk-based tiered approach: (1) Primary tier - government database cross-reference validation via LexisNexis Instant Verify or Experian Precise ID matching SSN, name, DOB, address against Social Security Administration, USPS NCOA, state DMV records, returning confidence score 0-100; (2) Step-up tier for scores 60-84 or applications with fraud_alert_flags - Knowledge-Based Authentication (KBA) challenge with 4 dynamically generated multiple-choice questions from credit history requiring 3/4 correct answers within 5 minutes; (3) Highest tier for scores <60 or KBA failure - document upload with OCR data extraction from government-issued photo ID and biometric facial matching between ID photo and live selfie requiring similarity score >80. Returns verification method used (government_database, kba, document_scan, biometric) and confidence score. Applications failing all three tiers are automatically declined with decline_reason_code = IDENTITY_VERIFICATION_FAILURE without proceeding to credit bureau inquiry.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from ValidateApplicationData output. Used to retrieve full identity attributes (SSN, full legal name, DOB, residential address) from validated application record for transmission to identity verification service."
+          },
+          "applicant_id": {
+            "type": "string",
+            "description": "Customer identifier from validated application. Used to check for existing customer identity verification history that may streamline current verification (trusted customer with prior successful verification may require less rigorous checks)."
+          },
+          "applicant_age": {
+            "type": "integer",
+            "description": "Applicant age from validated application. Used in synthetic identity detection logic - age inconsistent with SSN issuance date patterns or thin credit file inconsistent with stated age triggers elevated verification requirements."
+          },
+          "device_fingerprint_id": {
+            "type": "string",
+            "description": "Unique identifier for device hardware/software configuration generated through JavaScript fingerprinting (browser characteristics, fonts, screen resolution, time zone). Used to detect trusted devices (previous successful applications from same device) enabling streamlined verification vs. suspicious devices (linked to prior fraud) requiring enhanced verification."
+          },
+          "ip_address_location": {
+            "type": "string",
+            "description": "Geographic location derived from IP geolocation services in format 'City, State/Province, Country' (e.g., 'New York, NY, US'). Used to detect application location inconsistent with stated residential address (e.g., application from overseas IP for U.S. resident) triggering elevated verification tier."
+          },
+          "fraud_alert_flags": {
+            "type": "array",
+            "description": "Array of fraud indicator strings from preliminary fraud screening conducted during validation. Possible values: 'address_mismatch' (provided address differs from bureau address), 'device_fingerprint_suspicious' (device associated with prior fraud), 'velocity_anomaly' (multiple applications from device/IP in short timeframe), 'synthetic_identity_indicators' (characteristics suggesting fabricated identity). Non-empty array triggers step-up to KBA or document verification tier.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "application_id",
+          "applicant_id",
+          "applicant_age",
+          "device_fingerprint_id",
+          "ip_address_location",
+          "fraud_alert_flags"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "ScreenSanctionsWatchlist",
+    "description": "Screens applicant name (for retail) or both personal name and business entity name (for business applications) against Office of Foreign Assets Control (OFAC) Specially Designated Nationals (SDN) list and consolidated sanctions lists (sectoral sanctions, foreign sanctions evaders, etc.) to ensure institution does not provide financial services to prohibited persons per Treasury Department regulations. Uses fuzzy name-matching algorithms including Levenshtein edit distance (character-level differences) and Soundex/Metaphone phonetic similarity to account for spelling variations, transliteration from non-Latin characters, aliases, middle name inclusion/omission, and data entry errors. Returns match result with confidence score 0-100: 'clear' (<75 indicating no significant match), 'potential_match' (75-95 requiring human AML analyst adjudication for false positive determination), 'confirmed_match' (>95 with corroborating attributes like DOB/address match causing immediate automatic decline without adverse action notice per OFAC regulations). Potential matches route to Sanctions Review Queue where trained compliance analysts examine applicant details vs. sanctioned party record and document determination as 'False Positive - Proceed' or 'True Positive - Reject'. Confirmed matches trigger blocked assets reporting to OFAC if any funds transfer involved (e.g., secured card deposit payment).",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from VerifyIdentity output. Used to retrieve full legal name from validated application record for sanctions screening. Also serves as reference key for screening audit logs required for regulatory examination demonstrating all applicants were properly screened."
+          },
+          "applicant_id": {
+            "type": "string",
+            "description": "Customer identifier from validated application. Used to retrieve complete identity profile including any known aliases, previous names (maiden names), or AKA designations that should be included in comprehensive sanctions screening to detect matches on alternative name forms."
+          },
+          "business_entity_name": {
+            "type": "string",
+            "description": "Legal business entity name from validated application. Mandatory for business_type = 'small_business' or 'corporate', null for retail/secured applications. Both business entity name AND personal guarantor name must be screened for business applications, as business entity may be sanctioned even if individual is clear, or vice versa."
+          },
+          "identity_verification_method": {
+            "type": "string",
+            "description": "Verification method successfully completed from VerifyIdentity output. Values: 'government_database', 'kba', 'document_scan', 'biometric'. Sanctions screening executes only after identity verification succeeds, ensuring we screen the actual applicant's verified identity rather than potentially fraudulent submitted data. Failed identity verification prevents sanctions screening as identity not confirmed."
+          }
+        },
+        "required": [
+          "application_id",
+          "applicant_id",
+          "identity_verification_method"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "DetectFraudIndicators",
+    "description": "Analyzes application for fraud risk patterns using multi-factor fraud detection logic. Evaluates fraud_alert_flags array populated during validation for preliminary indicators (address_mismatch, device_fingerprint_suspicious, velocity_anomaly, synthetic_identity_indicators). Compares device_fingerprint_id against historical fraud patterns database to identify devices previously associated with fraudulent applications or bust-out fraud schemes. Validates IP address geolocation consistency with stated residential address (e.g., application claiming California residence but originating from overseas IP triggers red flag). Calculates velocity metrics by querying application database for count of applications from same device_fingerprint_id or IP address within sliding time windows (24 hours, 7 days) to detect application farming attacks. Computes synthetic identity risk score based on credit file characteristics (thin file with recent origination inconsistent with stated age, SSN issuance date patterns, velocity of inquiries suggesting credit farming). Returns aggregated fraud_risk_level classification (low/medium/high) and updated fraud_alert_flags array with any newly detected indicators. High-severity fraud flags (confirmed_synthetic_identity, device_linked_to_prior_fraud, excessive_velocity with 5+ applications in 24h) trigger fraud_investigation_required flag causing automatic decline. Medium-severity flags route to Fraud Analyst queue for manual investigation before proceeding to credit decisioning.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from ScreenSanctionsWatchlist output. Used to update application record with fraud_risk_level classification and fraud_alert_flags for decision logic and audit trail documentation."
+          },
+          "watchlist_check_result": {
+            "type": "string",
+            "description": "Sanctions screening result from ScreenSanctionsWatchlist output. Enumerated values: 'clear', 'potential_match', 'confirmed_match'. Fraud detection proceeds only for 'clear' or analyst-reviewed 'potential_match' reclassified as false positive. Confirmed_match applications already declined during sanctions screening, no fraud detection needed."
+          },
+          "device_fingerprint_id": {
+            "type": "string",
+            "description": "Device identifier from validated application. Queried against fraud database to check if device previously associated with confirmed fraud cases (e.g., prior applications from this device resulted in first-payment defaults, synthetic identity bust-outs, or identity theft). Also used for velocity query to count applications from this device in trailing 24h/7d periods."
+          },
+          "ip_address_location": {
+            "type": "string",
+            "description": "Geolocation string from validated application in format 'City, State/Province, Country'. Compared against applicant's stated residential address to detect geographic inconsistencies (e.g., application from international IP for U.S. resident suggests VPN use or offshore fraud ring). Also checked against high-risk geography lists (countries with elevated fraud rates or non-cooperative jurisdictions)."
+          },
+          "fraud_alert_flags": {
+            "type": "array",
+            "description": "Preliminary fraud indicators array from validated application. Contains initial flags detected during validation phase (address_mismatch, device_fingerprint_suspicious, velocity_anomaly, synthetic_identity_indicators). DetectFraudIndicators API appends additional flags discovered during comprehensive fraud analysis, returning updated array with all cumulative indicators.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "application_id",
+          "watchlist_check_result",
+          "device_fingerprint_id",
+          "ip_address_location",
+          "fraud_alert_flags"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "RetrieveCreditBureauData",
+    "description": "Executes hard inquiry API calls to credit bureaus with methodology varying by business_type. Retail applications trigger consumer credit inquiry to Experian Connect API, TransUnion TrueVision API, or Equifax OACIS API per institution's bureau rotation policy, transmitting inquiry request payload with SSN as primary key, name, address, DOB, and inquiry purpose code 'credit card application'. Bureau processes by matching identity attributes to credit files, retrieving matched file, calculating FICO Score 8 (most common for card decisioning) or VantageScore 3.0, and returning comprehensive credit report containing: header (name, address, SSN, DOB, employment), credit score with 4 reason codes (e.g., 'Proportion of balances to credit limits too high', 'Too many recent inquiries'), trade line details for each account (creditor, account type, status, date opened, limit/amount, current balance, 24-month payment history coded as Current/30/60/90/120+ days late), public records (bankruptcies with filing/discharge dates, tax liens, civil judgments, foreclosures), inquiry history (hard inquiries in preceding 24 months). System parses response to populate fields: credit_score (integer), credit_utilization_ratio (sum of revolving balances / sum of revolving limits as decimal), number_of_open_accounts (count of status='Open' trade lines), number_of_delinquent_accounts (count with any late payment in trailing 12 months), total_outstanding_debt (sum of all balances), bankruptcy_flag (boolean, true if Chapter 7 discharge within 10 years or Chapter 13 within 7 years per credit report retention standards), foreclosure_flag (true if foreclosure within 7 years), months_since_last_delinquency (integer months since most recent late payment, null if none). Business applications execute dual parallel inquiries: commercial credit report to Dun & Bradstreet D&B Direct API using business_tin_ein retrieving PAYDEX score 0-100 or Experian Intelliscore Plus 1-100, trade payment experiences, public filings, firmographic data; PLUS personal credit inquiry on guarantor using guarantor SSN following identical consumer methodology. Implements retry logic with exponential backoff (immediate, 5s, 20s, 60s delays) for up to 4 attempts on API failures. Handles no-hit/thin-file scenarios by returning credit_score=0 with thin_file_indicator, routing to alternative decisioning (may approve secured, decline unsecured).",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from DetectFraudIndicators output. Used as inquiry reference number transmitted to bureau and for storing bureau response data in application record. Also serves as audit trail key for FCRA permissible purpose documentation demonstrating lawful credit report access."
+          },
+          "applicant_id": {
+            "type": "string",
+            "description": "Customer identifier from validated application. Used to retrieve full identity attributes (SSN, legal name parsed into first/middle/last components, current address parsed into street/city/state/ZIP, DOB) for bureau API inquiry payload construction."
+          },
+          "business_type": {
+            "type": "string",
+            "description": "Application business type from validated data. Determines inquiry methodology: 'retail'/'secured' trigger consumer credit bureau inquiry only; 'small_business'/'corporate' trigger dual inquiries (commercial credit report on business entity via business_tin_ein PLUS personal credit report on guarantor via guarantor SSN). Enumerated values: 'retail', 'small_business', 'corporate', 'secured'."
+          },
+          "business_tin_ein": {
+            "type": "string",
+            "description": "Business Tax Identification Number from validated application. Required for business_type='small_business'/'corporate', null for retail/secured. Serves as primary matching key for Dun & Bradstreet or Experian Business commercial credit inquiry. Format XX-XXXXXXX. Must be present for business applications to execute commercial credit component of dual inquiry."
+          },
+          "fraud_risk_level": {
+            "type": "string",
+            "description": "Fraud risk classification from DetectFraudIndicators output. Enumerated values: 'low', 'medium', 'high'. Credit bureau inquiry executes only for applications passing fraud screening with 'low' or analyst-cleared 'medium' risk. High-risk applications with confirmed fraud indicators decline without bureau inquiry to avoid unnecessary hard inquiry impact on legitimate identity victim's credit report."
+          }
+        },
+        "required": [
+          "application_id",
+          "applicant_id",
+          "business_type",
+          "fraud_risk_level"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "CalculateDebtToIncomeRatio",
+    "description": "Computes debt-to-income ratio as primary quantitative measure of applicant's ability to service new credit obligations given existing debt burden and available income. Methodology varies by business_type: For retail applications - (1) Aggregates total monthly debt obligations by parsing credit bureau trade lines to identify minimum required monthly payments: sums 'monthly_payment' fields from installment loans (auto, student, personal loans), calculates revolving account minimums using institutional formula (greater of $25 or 2% of current balance) by applying to each revolving trade line balance, sums results. (2) Adds applicant_monthly_housing_cost (rent or mortgage PITI). (3) Divides by monthly gross income (applicant_annual_income / 12) yielding DTI ratio as decimal (e.g., 0.42 = 42%). For business applications - calculates business debt service coverage ratio (monthly business debt obligations from commercial credit report / monthly business cash flow estimated as business_annual_revenue/12 × industry profit margin from NAICS-keyed benchmark data) AND guarantor personal DTI using guarantor_personal_income, with approval requiring either business coverage >1.25 or guarantor DTI <0.43. Self-employed applicants (applicant_employment_status='self_employed') with income exceeding occupation median trigger income_verification_required flag routing to underwriter for document review (pay stubs, tax returns, bank statements). Returns debt_to_income_ratio decimal, monthly_debt_obligations USD, monthly_income USD, and detailed calculation breakdown. DTI evaluated against policy thresholds: <0.35 = Low Risk, 0.35-0.43 = Moderate Risk, 0.43-0.50 = Elevated Risk, >0.50 = Excessive Risk typically triggering decline for unsecured products (secured cards may accept higher DTI given collateral).",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from RetrieveCreditBureauData output. Used to store calculated debt_to_income_ratio in application record for subsequent scorecard evaluation and to retrieve detailed trade line data from bureau report for debt obligation aggregation."
+          },
+          "business_type": {
+            "type": "string",
+            "description": "Application type determining DTI calculation methodology. Values: 'retail'/'secured' use consumer DTI (personal income vs. personal debts), 'small_business'/'corporate' use blended logic (business debt service coverage AND guarantor personal DTI with dual pathway approval logic)."
+          },
+          "applicant_annual_income": {
+            "type": "number",
+            "description": "Gross annual income in USD from validated application. Divided by 12 to calculate monthly_income (DTI denominator). For self-employed applicants, compared against Bureau of Labor Statistics occupational median income for stated occupation to detect inflated income requiring verification. Must be ≥$10,000 per validation rules."
+          },
+          "applicant_monthly_housing_cost": {
+            "type": "number",
+            "description": "Monthly housing payment in USD from validated application (rent or mortgage PITI, typically zero for 'own' status unless property taxes/insurance specified). Added to estimated debt payments from trade lines to calculate total_monthly_debt_obligations (DTI numerator)."
+          },
+          "total_outstanding_debt": {
+            "type": "number",
+            "description": "Sum of all account balances in USD from RetrieveCreditBureauData output. Used to estimate monthly debt service obligations when bureau trade lines lack explicit monthly_payment fields. Revolving debt estimated as 2% of balance per month, installment debt estimated using balance with assumed 48-month amortization for unknown term loans."
+          },
+          "business_annual_revenue": {
+            "type": "number",
+            "description": "Gross annual business revenue in USD from validated application. Required for business_type='small_business'/'corporate', null for retail/secured. Divided by 12 to get monthly revenue, then multiplied by NAICS-specific profit margin (e.g., professional services 30-40%, retail 5-15%) to estimate monthly business cash flow for debt service coverage calculation."
+          },
+          "guarantor_personal_income": {
+            "type": "number",
+            "description": "Personal annual income in USD of business guarantor from validated application. Required for business applications, null otherwise. Used to calculate guarantor personal DTI as fallback approval pathway when business entity debt service coverage is inadequate. Divided by 12 for monthly income, compared against guarantor personal debts from guarantor credit report."
+          }
+        },
+        "required": [
+          "application_id",
+          "business_type",
+          "applicant_annual_income",
+          "applicant_monthly_housing_cost",
+          "total_outstanding_debt"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "EvaluateCreditScorecard",
+    "description": "Executes proprietary credit scorecard model developed through logistic regression analysis of historical application and performance data to predict probability of applicant defaulting (becoming 90+ days delinquent) within 12 months of account origination. Routes to appropriate scorecard segment based on credit_score: prime (≥720), near-prime (660-719), subprime (600-659), thin-file (score=0 or insufficient credit history). Applies additive point assignment model with binning rules mapping continuous variables to discrete point ranges: credit_score bands (800+=300pts, 780-799=285pts, 760-779=270pts, 740-759=255pts, 720-739=240pts declining by 15pts per 20-point score band); credit_utilization_ratio brackets (<0.10=150pts, 0.10-0.29=135pts, 0.30-0.49=110pts, 0.50-0.74=75pts, ≥0.75=30pts); debt_to_income_ratio tiers (<0.20=150pts, 0.20-0.35=125pts, 0.36-0.43=90pts, 0.44-0.50=50pts, >0.50=0pts); number_of_delinquent_accounts (0=100pts, 1=40pts, ≥2=0pts); months_since_last_delinquency (24+=100pts, 12-23=60pts, 6-11=20pts, 0-5=0pts); bankruptcy_flag (false=100pts, true=0pts often with auto-decline if discharge within 24 months); applicant_years_employed (5+=50pts, 2-4=35pts, 1=20pts, <1=5pts); applicant_years_at_address (similar stability scoring). Sums all variable points to generate internal_risk_score 0-1000 where higher scores indicate lower risk. Generates scorecard_reason_codes by identifying top 4 variables with lowest point contributions relative to maximum possible (largest point deficiencies), translating to standardized reason language for adverse action disclosure (e.g., 'Debt-to-income ratio too high', 'Proportion of balances to credit limits too high on revolving accounts'). Business applications use blended scorecard weighting commercial factors (business credit score, years in operation, debt service coverage, NAICS industry risk) at 60% and personal guarantor factors at 40% for established businesses, shifting to 40% commercial/60% personal for businesses incorporated <3 years. Secured applications may use simplified scorecard with minimal hygiene checks (recent bankruptcy, excessive collections) given collateral mitigation. Returns internal_risk_score, scorecard_reason_codes array, scorecard version identifier for model governance, and detailed point breakdown by variable.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from CalculateDebtToIncomeRatio output. Used to store calculated internal_risk_score and scorecard_reason_codes in application record for decision determination and adverse action notice generation."
+          },
+          "business_type": {
+            "type": "string",
+            "description": "Application type determining scorecard selection. Values: 'retail' uses consumer scorecard (separate versions for prime/near-prime/subprime segments), 'small_business'/'corporate' use blended commercial+personal scorecard, 'secured' uses simplified scorecard emphasizing hygiene checks over credit score given collateral protection."
+          },
+          "credit_score": {
+            "type": "integer",
+            "description": "FICO Score 8 or VantageScore 3.0 from RetrieveCreditBureauData output. Primary scorecard variable with highest weight, typically contributing 0-300 points. Score=0 indicates thin file routing to alternative scorecard. Used for segment routing: ≥720=prime, 660-719=near-prime, 600-659=subprime, each with distinct variable weights optimized for population."
+          },
+          "credit_utilization_ratio": {
+            "type": "number",
+            "description": "Decimal ratio of revolving debt usage from bureau data (sum of revolving balances / sum of revolving limits). Heavily weighted scorecard variable (0-150 points) with strong empirical correlation to default. Values <0.10 optimal (150pts), ≥0.75 high-risk (30pts). Null if no revolving accounts; receives default 50pt assignment."
+          },
+          "debt_to_income_ratio": {
+            "type": "number",
+            "description": "Decimal DTI from CalculateDebtToIncomeRatio output. Heavily weighted scorecard variable (0-150 points) quantifying ability-to-pay. Values <0.20 optimal (150pts), >0.50 excessive (0pts often triggering auto-decline). Primary factor in approving/declining borderline credit scores."
+          },
+          "number_of_open_accounts": {
+            "type": "integer",
+            "description": "Count of active credit accounts from bureau data. Moderate weight scorecard variable indicating breadth of credit experience. Typical binning: 8+=40pts, 5-7=35pts, 3-4=25pts, 1-2=15pts, 0=5pts (thin file penalty)."
+          },
+          "number_of_delinquent_accounts": {
+            "type": "integer",
+            "description": "Count of accounts with late payments in trailing 12 months from bureau data. High-impact negative scorecard variable. Binary-style scoring: 0=100pts (clean history), 1=40pts (isolated issue), ≥2=0pts (pattern of delinquency often triggering decline)."
+          },
+          "months_since_last_delinquency": {
+            "type": "integer",
+            "description": "Integer months elapsed since most recent late payment from bureau data. Null if no delinquencies on record (receives 100pt default). Recent delinquency high-risk: 0-5 months=0pts often declining, 6-11=20pts, 12-23=60pts (issue aging), 24+=100pts (resolved/distant issue)."
+          },
+          "bankruptcy_flag": {
+            "type": "boolean",
+            "description": "Boolean from bureau data indicating bankruptcy filing within retention period (Chapter 7 within 10 years, Chapter 13 within 7 years). Critical knockout variable: false=100pts, true=0pts. True with discharge within 24 months typically triggers automatic decline regardless of other factors. Older bankruptcies (24+ months) may permit approval with compensating factors."
+          },
+          "applicant_years_employed": {
+            "type": "integer",
+            "description": "Employment tenure from validated application. Moderate weight stability variable (0-50 points): 5+=50pts, 2-4=35pts, 1=20pts, <1=5pts. Longer tenure suggests income reliability and lower involuntary job loss risk. Self-employed may receive adjusted scoring."
+          },
+          "applicant_years_at_address": {
+            "type": "integer",
+            "description": "Residential tenure from validated application. Moderate weight stability variable (0-50 points) similar to employment tenure scoring. Longer residence suggests lower flight risk and higher address stability for card delivery and collections contact."
+          }
+        },
+        "required": [
+          "application_id",
+          "business_type",
+          "credit_score",
+          "credit_utilization_ratio",
+          "debt_to_income_ratio",
+          "number_of_open_accounts",
+          "number_of_delinquent_accounts",
+          "bankruptcy_flag",
+          "applicant_years_employed",
+          "applicant_years_at_address"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "DetermineCreditDecision",
+    "description": "Applies hierarchical decision rule logic to render final binary credit decision (approve/decline/pending_manual_review). Executes in two stages: (1) Preliminary knockout rules for categorically disqualifying characteristics regardless of internal_risk_score: sanctions confirmed_match (watchlist_check_result='confirmed_match') declines with decline_reason_code='SANCTIONS_MATCH' without adverse action notice per OFAC; identity verification failed (identity_verification_method='failed') declines with 'IDENTITY_VERIFICATION_FAILURE'; recent bankruptcy within 24 months (bankruptcy_flag=true AND discharge date within 24 months of application_timestamp) declines with 'RECENT_BANKRUPTCY'; high-severity fraud confirmed (fraud_alert_flags contains 'confirmed_synthetic_identity' or 'device_linked_to_prior_fraud') declines with 'ACTIVE_FRAUD_ALERT'; prohibited NAICS industry for business apps (business_industry_code matches prohibited list: cannabis 111998, cryptocurrency 522320, ammunition 332994, adult entertainment 512199) declines with 'PROHIBITED_INDUSTRY'; insufficient minimum income (applicant_annual_income <$10,000) declines with 'INSUFFICIENT_INCOME'. (2) Score-based decisioning for applications passing knockout gates, evaluating internal_risk_score against product-specific cutoff thresholds: Premium products (Rewards Platinum, Cashback Gold) require score ≥650 for auto-approve (score 500-649 routes to manual_review_required, <500 auto-decline); Standard products (Low Interest Silver, basic cards) require score ≥550 for auto-approve; Business cards align with standard at ≥550; Secured cards use relaxed ≥400 threshold given collateral protection (some institutions approve all secured with verified deposits regardless of score). Borderline applications in manual review zones (score between auto-decline and auto-approve thresholds) set final_decision='pending_manual_review', manual_review_required=true, manual_review_reason explaining reason (e.g., 'Credit score in indeterminate zone requiring underwriter evaluation', 'Elevated DTI with compensating factors present requiring judgment'). Also checks aggregate customer exposure: queries existing credit accounts for applicant_id, sums total exposure, validates new approved_credit_limit would not exceed per-customer maximum ($50k retail, higher for business/affluent); excess exposure declines with 'MAXIMUM_CREDIT_EXPOSURE_EXCEEDED'. Assigns decline_reason_code for rejected applications by prioritizing knockout rule triggers (sanctions > identity > bankruptcy > industry > fraud > income) or using top scorecard_reason_codes from EvaluateCreditScorecard for score-based declines. Returns final_decision, decline_reason_code (null if approved), manual_review flags, underwriter_id (null for auto-decisions), and decision_details documenting decision path and rules triggered.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from EvaluateCreditScorecard output. Used to update application record with final_decision, decline_reason_code, manual_review_required status, and to trigger downstream workflows (credit terms assignment for approvals, adverse action notice for declines)."
+          },
+          "business_type": {
+            "type": "string",
+            "description": "Application type from validated data. Used to determine applicable decision thresholds (secured cards have lower score requirements than unsecured) and to validate business-specific knockout rules (prohibited NAICS industry codes only apply to business_type='small_business'/'corporate')."
+          },
+          "product_type": {
+            "type": "string",
+            "description": "Specific card product from validated data. Determines internal_risk_score cutoff thresholds: premium products (Rewards Platinum, Cashback Gold) require ≥650 for auto-approve, standard products ≥550, secured products ≥400. Product-specific minimums ensure premium offerings reserved for lower-risk customers."
+          },
+          "internal_risk_score": {
+            "type": "integer",
+            "description": "Proprietary risk score 0-1000 from EvaluateCreditScorecard output where higher scores indicate lower risk. Evaluated against product-specific thresholds for score-based decisioning. Score ≥ threshold = auto-approve, score in manual review zone (threshold -150 to threshold) = pending_manual_review, score < manual review floor = auto-decline."
+          },
+          "scorecard_reason_codes": {
+            "type": "array",
+            "description": "Array of up to 4 reason code strings from EvaluateCreditScorecard identifying variables with lowest point contributions (largest deficiencies). Used to assign decline_reason_code for score-based declines by selecting top reason from array. Example values: 'Debt-to-income ratio too high', 'Proportion of balances to credit limits too high on revolving accounts', 'Recent delinquencies on credit obligations', 'Too many recent credit inquiries'.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "watchlist_check_result": {
+            "type": "string",
+            "description": "OFAC sanctions screening result from ScreenSanctionsWatchlist. Values: 'clear' (no match, permits decisioning), 'potential_match' (manual analyst review completed with false positive determination permitting decisioning), 'confirmed_match' (triggers immediate decline knockout rule with decline_reason_code='SANCTIONS_MATCH'). Confirmed matches block all further processing."
+          },
+          "identity_verification_method": {
+            "type": "string",
+            "description": "Successful verification method from VerifyIdentity output. Values: 'government_database', 'kba', 'document_scan', 'biometric' all permit decisioning. 'failed' value (all verification tiers failed) triggers decline knockout rule with decline_reason_code='IDENTITY_VERIFICATION_FAILURE' without credit bureau inquiry."
+          },
+          "bankruptcy_flag": {
+            "type": "boolean",
+            "description": "Boolean from RetrieveCreditBureauData indicating bankruptcy within retention period. True value combined with discharge date within 24 months of application_timestamp triggers decline knockout rule with decline_reason_code='RECENT_BANKRUPTCY'. Older bankruptcies (24+ months) permit decisioning via scorecard evaluation."
+          },
+          "fraud_alert_flags": {
+            "type": "array",
+            "description": "Array of fraud indicator strings from DetectFraudIndicators. High-severity flags ('confirmed_synthetic_identity', 'device_linked_to_prior_fraud', 'excessive_velocity') trigger decline knockout rule with decline_reason_code='ACTIVE_FRAUD_ALERT'. Medium-severity flags ('address_mismatch', 'velocity_anomaly') route to manual_review_required for fraud analyst investigation.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "applicant_annual_income": {
+            "type": "number",
+            "description": "Gross annual income from validated application. Checked against minimum threshold ($10,000) in knockout rule evaluation. Income <$10k triggers decline with decline_reason_code='INSUFFICIENT_INCOME' as ability-to-pay questioned even for secured products. Also used for affordability constraint checks in aggregate exposure calculation."
+          },
+          "business_industry_code": {
+            "type": "string",
+            "description": "Six-digit NAICS code from validated business application (null for retail/secured). Checked against institution's prohibited merchant category list. Prohibited industries (cannabis 111998, cryptocurrency 522320, ammunition 332994, adult entertainment 512199, marijuana-related businesses 111998) trigger decline with decline_reason_code='PROHIBITED_INDUSTRY' due to legal/regulatory/reputational risk."
+          }
+        },
+        "required": [
+          "application_id",
+          "business_type",
+          "product_type",
+          "internal_risk_score",
+          "scorecard_reason_codes",
+          "watchlist_check_result",
+          "identity_verification_method",
+          "bankruptcy_flag",
+          "fraud_alert_flags",
+          "applicant_annual_income"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "AssignCreditTerms",
+    "description": "Calculates approved_credit_limit and assigned_apr for applications with final_decision='approved' using risk-based tiering and regulatory constraints. Credit limit assignment: Maps internal_risk_score bands to limit ranges with income affordability constraint: 800+ score qualifies for $15k-$25k range, 750-799 for $10k-$15k, 700-749 for $7k-$10k, 650-699 for $5k-$7k, 600-649 for $3k-$5k, 550-599 for $1k-$3k. Applies affordability overlay: calculates income-based limit as applicant_annual_income × 0.20 (assuming customer can safely carry revolving debt up to 20% of annual income), sets approved_credit_limit to LESSER of score-based maximum or income-based affordability, preventing over-extension despite strong credit scores when income modest. Enforces product minimums/maximums (e.g., Rewards Platinum minimum $5k, student cards maximum $5k regardless of score). For business applications: score-based ranges higher ($50k-$100k for 800+, $25k-$50k for 700-799, $10k-$25k for 600-699), affordability calculated as business_annual_revenue × 0.10. Calculates cardholder_limit_distribution object: {total_line: approved_credit_limit, per_card_limit: total_line/10, max_cards: 20} distributing total business line across employee cards (default 10 cards each with 10% of total, maximum 20 cards at 5% each). For secured applications: approved_credit_limit = security_deposit_amount × LTV_policy_ratio (typically 1.00 for 100% collateralization), stores credit_limit_to_deposit_ratio. APR determination: Risk-based pricing matrix maps internal_risk_score to APR rates: 800+=13.99% (institution's best rate floor), 750-799=15.99%, 700-749=17.99%, 650-699=19.99%, 600-649=22.99%, 550-599=25.99% (approaching maximum regular APR). Product_type adjusts rates (Low Interest products subtract 2-3 percentage points, Rewards products add 1-2 points reflecting rewards program funding costs). Enforces state usury law ceilings by comparing calculated APR to state-specific maximum permissible rate for applicant's state of residence, assigning LESSER of risk-based APR or state ceiling. If state ceiling below profitability threshold (e.g., state max 18% but applicant risk profile requires 24%), declines application with decline_reason_code='UNABLE_TO_OFFER_COMPLIANT_TERMS'. Validates aggregate customer exposure: queries existing accounts, sums total exposure, ensures new approved_credit_limit does not exceed per-customer maximum ($50k retail); reduces limit if necessary or declines if minimum product limit cannot be met within exposure cap. Returns approved_credit_limit, assigned_apr (as decimal, e.g., 0.1799 for 17.99%), credit_limit_to_deposit_ratio (for secured), cardholder_limit_distribution (for business), and detailed calculation breakdown documenting constraints applied.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from DetermineCreditDecision output. Used to store approved_credit_limit and assigned_apr in application record for account activation and to retrieve detailed application data for limit/APR calculations."
+          },
+          "final_decision": {
+            "type": "string",
+            "description": "Credit decision from DetermineCreditDecision. AssignCreditTerms executes ONLY for final_decision='approved'. Declined and pending_manual_review applications skip credit terms assignment (no limit/APR calculated for rejected applications, manual review cases await underwriter disposition)."
+          },
+          "business_type": {
+            "type": "string",
+            "description": "Application type determining credit terms methodology. Values: 'retail' uses consumer limit ranges and personal income affordability; 'small_business'/'corporate' use business limit ranges, revenue-based affordability, and cardholder_limit_distribution calculation; 'secured' uses deposit-based limit with LTV ratio ignoring score-based ranges."
+          },
+          "product_type": {
+            "type": "string",
+            "description": "Specific card product determining product-specific constraints. Premium products (Rewards Platinum) enforce minimum limits ($5k) and APR adjustments (+1-2 points for rewards funding). Low Interest products enforce APR reductions (-2-3 points). Student/secured products enforce maximum limits regardless of score-based qualification."
+          },
+          "internal_risk_score": {
+            "type": "integer",
+            "description": "Risk score 0-1000 from EvaluateCreditScorecard. Maps to credit limit risk tier bands (800+=tier 1 $15k-$25k, declining by tiers to 550-599=tier 6 $1k-$3k) and APR risk pricing bands (800+=13.99% increasing to 550-599=25.99%). Higher scores qualify for higher limits and lower rates."
+          },
+          "applicant_annual_income": {
+            "type": "number",
+            "description": "Gross annual income from validated application. Used to calculate income-based affordability constraint: income × 0.20 = maximum safe revolving debt capacity. Serves as override limiting approved_credit_limit even for high credit scores when income modest, ensuring ability-to-pay per CARD Act considerations."
+          },
+          "business_annual_revenue": {
+            "type": "number",
+            "description": "Gross business revenue from validated application. Required for business_type='small_business'/'corporate', null otherwise. Used to calculate business affordability: revenue × 0.10 = maximum business credit line. Replaces personal income affordability for business limit calculations."
+          },
+          "security_deposit_amount": {
+            "type": "number",
+            "description": "Cash collateral deposit from validated application. Required for business_type='secured', null otherwise. Determines approved_credit_limit directly via LTV formula: limit = deposit × LTV_policy (typically 1.00 for 100% collateralization). Bypasses score-based limit ranges given full collateral protection eliminating principal loss risk."
+          },
+          "deposit_verification_status": {
+            "type": "string",
+            "description": "Deposit verification status from validated application. Required for secured applications. Values: 'verified' (funds confirmed in holding account, permits credit terms assignment), 'pending' (transfer not complete, blocks credit terms until verified), 'failed' (transfer rejected, application declined). Only 'verified' permits limit calculation."
+          }
+        },
+        "required": [
+          "application_id",
+          "final_decision",
+          "business_type",
+          "product_type",
+          "internal_risk_score",
+          "applicant_annual_income"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "GenerateAdverseActionNotice",
+    "description": "Produces FCRA Section 615(a) and ECOA Regulation B compliant adverse action notices required for declined applications (final_decision='declined') or less-favorable-terms approvals (approved_credit_limit below applicant-requested amount or assigned_apr >3 percentage points above institution's best rate). Retrieves appropriate letter template (decline template vs. less-favorable-terms template) and populates with application-specific data and mandatory statutory elements: (1) Applicant identification (name, address from applicant_id lookup); (2) Application reference (application_id); (3) Credit bureau identification - bureau name, mailing address, toll-free phone number from credit_bureau_source lookup table (e.g., Experian: 888-397-3742, TransUnion: 800-888-4213, Equifax: 800-685-1111); (4) Statement that bureau did not make adverse decision and cannot provide specific reasons; (5) Consumer rights disclosure - right to obtain free credit report copy from bureau within 60 days of adverse action date; (6) Dispute rights - right to dispute inaccurate/incomplete information in credit file directly with bureau; (7) Principal reasons for adverse action - retrieves decline_reason_code and supporting reasons from scorecard_reason_codes (up to 4 reasons maximum per FCRA) listed in descending order of importance, translates internal codes to consumer-friendly language (e.g., internal 'DTI_EXCEEDED_THRESHOLD' → consumer disclosure 'Debt obligations too high relative to income', 'CREDIT_SCORE_BELOW_MINIMUM' → 'Credit score did not meet minimum requirements for approval'); (8) ECOA-specific elements - notice of right to request statement of specific reasons within 60 days, prohibition of discrimination based on protected characteristics (race, color, religion, national origin, sex, marital status, age, public assistance receipt), individual basis evaluation statement. For less-favorable-terms approvals, includes comparative disclosure showing approved terms vs. best available terms (e.g., approved 22.99% APR vs. 13.99% best rate = 9 percentage point difference). Transmits letter via configured delivery methods: (1) Email delivery via email service API using applicant email address with PDF attachment; (2) Postal mail delivery via mail services vendor API (e.g., Lob, SendGrid Print) transmitting PDF for physical printing, envelope stuffing, first-class postage, with USPS tracking number returned; (3) Dual delivery (email + postal) for maximum delivery assurance. Validates 30-day regulatory deadline: calculates application_timestamp + 30 calendar days = regulatory_deadline, flags applications approaching deadline (day 28+) for expedited certified mail delivery. Logs delivery details: adverse_action_letter_id, generation timestamp, delivery method, email_delivery_status, postal_tracking_number, regulatory_deadline date. Sets adverse_action_letter_generated=true flag. Monitors email bounces and postal delivery failures, escalating undeliverable notices to compliance team for alternative applicant contact. Stores immutable audit records for 25-month ECOA retention period supporting regulatory examination requests to verify 100% adverse action notice generation for applicable applications with timely delivery within 30-day requirement.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from DetermineCreditDecision output. Used to retrieve full applicant data (name, address, email for delivery), populate letter reference field, and update application record with adverse_action_letter_generated flag and delivery tracking details."
+          },
+          "final_decision": {
+            "type": "string",
+            "description": "Credit decision from DetermineCreditDecision. GenerateAdverseActionNotice executes for final_decision='declined' (always requires notice) or 'approved' when terms materially less favorable than requested/best available (credit limit below request or APR >3 points above best rate). Approved applications with favorable terms skip notice generation."
+          },
+          "decline_reason_code": {
+            "type": "string",
+            "description": "Primary decline reason code from DetermineCreditDecision for rejected applications. Values: 'INSUFFICIENT_CREDIT_SCORE', 'EXCESSIVE_DEBT_TO_INCOME', 'RECENT_BANKRUPTCY', 'IDENTITY_VERIFICATION_FAILURE', 'SANCTIONS_MATCH' (no notice per OFAC), 'ACTIVE_FRAUD_ALERT', 'PROHIBITED_INDUSTRY', 'INSUFFICIENT_INCOME', 'MAXIMUM_CREDIT_EXPOSURE_EXCEEDED'. Translated to consumer-friendly principal reason disclosure (e.g., 'INSUFFICIENT_CREDIT_SCORE' → 'Credit score did not meet minimum requirements for approval'). Null for approved applications requiring less-favorable-terms notice."
+          },
+          "applicant_id": {
+            "type": "string",
+            "description": "Customer identifier from validated application. Used to retrieve applicant's full legal name, residential address (for postal mail delivery), email address (for electronic delivery), and any communication preferences (email vs. mail vs. both) for delivery method selection."
+          },
+          "credit_bureau_source": {
+            "type": "string",
+            "description": "Bureau identifier from RetrieveCreditBureauData output indicating which credit reporting agency's report was used in decision. Values: 'experian', 'transunion', 'equifax' for consumer reports; 'dnb_commercial' for Dun & Bradstreet business reports. Mapped to bureau contact information lookup table to populate statutory bureau disclosure: name, address, toll-free phone number (e.g., Experian → 'Experian Information Solutions, Inc., P.O. Box 9595, Allen TX 75013, 888-397-3742')."
+          },
+          "application_timestamp": {
+            "type": "string",
+            "description": "ISO 8601 timestamp from validated application marking exact submission time. Used to calculate regulatory_deadline for notice delivery: application_timestamp + 30 calendar days = deadline per ECOA requirement. Monitors approaching deadlines (day 28+) to escalate for expedited certified mail delivery ensuring compliance. Format: 2025-04-18T10:23:45Z."
+          }
+        },
+        "required": [
+          "application_id",
+          "final_decision",
+          "decline_reason_code",
+          "applicant_id",
+          "credit_bureau_source",
+          "application_timestamp"
+        ]
+      }
+    }
+  },
+  "toolSpec": {
+    "name": "FinalizeApplicationOutputs",
+    "description": "Consolidates all required output fields to complete application processing lifecycle and determine account activation eligibility. Performs comprehensive calculations and validations: (1) Calculates turnaround_time_seconds as integer difference in seconds between processing_end_timestamp (current timestamp) and processing_start_timestamp from ValidateApplicationData output, measuring total elapsed time from validation initiation to finalization completion (typically 10-300 seconds for auto-decisions, 3600-14400 seconds for manual reviews spanning hours); (2) Sets auto_decision_flag boolean: true if manual_review_required=false AND underwriter_id=null (fully automated decisioning without human intervention), false if either manual_review_required=true OR underwriter_id populated (human underwriter involvement), with auto-decision rate (percentage true) being key operational efficiency metric targeting 60-90% automation; (3) Determines account_activation_eligible boolean through prerequisite validation gate checklist: requires final_decision='approved' (rejected applications ineligible), approved_credit_limit is non-null positive value (credit line assigned), assigned_apr is non-null value (rate determined), for business_type='secured' requires deposit_verification_status='verified' (collateral funds secured), no unresolved fraud holds (high-severity fraud_alert_flags absent), all mandatory document uploads received per underwriting stipulations (checks uploaded_documents array for required doc_types based on manual_review_reason); sets true if all prerequisites met enabling immediate downstream account opening/card production, sets false if any blocker present with activation_blockers array documenting specific deficiencies (e.g., 'DEPOSIT_VERIFICATION_PENDING', 'MISSING_REQUIRED_DOCUMENTS', 'FRAUD_HOLD'); (4) Computes estimated_card_delivery_date by adding institution's standard card production SLA (typically 7 business days for standard processing, 3 business days for expedited) to current date, excluding weekends and holidays via business day calendar service, returning date in YYYY-MM-DD format for customer communication of when physical card will arrive at mailing address; (5) Persists complete output dataset to LOS database with immutability constraints preventing retroactive decision modification; (6) Transmits approved applications to downstream systems: card management platform API (TSYS, FIS, Fiserv) for account setup with approved_credit_limit and assigned_apr parameters, card production bureau for physical card personalization (embossing name, encoding account number/CVV, printing expiration date), analytics/BI platforms for reporting dashboards (approval rates, average limits/APRs, turnaround times, auto-decision rates segmented by business_type and product_type); (7) Implements retry logic with exponential backoff for downstream integration failures, queueing for manual transmission if all retries exhausted and notifying operations team. Returns comprehensive finalization_details object documenting all_prerequisites_met status, activation_blockers array if applicable, downstream_transmission_status (success/failed/retry), card_production_queue_status, business_days_to_delivery calculation. Logs immutable completion audit trail with processing_end_timestamp, turnaround_time_seconds, auto_decision_flag for SLA monitoring and regulatory examination demonstrating complete lifecycle traceability from intake through disposition.",
+    "inputSchema": {
+      "json": {
+        "type": "object",
+        "properties": {
+          "application_id": {
+            "type": "string",
+            "description": "Unique application identifier from all prior API outputs. Used to update application record with final output fields (processing_end_timestamp, turnaround_time_seconds, auto_decision_flag, account_activation_eligible, estimated_card_delivery_date) and to transmit approved application data to downstream systems for account opening and card production."
+          },
+          "processing_start_timestamp": {
+            "type": "string",
+            "description": "ISO 8601 timestamp from ValidateApplicationData output marking when automated decisioning commenced after successful validation. Used with current timestamp (processing_end_timestamp) to calculate turnaround_time_seconds: difference in seconds measuring total processing duration. Format: 2025-04-18T10:24:35Z. Turnaround time subject to SLA monitoring (target <60s for auto-decisions, <4h for manual reviews during business hours)."
+          },
+          "final_decision": {
+            "type": "string",
+            "description": "Credit decision from DetermineCreditDecision output. Values: 'approved', 'declined', 'pending_manual_review'. Used in account_activation_eligible validation - only 'approved' applications eligible for activation (declined and pending ineligible). Also determines downstream routing: approved → account setup + card production, declined → adverse action notice only, pending → underwriter work queue."
+          },
+          "approved_credit_limit": {
+            "type": "number",
+            "description": "Credit line amount in USD from AssignCreditTerms output (null if not approved). Used in activation eligibility validation - non-null positive value required for activation (limit must be assigned before account can open). Typical range $1,000-$25,000 retail, $10,000-$100,000 business, $300-$5,000 secured. Transmitted to card management platform for revolving credit line establishment."
+          },
+          "assigned_apr": {
+            "type": "number",
+            "description": "Annual Percentage Rate as decimal from AssignCreditTerms output (null if not approved). Example: 0.1799 for 17.99% APR. Used in activation eligibility validation - non-null value required for activation (rate must be assigned). Typical range 0.1399-0.2599 (13.99%-25.99%). Transmitted to card management platform for interest rate configuration on account."
+          },
+          "adverse_action_letter_generated": {
+            "type": "boolean",
+            "description": "Flag from GenerateAdverseActionNotice output indicating whether regulatory-required adverse action notice was produced and delivered. True for declined applications and less-favorable-terms approvals requiring notice, false for approved applications with favorable terms not requiring notice. Used for compliance monitoring validating 100% notice generation for applicable applications within 30-day ECOA deadline."
+          },
+          "manual_review_required": {
+            "type": "boolean",
+            "description": "Flag from DetermineCreditDecision indicating whether application routed to human underwriter. True if internal_risk_score in indeterminate zone, income verification needed, fraud investigation required, or OFAC potential match requiring analyst review. False for fully automated decisioning. Used to set auto_decision_flag (false if manual_review_required=true)."
+          },
+          "underwriter_id": {
+            "type": "string",
+            "description": "Unique identifier of credit underwriter assigned to manually review application from DetermineCreditDecision output. Null for auto-decisioned applications. Format: UW_XXX. Used to set auto_decision_flag (false if underwriter_id populated). Also used for underwriter performance tracking (approval rates, processing times, override rates by underwriter)."
+          },
+          "deposit_verification_status": {
+            "type": "string",
+            "description": "Deposit verification status from validated application (applicable only for business_type='secured', null otherwise). Values: 'verified' (funds confirmed in holding account), 'pending' (transfer not complete), 'failed' (transfer rejected). Used in activation eligibility validation for secured cards - only 'verified' status permits activation. 'pending' sets account_activation_eligible=false with 'DEPOSIT_VERIFICATION_PENDING' blocker until deposit confirmed."
+          },
+          "fraud_alert_flags": {
+            "type": "array",
+            "description": "Array of fraud indicator strings from DetectFraudIndicators output. Used in activation eligibility validation - presence of high-severity flags ('confirmed_synthetic_identity', 'device_linked_to_prior_fraud') blocks activation with 'FRAUD_HOLD' in activation_blockers array requiring fraud investigation clearance before account opening permitted.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "uploaded_documents": {
+            "type": "array",
+            "description": "Array of document objects from validated application, each containing {doc_type: string (e.g., 'pay_stub', 'tax_return', 'bank_statement', 'government_id'), doc_id: string (unique document identifier), upload_timestamp: ISO 8601 string}. Used in activation eligibility validation - if manual_review_reason included document stipulation (e.g., 'Income verification required'), checks uploaded_documents array for presence of required doc_type. Missing required documents blocks activation with 'MISSING_REQUIRED_DOCUMENTS' in activation_blockers array.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "doc_type": {
+                  "type": "string"
+                },
+                "doc_id": {
+                  "type": "string"
+                },
+                "upload_timestamp": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "application_id",
+          "processing_start_timestamp",
+          "final_decision",
+          "adverse_action_letter_generated",
+          "manual_review_required",
+          "fraud_alert_flags",
+          "uploaded_documents"
+        ]
+      }
+    }
+  }
+}
+</SCHEMA>

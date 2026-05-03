@@ -1,0 +1,1631 @@
+<dependency_analysis>
+
+## 1. Business Process Deconstruction
+
+### Phase 1: Mortgage Application Intake and Pre-qualification (Steps 5.1.1-5.1.7)
+
+**Step 5.1.1: Customer Identification & KYC**
+- **Potential API**: `ValidateApplicantIdentity`
+- **Data Operations**: Validates applicant_name, applicant_ssn, applicant_dob, applicant_address, co_applicant details against government databases and OFAC watchlists
+- **Output**: KYC validation status, verified identity fields
+
+**Step 5.1.2: Income & Employment Validation**
+- **Potential API**: `ValidateEmploymentAndIncome`
+- **Data Operations**: Analyzes pay_stubs_uploaded, w2_forms_uploaded, tax_returns_uploaded to calculate preliminary gross_monthly_income
+- **Output**: Preliminary income figures, employment verification status
+
+**Step 5.1.3: Asset Verification**
+- **Potential API**: `ValidateLiquidAssets`
+- **Data Operations**: Reviews bank_statements_uploaded, calculates available liquid_assets and retirement_accounts, identifies large deposits
+- **Output**: Verified asset amounts, reserve months calculation
+
+**Step 5.1.4-5.1.5: Credit Authorization & Report Analysis**
+- **Potential API**: `PullCreditReports`
+- **Data Operations**: Obtains tri-bureau reports, populates fico_score_equifax, fico_score_experian, fico_score_transunion, derogatory_marks_count, bankruptcy_history, total_monthly_debt_obligations
+- **Output**: Credit scores, debt obligations, derogatory marks
+
+**Step 5.1.5: Credit Score Methodology**
+- **Potential API**: `CalculateRepresentativeCreditScore`
+- **Data Operations**: Applies tri-merge middle score methodology to determine qualifying credit score
+- **Output**: Representative credit score for underwriting
+
+**Step 5.1.6-5.1.7: Pre-qualification Screening**
+- **Potential API**: `ExecutePrequalificationAnalysis`
+- **Data Operations**: Calculates preliminary DTI, compares against thresholds, determines prequalification_decision, max_loan_amount_prequalified, estimated_interest_rate_prequalification
+- **Output**: Pre-qualification decision and parameters
+
+### Phase 2: Credit Underwriting (Steps 5.2.1-5.2.9)
+
+**Step 5.2.1-5.2.2: Employment & Income Verification**
+- **Potential API**: `VerifyEmploymentAndIncome`
+- **Data Operations**: Conducts VOE calls, analyzes tax returns for self-employed, calculates verified_gross_monthly_income
+- **Output**: Verified income with documentation trail
+
+**Step 5.2.3: Comprehensive Asset Verification**
+- **Potential API**: `VerifyAssetsAndReserves`
+- **Data Operations**: Deep verification of liquid_assets, retirement_accounts, large deposit sourcing, reserve calculation
+- **Output**: Verified assets, reserve months, compensating factor points
+
+**Step 5.2.4: Credit Report Deep Analysis**
+- **Potential API**: `AnalyzeCreditHistory`
+- **Data Operations**: Reviews payment history, validates derogatory_marks_count, bankruptcy_history, assesses credit patterns
+- **Output**: Detailed credit assessment, risk indicators
+
+**Step 5.2.5: DTI & DSCR Calculation**
+- **Potential API**: `CalculateDebtRatios`
+- **Data Operations**: Computes debt_to_income_ratio and debt_service_coverage_ratio using verified data
+- **Output**: Precise debt ratios for policy compliance
+
+**Step 5.2.6: Probability of Default Scoring**
+- **Potential API**: `CalculateProbabilityOfDefault`
+- **Data Operations**: Applies logistic regression model to calculate probability_of_default_score and map to credit_score_grade
+- **Output**: PD score, credit grade (A/B/C/D)
+
+**Step 5.2.7: Risk-Based Pricing**
+- **Potential API**: `DetermineFinalInterestRate`
+- **Data Operations**: Applies multi-dimensional pricing matrix to calculate final_risk_adjusted_interest_rate
+- **Output**: Final interest rate with all adjustments
+
+**Step 5.2.8: Compensating Factors Analysis**
+- **Potential API**: `EvaluateCompensatingFactors`
+- **Data Operations**: Assesses reserve levels, payment history, residual income, LTV position to determine compensating_factors_present
+- **Output**: Compensating factor evaluation and point scoring
+
+**Step 5.2.9: Underwriting Decision Preparation**
+- **Potential API**: `PrepareUnderwritingDecision`
+- **Data Operations**: Synthesizes all underwriting findings, determines preliminary approval status subject to appraisal
+- **Output**: Preliminary decision, conditions documentation
+
+### Phase 3: Property Valuation (Steps 5.3.1-5.3.6)
+
+**Step 5.3.1-5.3.2: Appraisal Order & Assignment**
+- **Potential API**: `OrderPropertyAppraisal`
+- **Data Operations**: Initiates appraisal with property_address, property_type, records appraisal_order_timestamp, appraiser_id
+- **Output**: Appraisal order confirmation, assignment details
+
+**Step 5.3.3-5.3.4: Appraisal Execution & Value Determination**
+- **Potential API**: `ConductPropertyValuation`
+- **Data Operations**: Records site_inspection_timestamp, property_square_footage, property_condition, comparable_properties_count, calculates final_appraised_value
+- **Output**: Complete appraisal report with final value
+
+**Step 5.3.5: AVM Validation & Quality Control**
+- **Potential API**: `ValidateAppraisalWithAVM`
+- **Data Operations**: Runs AVM to get avm_estimated_value, calculates appraisal_avm_variance_percent, determines second_review_triggered
+- **Output**: Appraisal validation results, variance analysis
+
+**Step 5.3.6: LTV Calculation**
+- **Potential API**: `CalculateLoanToValueRatio`
+- **Data Operations**: Computes loan_to_value_ratio using final_appraised_value and loan amount, validates against policy thresholds
+- **Output**: Final LTV ratio, policy compliance status
+
+### Phase 4: Final Decision (Steps 5.4.1-5.4.7)
+
+**Step 5.4.1-5.4.4: Credit Refresh & Final Decision**
+- **Potential API**: `RenderFinalLoanDecision`
+- **Data Operations**: Executes decision tree logic, populates final_decision, approved_loan_amount, approved_interest_rate, approved_loan_term_months, conditions_count, decline_reason, final_decision_timestamp
+- **Output**: Final decision with all approval parameters or decline rationale
+
+**Step 5.4.6: Fair Lending Compliance**
+- **Potential API**: `ExecuteFairLendingMonitoring`
+- **Data Operations**: Analyzes demographic data, pricing consistency, sets fair_lending_audit_flag
+- **Output**: Compliance monitoring results
+
+**Step 5.4.5 & 5.4.7: Post-Decision Tracking**
+- **Potential API**: `TrackLoanPerformanceMetrics`
+- **Data Operations**: Calculates turnaround_time_days, first_pass_yield, funded_status, funding_date
+- **Output**: Operational and performance metrics
+
+## 2. Data Flow Analysis
+
+### Primary Data Sources
+- **User Input**: Application form (applicant details, property info, loan request, employment, income, assets)
+- **Uploaded Documents**: pay_stubs_uploaded, tax_returns_uploaded, bank_statements_uploaded, w2_forms_uploaded
+- **Third-Party Systems**: Credit bureaus (tri-bureau reports), OFAC watchlists, AVM platforms, tax authorities (IRS 4506-T)
+- **Internal Databases**: Pricing matrices, underwriting models, policy thresholds
+
+### Key Data Flows
+
+1. **Identity → Credit → Pre-qualification Flow**
+   - ValidateApplicantIdentity outputs verified identity
+   - PullCreditReports requires verified SSN from identity validation
+   - CalculateRepresentativeCreditScore requires credit bureau data
+   - ExecutePrequalificationAnalysis requires credit score + income + debt data
+
+2. **Income/Asset Verification → Underwriting Flow**
+   - ValidateEmploymentAndIncome produces preliminary income
+   - VerifyEmploymentAndIncome produces verified_gross_monthly_income
+   - VerifyAssetsAndReserves produces verified assets and reserves
+   - CalculateDebtRatios requires verified income and debt obligations
+   - CalculateProbabilityOfDefault requires all verified financial data
+
+3. **Property Valuation → LTV → Decision Flow**
+   - OrderPropertyAppraisal initiates valuation process
+   - ConductPropertyValuation produces final_appraised_value
+   - ValidateAppraisalWithAVM validates appraisal quality
+   - CalculateLoanToValueRatio requires appraised value + loan amount
+   - RenderFinalLoanDecision requires LTV + all underwriting outputs
+
+4. **Pricing & Decision Integration Flow**
+   - DetermineFinalInterestRate requires credit_score_grade, LTV, property attributes
+   - EvaluateCompensatingFactors requires reserves, DTI, payment history
+   - RenderFinalLoanDecision synthesizes all prior outputs
+
+## 3. Dependency Relationship Deduction
+
+### Direct Data Dependencies
+
+**Tier 1: Foundation APIs (No dependencies)**
+- `ValidateApplicantIdentity`: Standalone validation against external databases
+- `ValidateEmploymentAndIncome`: Uses uploaded documents (input parameter)
+
+**Tier 2: Credit Analysis (Depends on Identity)**
+- `PullCreditReports` depends on `ValidateApplicantIdentity`
+  - **Reason**: Requires verified applicant_ssn, applicant_name, applicant_dob for credit bureau queries
+  - **Type**: Data dependency (identity outputs → credit inputs)
+
+- `CalculateRepresentativeCreditScore` depends on `PullCreditReports`
+  - **Reason**: Requires fico_score_equifax, fico_score_experian, fico_score_transunion
+  - **Type**: Data dependency (credit scores → score calculation)
+
+**Tier 3: Pre-qualification (Depends on Credit + Income)**
+- `ExecutePrequalificationAnalysis` depends on:
+  - `CalculateRepresentativeCreditScore`: Needs representative credit score
+  - `ValidateEmploymentAndIncome`: Needs gross_monthly_income
+  - `PullCreditReports`: Needs total_monthly_debt_obligations
+  - **Type**: Data dependency (multiple inputs converge)
+
+**Tier 4: Deep Underwriting Verification (Parallel after Pre-qualification)**
+- `VerifyEmploymentAndIncome` depends on `ExecutePrequalificationAnalysis`
+  - **Reason**: Only proceed to deep verification after pre-qualification passes
+  - **Type**: State dependency (business process gate)
+
+- `VerifyAssetsAndReserves` depends on `ExecutePrequalificationAnalysis`
+  - **Reason**: Same state dependency as income verification
+  - **Type**: State dependency
+
+- `AnalyzeCreditHistory` depends on `PullCreditReports`
+  - **Reason**: Requires full credit report for deep analysis
+  - **Type**: Data dependency
+
+**Tier 5: Ratio Calculations (Depends on Verified Data)**
+- `CalculateDebtRatios` depends on:
+  - `VerifyEmploymentAndIncome`: Needs verified_gross_monthly_income
+  - `PullCreditReports`: Needs total_monthly_debt_obligations
+  - `OrderPropertyAppraisal`: Needs property tax/insurance estimates (can use estimated values initially)
+  - **Type**: Data dependency
+
+**Tier 6: Risk Scoring (Depends on All Verified Inputs)**
+- `CalculateProbabilityOfDefault` depends on:
+  - `CalculateRepresentativeCreditScore`: Needs credit score
+  - `CalculateDebtRatios`: Needs debt_to_income_ratio
+  - `VerifyAssetsAndReserves`: Needs reserve months, employment_years
+  - `AnalyzeCreditHistory`: Needs derogatory_marks_count
+  - Note: Initially uses estimated LTV, refined later with actual appraisal
+  - **Type**: Data dependency (multivariate model inputs)
+
+**Tier 7: Compensating Factors & Pricing (Depends on Risk Assessment)**
+- `EvaluateCompensatingFactors` depends on:
+  - `CalculateDebtRatios`: Needs DTI for threshold checks
+  - `VerifyAssetsAndReserves`: Needs reserve months
+  - `AnalyzeCreditHistory`: Needs payment history
+  - **Type**: Data dependency
+
+- `DetermineFinalInterestRate` depends on:
+  - `CalculateProbabilityOfDefault`: Needs credit_score_grade
+  - Property attributes (from input)
+  - Note: Will be refined after LTV calculation
+  - **Type**: Data dependency
+
+**Tier 8: Property Valuation Workflow (Parallel to some underwriting)**
+- `OrderPropertyAppraisal` depends on `ExecutePrequalificationAnalysis`
+  - **Reason**: Only order appraisal after preliminary approval
+  - **Type**: State dependency (business gate)
+
+- `ConductPropertyValuation` depends on `OrderPropertyAppraisal`
+  - **Reason**: Sequential process (order → conduct)
+  - **Type**: Temporal dependency
+
+- `ValidateAppraisalWithAVM` depends on `ConductPropertyValuation`
+  - **Reason**: Requires final_appraised_value for comparison
+  - **Type**: Data dependency
+
+**Tier 9: LTV Calculation (Depends on Appraisal)**
+- `CalculateLoanToValueRatio` depends on:
+  - `ValidateAppraisalWithAVM`: Needs validated final_appraised_value
+  - Loan amount from application input
+  - **Type**: Data dependency
+
+**Tier 10: Final Decision (Depends on All Prior Outputs)**
+- `RenderFinalLoanDecision` depends on:
+  - `CalculateDebtRatios`: Needs debt_to_income_ratio, debt_service_coverage_ratio
+  - `CalculateProbabilityOfDefault`: Needs probability_of_default_score, credit_score_grade
+  - `DetermineFinalInterestRate`: Needs final_risk_adjusted_interest_rate (may need recalculation with actual LTV)
+  - `CalculateLoanToValueRatio`: Needs loan_to_value_ratio
+  - `EvaluateCompensatingFactors`: Needs compensating_factors_present
+  - `AnalyzeCreditHistory`: Needs detailed credit assessment
+  - `VerifyAssetsAndReserves`: Needs verified reserves
+  - **Type**: Data dependency (final synthesis)
+
+**Tier 11: Compliance & Metrics (Post-Decision)**
+- `ExecuteFairLendingMonitoring` depends on `RenderFinalLoanDecision`
+  - **Reason**: Analyzes decision consistency across demographic groups
+  - **Type**: State dependency (requires decision to monitor)
+
+- `TrackLoanPerformanceMetrics` depends on `RenderFinalLoanDecision`
+  - **Reason**: Calculates turnaround_time_days, first_pass_yield after decision
+  - **Type**: Temporal dependency
+
+### Indirect Dependencies
+- `DetermineFinalInterestRate` has an indirect dependency on `CalculateLoanToValueRatio` because LTV impacts pricing; may require rate recalculation after appraisal
+- `RenderFinalLoanDecision` has indirect dependencies on all Tier 1-9 APIs through data propagation
+
+## 4. Complexity Assessment
+
+### High Complexity APIs
+1. **CalculateProbabilityOfDefault**: Multivariate logistic regression model with 9+ input variables, complex mathematical calculations
+2. **RenderFinalLoanDecision**: Decision tree logic with multiple branches, synthesizes 10+ data points, generates multiple outputs
+3. **VerifyEmploymentAndIncome**: Complex logic for self-employed vs. W-2, tax return analysis, averaging calculations
+4. **ConductPropertyValuation**: Comparable analysis, adjustment grid calculations, reconciliation logic
+
+### Medium Complexity APIs
+1. **ExecutePrequalificationAnalysis**: DTI calculation, threshold comparisons, loan capacity calculation
+2. **CalculateDebtRatios**: Precise payment calculations with multiple components (PITI+debt)
+3. **DetermineFinalInterestRate**: Multi-dimensional matrix lookup with additive adjustments
+4. **EvaluateCompensatingFactors**: Point-based scoring system with multiple criteria
+5. **ValidateAppraisalWithAVM**: Variance calculation, threshold comparison, triggering logic
+
+### Low Complexity APIs
+1. **ValidateApplicantIdentity**: Database lookups, pattern matching
+2. **PullCreditReports**: API calls to external systems, data extraction
+3. **CalculateRepresentativeCreditScore**: Ranking and selection logic
+4. **CalculateLoanToValueRatio**: Simple division formula
+5. **OrderPropertyAppraisal**: Data transmission and recording
+6. **TrackLoanPerformanceMetrics**: Timestamp calculations, boolean setting
+
+### Dependency Chain Analysis
+- **Longest Critical Path**: ValidateApplicantIdentity → PullCreditReports → CalculateRepresentativeCreditScore → ExecutePrequalificationAnalysis → VerifyEmploymentAndIncome → CalculateDebtRatios → CalculateProbabilityOfDefault → RenderFinalLoanDecision (8 steps)
+- **Parallel Execution Opportunities**: 
+  - VerifyEmploymentAndIncome, VerifyAssetsAndReserves, AnalyzeCreditHistory can run in parallel after ExecutePrequalificationAnalysis
+  - OrderPropertyAppraisal can run in parallel with underwriting verification steps
+- **Potential Bottlenecks**: ConductPropertyValuation (depends on external appraiser, 10-day SLA), VerifyEmploymentAndIncome (requires VOE callbacks)
+
+### Cyclic Dependency Risks
+- **Risk Identified**: DetermineFinalInterestRate may need recalculation after CalculateLoanToValueRatio completes, creating a potential refinement loop
+- **Mitigation**: Use estimated LTV initially, allow rate recalculation as a refinement step before final decision
+
+## 5. Verification and Optimization
+
+### Rationality Checks
+✓ All dependencies align with SOP sequential steps
+✓ No circular dependencies in critical path
+✓ Data dependencies match schema field relationships
+✓ State dependencies reflect business gates (pre-qualification before deep underwriting)
+
+### Necessity Validation
+✓ Each API serves a distinct business function from SOP
+✓ No redundant APIs identified
+✓ All dependencies support required data flows
+✓ Dependencies enable deterministic output generation
+
+### Parallel Execution Optimization
+**Recommended Parallel Groups:**
+1. **After Pre-qualification Approval**:
+   - Group A: VerifyEmploymentAndIncome, VerifyAssetsAndReserves, AnalyzeCreditHistory
+   - Group B: OrderPropertyAppraisal (can start immediately)
+
+2. **After Verification Completion**:
+   - CalculateDebtRatios and EvaluateCompensatingFactors can partially overlap
+
+3. **After Appraisal Completion**:
+   - CalculateLoanToValueRatio, then final rate adjustment can happen quickly
+
+### Optimization Suggestions
+1. **Early Appraisal Ordering**: Move OrderPropertyAppraisal to execute immediately after ExecutePrequalificationAnalysis to reduce overall turnaround time
+2. **Incremental Pricing**: Calculate preliminary final_risk_adjusted_interest_rate with estimated LTV, update after actual LTV available
+3. **Async Verification**: Implement VerifyEmploymentAndIncome, VerifyAssetsAndReserves as async operations with callback pattern
+4. **Caching Strategy**: Cache credit reports and representative score calculation for 90-day validity period to avoid redundant pulls
+
+### Exception Handling Considerations
+- **Credit Pull Failure**: If only 1-2 bureau scores available, CalculateRepresentativeCreditScore handles with defined logic
+- **Appraisal Variance >10%**: ValidateAppraisalWithAVM triggers second_review_triggered, requires additional API call for field review
+- **Verification Failures**: Each verification API should return status codes enabling RenderFinalLoanDecision to populate decline_reason
+- **Compensating Factor Insufficient**: EvaluateCompensatingFactors returns false, feeding into decision logic for potential decline
+
+</dependency_analysis>
+
+<api_dependency_graph>
+apis:
+  - api_name: "ValidateApplicantIdentity"
+    description: "Performs comprehensive Know Your Customer (KYC) verification by validating government-issued identification documents, checking applicant and co-applicant information against OFAC Specially Designated Nationals lists and other government watchlists, validating Social Security Number patterns and authenticity through SSA Consent Based Verification Service when necessary, and ensuring identity documents match application data fields to prevent identity fraud and comply with USA PATRIOT Act Section 326 Customer Identification Program requirements."
+    purpose: "Establish verified identity foundation for all subsequent credit and underwriting processes, ensuring the institution is lending to legitimate borrowers and maintaining compliance with anti-money laundering and counter-terrorism financing regulations."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_name"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_ssn"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_dob"
+        data_type: "date"
+        source: "user_input"
+        required: true
+      - name: "applicant_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "co_applicant_name"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "co_applicant_ssn"
+        data_type: "string"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "identity_verification_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "ofac_clearance_status"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "verified_applicant_name"
+        data_type: "string"
+        destination: "other_api"
+      - name: "verified_applicant_ssn"
+        data_type: "string"
+        destination: "other_api"
+      - name: "verified_applicant_dob"
+        data_type: "date"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "ValidateEmploymentAndIncome"
+    description: "Analyzes uploaded income documentation including pay stubs, W-2 forms, and tax returns to calculate preliminary gross monthly income, validates employment status and employer information against document data, performs income averaging for self-employed applicants using Schedule C or K-1 distributions with add-backs for non-cash deductions, flags year-over-year income declines exceeding 10% for underwriter attention, and establishes initial income figures for pre-qualification debt-to-income calculations."
+    purpose: "Provide preliminary income validation to support pre-qualification analysis and maximum loan amount calculations, enabling early screening before resource-intensive deep underwriting verification processes."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "employment_status"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "employer_name"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "employment_years"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "gross_monthly_income"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "additional_income_monthly"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "pay_stubs_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: true
+      - name: "w2_forms_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: true
+      - name: "tax_returns_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "preliminary_gross_monthly_income"
+        data_type: "float"
+        destination: "other_api"
+      - name: "income_validation_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "income_stability_flag"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "employment_verification_required"
+        data_type: "boolean"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ValidateLiquidAssets"
+    description: "Reviews uploaded bank statements covering two consecutive months to verify declared liquid assets and retirement accounts, identifies and flags large deposits exceeding 50% of monthly income or cumulative deposits exceeding 100% of monthly income requiring source documentation, calculates available reserves after accounting for down payment and estimated closing costs, determines reserve months by dividing remaining liquid assets by proposed total housing payment, and applies appropriate discount factors to retirement accounts based on applicant age to reflect tax and penalty implications."
+    purpose: "Verify applicant financial capacity to close the transaction and maintain adequate reserves, supporting pre-qualification approval and identifying potential red flags such as undisclosed borrowed funds or fraudulent asset documentation."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "liquid_assets"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "retirement_accounts"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "bank_statements_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: true
+      - name: "down_payment_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "requested_loan_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "applicant_dob"
+        data_type: "date"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "verified_liquid_assets"
+        data_type: "float"
+        destination: "other_api"
+      - name: "large_deposits_flagged"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "reserve_months_preliminary"
+        data_type: "float"
+        destination: "other_api"
+      - name: "asset_verification_status"
+        data_type: "enum"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "PullCreditReports"
+    description: "Executes tri-bureau credit report acquisition by transmitting applicant and co-applicant verified identity information to institution's credit bureau API interfaces connected to Equifax, Experian, and TransUnion repositories, retrieves in-file credit reports with FICO scores calculated using mortgage-specific scoring models (FICO Score 2, 5, and 4 respectively), extracts and populates credit score fields for each bureau, analyzes credit report narrative to count derogatory marks including collections, charge-offs, public records, late payments, identifies bankruptcy history and foreclosure history, and calculates total monthly debt obligations by summing all recurring payment obligations shown on tradelines."
+    purpose: "Obtain comprehensive credit profile data required for credit score determination, debt-to-income calculation, risk assessment, and pricing decisions, establishing the foundation for all credit-based underwriting judgments."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "verified_applicant_name"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "verified_applicant_ssn"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "verified_applicant_dob"
+        data_type: "date"
+        source: "other_api"
+        required: true
+      - name: "applicant_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "co_applicant_name"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "co_applicant_ssn"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "credit_consent_signed"
+        data_type: "boolean"
+        source: "user_input"
+        required: true
+      - name: "credit_consent_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "credit_pull_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "fico_score_equifax"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "fico_score_experian"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "fico_score_transunion"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "derogatory_marks_count"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "bankruptcy_history"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "total_monthly_debt_obligations"
+        data_type: "float"
+        destination: "other_api"
+      - name: "credit_report_full_data"
+        data_type: "object"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ValidateApplicantIdentity"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires verified applicant name, SSN, and date of birth to submit accurate credit bureau queries and ensure credit reports are pulled for the correct individuals, preventing misidentification and ensuring FCRA compliance."
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "CalculateRepresentativeCreditScore"
+    description: "Applies the FICO Score Tri-Merge Middle Score Methodology by ranking the three bureau credit scores (fico_score_equifax, fico_score_experian, fico_score_transunion) in ascending order and selecting the median value as the representative score, handling cases where only two scores are available by selecting the lower value, or using a single score if only one bureau provides data, and for co-applicant scenarios, determining each individual's representative score then selecting the lower of the two as the qualifying credit score used for all subsequent underwriting policy evaluation, pricing decisions, and mortgage insurance premium calculations."
+    purpose: "Establish the single authoritative credit score that will govern all credit policy thresholds, risk-based pricing adjustments, and underwriting decisions, ensuring consistent application of credit standards across the institution's mortgage portfolio."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "fico_score_equifax"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "fico_score_experian"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "fico_score_transunion"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "co_applicant_fico_equifax"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "co_applicant_fico_experian"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "co_applicant_fico_transunion"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "representative_credit_score"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "credit_score_methodology_applied"
+        data_type: "string"
+        destination: "storage"
+      - name: "credit_score_calculation_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "PullCreditReports"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires the three bureau FICO scores (fico_score_equifax, fico_score_experian, fico_score_transunion) from credit report pull to perform tri-merge middle score calculation, as the methodology cannot execute without the raw score inputs from each credit repository."
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "ExecutePrequalificationAnalysis"
+    description: "Performs systematic pre-qualification screening by comparing representative credit score against institutional minimum threshold of 620 for conventional products, calculates preliminary debt-to-income ratio using estimated housing payment derived from requested loan amount and proxy interest rate based on credit score tier plus total monthly debt obligations divided by gross monthly income, evaluates calculated DTI against policy thresholds to generate prequalification_decision classification of Qualified (DTI ≤43%), Conditionally Qualified (DTI 43.01-50%), or Not Qualified (DTI >50% or FICO <620), calculates maximum loan capacity (max_loan_amount_prequalified) by solving DTI equation for loan amount that achieves 43% ratio, determines estimated_interest_rate_prequalification by applying credit score band and property type pricing adjustments to current market base rates, and generates pre-qualification letter suitable for property search and seller presentation."
+    purpose: "Provide rapid preliminary eligibility determination and loan capacity guidance to applicants before property identification and resource-intensive underwriting processes, enabling efficient property search targeting and early identification of unqualified applicants to optimize operational efficiency."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "representative_credit_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "preliminary_gross_monthly_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "total_monthly_debt_obligations"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "requested_loan_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "loan_term_months"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+      - name: "estimated_property_value"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "down_payment_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "property_occupancy"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "loan_purpose"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "prequalification_decision"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "max_loan_amount_prequalified"
+        data_type: "float"
+        destination: "other_api"
+      - name: "estimated_interest_rate_prequalification"
+        data_type: "float"
+        destination: "other_api"
+      - name: "preliminary_dti_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "preliminary_ltv_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "prequalification_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CalculateRepresentativeCreditScore"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires representative_credit_score to compare against minimum FICO threshold of 620 and to determine appropriate interest rate pricing tier for preliminary DTI and loan capacity calculations."
+      - dependent_api: "ValidateEmploymentAndIncome"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires preliminary_gross_monthly_income to calculate debt-to-income ratio and determine maximum affordable loan amount through capacity analysis."
+      - dependent_api: "PullCreditReports"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires total_monthly_debt_obligations extracted from credit report tradelines to calculate accurate debt-to-income ratio including both housing payment and all recurring debt obligations."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "VerifyEmploymentAndIncome"
+    description: "Conducts comprehensive income verification through Verification of Employment (VOE) telephone calls or written requests to employers using independently verified contact information to confirm current employment status, job title, hire date, base salary or hourly wage, and employment continuity expectations for Full-Time employed applicants, performs detailed tax return analysis for Self-Employed applicants by examining IRS Form 1040 with Schedule C, E, K-1 distributions over two years to calculate adjusted income with add-backs for depreciation and depletion while subtracting one-time income events, applies two-year income averaging methodology, flags year-over-year income declines exceeding 10% requiring documented justification, verifies bonus and commission income through employer confirmation of continuation likelihood, validates overtime income sustainability, and produces verified_gross_monthly_income representing underwriter-certified income figure used for final debt-to-income ratio calculations."
+    purpose: "Establish definitive verified income figure through third-party validation and forensic document analysis to replace preliminary self-declared income, ensuring lending decisions are based on accurate capacity assessments and preventing income fraud that could lead to defaults and losses."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "prequalification_decision"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "employment_status"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "employer_name"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "employment_years"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "gross_monthly_income"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "additional_income_monthly"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "pay_stubs_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: true
+      - name: "w2_forms_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: true
+      - name: "tax_returns_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "verified_gross_monthly_income"
+        data_type: "float"
+        destination: "other_api"
+      - name: "income_verification_method"
+        data_type: "string"
+        destination: "storage"
+      - name: "employment_stability_rating"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "income_trending_direction"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "document_verification_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecutePrequalificationAnalysis"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only proceeds to resource-intensive deep income verification after prequalification_decision indicates Qualified or Conditionally Qualified status, preventing wasted effort on applications that fail preliminary screening and serving as a business process gate."
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "VerifyAssetsAndReserves"
+    description: "Executes comprehensive asset verification by examining two consecutive months of bank statements for all checking, savings, and money market accounts to confirm ending balances match or exceed declared liquid_assets, investigates all individual deposits exceeding 50% of monthly income or cumulative deposits exceeding 100% of monthly income to identify potential undisclosed borrowed funds requiring source documentation such as asset transfer statements or gift letters with donor verification, applies appropriate discount factors to retirement_accounts (25% for under age 59.5, 10% for age 59.5 and above) to reflect tax and penalty implications, calculates net available assets after subtracting down_payment_amount and estimated closing costs, determines reserve months by dividing remaining assets by proposed total housing payment, and evaluates reserve adequacy against policy requirements (2-12 months depending on property type, occupancy, and LTV) while assigning compensating factor points based on reserve levels exceeding minimum thresholds."
+    purpose: "Verify applicant financial capacity to close the transaction and maintain adequate reserves for financial contingencies, detect potential fraud through large deposit analysis, and establish reserve-based compensating factors that may offset elevated DTI or other risk indicators in marginal credit profiles."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "prequalification_decision"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "liquid_assets"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "retirement_accounts"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "bank_statements_uploaded"
+        data_type: "boolean"
+        source: "user_input"
+        required: true
+      - name: "down_payment_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "requested_loan_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "applicant_dob"
+        data_type: "date"
+        source: "user_input"
+        required: true
+      - name: "verified_gross_monthly_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "property_occupancy"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "verified_liquid_assets_final"
+        data_type: "float"
+        destination: "other_api"
+      - name: "verified_retirement_accounts_discounted"
+        data_type: "float"
+        destination: "other_api"
+      - name: "reserve_months_calculated"
+        data_type: "float"
+        destination: "other_api"
+      - name: "large_deposit_explanations_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "reserve_compensating_factor_points"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "asset_verification_complete_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecutePrequalificationAnalysis"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only proceeds to detailed asset verification after prequalification_decision indicates preliminary approval, serving as a business process gate to prevent unnecessary resource expenditure on likely-to-decline applications."
+      - dependent_api: "VerifyEmploymentAndIncome"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires verified_gross_monthly_income to calculate reserve months by dividing available assets by total housing payment, which is derived from verified income-based payment capacity, and to flag large deposits as percentage of verified monthly income."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "AnalyzeCreditHistory"
+    description: "Conducts forensic analysis of tri-bureau credit report narrative sections by examining each tradeline's 24-month payment history to identify and count derogatory marks including 30-day late payments (1 point), 60-day late payments (2 points), 90+ day late payments (3 points), collections accounts with distinction between medical collections under $500 (may be disregarded per GSE guidelines) and non-medical collections requiring payment or acceptance justification, charge-offs, public records including tax liens and civil judgments, reviews foreclosure and short sale history to verify compliance with institutional seasoning requirements (7 years standard, 3 years with extenuating circumstances), validates bankruptcy_history and ensures sufficient time has elapsed since discharge (4 years Chapter 7, 2 years Chapter 13), analyzes credit inquiry patterns in preceding 90 days to identify potential undisclosed debt, and produces comprehensive credit risk assessment documenting payment behavior patterns, credit depth, and overall creditworthiness that informs underwriting judgment and compensating factor evaluation."
+    purpose: "Provide detailed credit behavior analysis beyond numeric credit scores to identify character risk indicators, verify compliance with credit history seasoning requirements, and document credit strengths or weaknesses that influence final credit decisions and exception approvals."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "credit_report_full_data"
+        data_type: "object"
+        source: "other_api"
+        required: true
+      - name: "derogatory_marks_count"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "bankruptcy_history"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "detailed_derogatory_marks_count"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "payment_history_quality"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "bankruptcy_seasoning_compliant"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "foreclosure_history_compliant"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "credit_depth_rating"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "undisclosed_debt_risk_flag"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "credit_analysis_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "PullCreditReports"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires full credit_report_full_data object containing detailed tradeline information, payment histories, public records, and inquiry data to perform comprehensive forensic analysis beyond the summary metrics extracted during initial credit pull."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "CalculateDebtRatios"
+    description: "Computes precise debt-to-income ratio and debt service coverage ratio using verified financial data by first calculating exact monthly housing payment using mortgage payment formula P=L[c(1+c)^n]/[(1+c)^n-1] where P is principal and interest, L is approved loan amount, c is monthly interest rate, n is loan term in months, then adding property taxes obtained from tax assessor records, hazard insurance quoted by carrier, mortgage insurance premium calculated from MI rate tables based on LTV and credit score if LTV exceeds 80%, and HOA dues from association documents, summing this total housing payment with total_monthly_debt_obligations from credit report, dividing by verified_gross_monthly_income and multiplying by 100 to produce debt_to_income_ratio with precision to two decimal places, and calculating debt_service_coverage_ratio as verified_gross_monthly_income divided by sum of housing payment plus debt obligations with precision to two decimal places, comparing both ratios against institutional policy thresholds to determine compliance with QM standards (DTI ≤43%) and portfolio requirements (DSCR ≥1.15) while flagging marginal cases requiring compensating factor analysis."
+    purpose: "Establish definitive debt burden metrics using verified rather than preliminary data to ensure lending decisions accurately reflect borrower payment capacity, support Qualified Mortgage compliance under 12 CFR 1026.43, and identify applications requiring compensating factor justification for policy exceptions."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "verified_gross_monthly_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "total_monthly_debt_obligations"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "requested_loan_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "loan_term_months"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+      - name: "estimated_interest_rate_prequalification"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "property_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "estimated_property_value"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "representative_credit_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "preliminary_ltv_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "debt_service_coverage_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "monthly_housing_payment_total"
+        data_type: "float"
+        destination: "other_api"
+      - name: "dti_policy_compliance_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "dscr_policy_compliance_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "debt_ratio_calculation_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "VerifyEmploymentAndIncome"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires verified_gross_monthly_income (denominator in DTI and DSCR formulas) to calculate accurate debt ratios using underwriter-validated income figures rather than applicant self-declarations, ensuring ratio calculations reflect true payment capacity."
+      - dependent_api: "PullCreditReports"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires total_monthly_debt_obligations (component of numerator in DTI and DSCR formulas) extracted from credit report tradelines to include all recurring debt payments in ratio calculations."
+      - dependent_api: "ExecutePrequalificationAnalysis"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses estimated_interest_rate_prequalification to calculate principal and interest payment component of housing payment, which is refined from preliminary pricing but not yet finalized pending appraisal completion and final rate determination."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "CalculateProbabilityOfDefault"
+    description: "Executes institution's proprietary multivariate logistic regression model to quantify default risk by computing probability_of_default_score as PD = 1/(1+e^-z) where z = β₀ + β₁(FICO) + β₂(DTI) + β₃(LTV) + β₄(Reserves) + β₅(Employment_Years) + β₆(Property_Type_Indicator) + β₇(Occupancy_Indicator) + β₈(Loan_Purpose_Indicator) + β₉(Derogatory_Marks) with institution-calibrated beta coefficients derived from historical loan performance data, inputs representative_credit_score, debt_to_income_ratio, preliminary or final LTV ratio, reserve_months_calculated, employment_years, property_type and property_occupancy dummy variables, loan_purpose indicator, and detailed_derogatory_marks_count to produce a probability of default percentage with precision to two decimal places representing statistical likelihood of 90+ day delinquency within 36 months, maps the PD score to credit_score_grade using thresholds of ≤2.0% for Grade A, 2.01-4.0% for Grade B, 4.01-7.0% for Grade C, and >7.0% for Grade D requiring special review, and documents the model inputs and calculation methodology for audit trail and regulatory examination purposes."
+    purpose: "Provide quantitative risk assessment that translates qualitative credit characteristics into a standardized probability metric enabling consistent risk-based pricing, capital allocation under Basel III frameworks, portfolio risk aggregation, and data-driven credit decision support while maintaining model transparency and auditability."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "representative_credit_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "preliminary_ltv_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "reserve_months_calculated"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "employment_years"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "property_occupancy"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "loan_purpose"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "detailed_derogatory_marks_count"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "probability_of_default_score"
+        data_type: "float"
+        destination: "other_api"
+      - name: "credit_score_grade"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "pd_model_version"
+        data_type: "string"
+        destination: "storage"
+      - name: "pd_calculation_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "model_input_parameters"
+        data_type: "object"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CalculateRepresentativeCreditScore"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires representative_credit_score as primary independent variable (β₁ coefficient) in PD logistic regression model, as credit score is the strongest predictor of default probability in mortgage lending."
+      - dependent_api: "CalculateDebtRatios"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires debt_to_income_ratio as critical independent variable (β₂ coefficient) reflecting borrower payment capacity and default risk, as higher DTI correlates with elevated default probability."
+      - dependent_api: "VerifyAssetsAndReserves"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires reserve_months_calculated as independent variable (β₄ coefficient) reflecting financial cushion available to absorb income disruptions, as higher reserves reduce default probability through enhanced financial resilience."
+      - dependent_api: "AnalyzeCreditHistory"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires detailed_derogatory_marks_count as independent variable (β₉ coefficient) capturing character risk beyond credit score, as recent derogatory credit behavior indicates elevated default propensity."
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "DetermineFinalInterestRate"
+    description: "Applies multi-dimensional risk-based pricing matrix to calculate final_risk_adjusted_interest_rate by retrieving base interest rate indexed to current 30-year Freddie Mac Primary Mortgage Market Survey rate or institution's cost of funds benchmark, then applying additive pricing adjustments across multiple risk dimensions including credit score adjustments ranging from -0.500% for FICO ≥780 to +2.000% for FICO 620-639, LTV ratio adjustments ranging from +0.000% for LTV ≤60% to +1.000% for LTV 90.01-95%, property type adjustments of +0.000% for Single Family to +1.000% for three-to-four unit Multi-Family, occupancy adjustments of +0.000% for Primary Residence to +1.500% for Investment Property multi-family, loan purpose adjustments of +0.000% for Purchase to +0.750% for Cash-Out Refinance LTV >70%, and DTI adjustments of +0.000% for DTI ≤36% to +0.500% for DTI 43.01-45%, summing all applicable adjustments algebraically to produce final interest rate expressed to three decimal places, and documenting the pricing breakdown for rate lock confirmation and Closing Disclosure preparation, with the rate subject to refinement after final_appraised_value and loan_to_value_ratio are definitively established post-appraisal."
+    purpose: "Establish risk-commensurate interest rate pricing that ensures the institution earns appropriate return for credit, collateral, and concentration risks while maintaining competitive positioning in the mortgage market and supporting secondary market sale eligibility or portfolio retention profitability targets."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "credit_score_grade"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "representative_credit_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "preliminary_ltv_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "property_occupancy"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "loan_purpose"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "loan_term_months"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "final_risk_adjusted_interest_rate"
+        data_type: "float"
+        destination: "other_api"
+      - name: "base_interest_rate"
+        data_type: "float"
+        destination: "storage"
+      - name: "pricing_adjustments_detail"
+        data_type: "object"
+        destination: "storage"
+      - name: "rate_calculation_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "rate_lock_eligible"
+        data_type: "boolean"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "CalculateProbabilityOfDefault"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires credit_score_grade (A/B/C/D) mapped from PD score to determine appropriate risk tier for pricing matrix application, as credit grade drives base pricing adjustments and establishes fundamental risk-return relationship."
+      - dependent_api: "CalculateDebtRatios"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires debt_to_income_ratio to apply DTI-based pricing adjustments, as elevated DTI ratios approaching or exceeding 43% warrant rate premiums to compensate for reduced payment capacity and elevated default risk."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "EvaluateCompensatingFactors"
+    description: "Conducts systematic compensating factors analysis for applications with elevated risk indicators by evaluating and scoring positive offsetting characteristics including reserve months (3 points for >12 months, 2 points for 6-12 months, 1 point for 3-6 months), housing payment history assessment (2 points for 12+ months of equal or higher payment without 30-day lates), residual income analysis (2 points for residual exceeding 120% of regional HUD median income after all obligations), LTV position evaluation (2 points for LTV ≤70% representing substantial equity), employment stability assessment (1 point for employment_years >5.0 in same field), and credit depth review (1 point for 3+ revolving accounts with limits >$5,000 and utilization <30%), summing compensating factor points to determine if aggregate score meets threshold requirements of ≥5 points for DTI 43-45% exceptions or ≥7 points for DTI 45-50% exceptions, documenting each claimed compensating factor with quantified supporting evidence in narrative form to justify policy exception requests to Chief Credit Officer, and populating compensating_factors_present Boolean field based on threshold achievement to inform final underwriting decision logic regarding approval feasibility for marginal applications."
+    purpose: "Provide structured methodology for evaluating positive borrower characteristics that partially offset elevated DTI ratios, marginal credit scores, or limited employment tenure, enabling appropriate credit access for borrowers with non-traditional but demonstrably strong credit profiles while maintaining sound risk management through objective, quantifiable compensating factor criteria."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "reserve_months_calculated"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "payment_history_quality"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "verified_gross_monthly_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "monthly_housing_payment_total"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "total_monthly_debt_obligations"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "preliminary_ltv_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "employment_years"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "credit_depth_rating"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "applicant_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "compensating_factors_present"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "total_compensating_factor_points"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "compensating_factors_detail"
+        data_type: "object"
+        destination: "storage"
+      - name: "exception_approval_eligible"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "compensating_factor_analysis_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CalculateDebtRatios"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires debt_to_income_ratio to determine if compensating factor analysis is triggered (DTI >43%) and to assess the magnitude of DTI exception requiring correspondingly higher compensating factor point thresholds."
+      - dependent_api: "VerifyAssetsAndReserves"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires reserve_months_calculated to assign reserve-based compensating factor points (3 points for >12 months, 2 for 6-12, 1 for 3-6), as reserves represent the strongest compensating factor offsetting payment capacity concerns."
+      - dependent_api: "AnalyzeCreditHistory"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires payment_history_quality and credit_depth_rating to assign housing payment history points (2 points for 12+ months of comparable payment without lates) and credit depth points (1 point for sophisticated credit management), reflecting character strengths."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "OrderPropertyAppraisal"
+    description: "Initiates property valuation process by transmitting appraisal order to independent Appraisal Management Company or internal appraisal desk with comprehensive property information including property_address, property_type classification, property_occupancy status, estimated_property_value from purchase contract or applicant estimate, specific appraisal form requirements (URAR Form 1004 for single-family, Form 1073 for condos, Form 1025 for 2-4 units), and special instructions for unique property characteristics or market conditions, recording appraisal_order_timestamp to initiate 10-business-day completion expectation per service level agreement, assigning appraiser_id for the licensed or certified appraiser selected by AMC based on geographic competency requirements, documenting appraisal_company name for vendor management tracking, and ensuring appraiser independence compliance with Dodd-Frank Act provisions in 12 CFR 1026.42 prohibiting lender influence on valuation, with the order transmission enabling parallel workflow execution where appraisal proceeds concurrently with underwriting verification activities to optimize overall turnaround time."
+    purpose: "Trigger property valuation workflow early in the underwriting process to enable parallel execution with income and credit verification activities, reducing overall cycle time while ensuring appraiser independence and obtaining collateral value assessment required for LTV calculation and loan amount support determination."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "prequalification_decision"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "property_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "property_occupancy"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "estimated_property_value"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "requested_loan_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "loan_purpose"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "appraisal_order_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "appraiser_id"
+        data_type: "string"
+        destination: "storage"
+      - name: "appraisal_company"
+        data_type: "string"
+        destination: "storage"
+      - name: "appraisal_order_number"
+        data_type: "string"
+        destination: "other_api"
+      - name: "expected_completion_date"
+        data_type: "date"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecutePrequalificationAnalysis"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only orders appraisal after prequalification_decision indicates Qualified or Conditionally Qualified status to avoid incurring appraisal costs ($500-$700) for applications likely to be declined based on credit or capacity deficiencies, serving as a business process gate and cost control measure."
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "ConductPropertyValuation"
+    description: "Executes comprehensive property appraisal by licensed appraiser conducting site inspection to measure property_square_footage using external perimeter methodology, assessing property_condition using standardized C1-C5 rating scale (C1=new/renovated, C2=well-maintained, C3=normal wear, C4=deferred maintenance, C5=substantial deficiencies), photographing interior rooms and exterior elevations for report documentation, identifying and analyzing minimum three closed sales of comparable properties within 12 months and 1 mile radius matching subject property characteristics, constructing adjustment grid quantifying dollar differences between subject and each comparable across dimensions of sale date, location, site characteristics, gross living area, room count, basement, garage, condition with individual adjustments typically ≤10% of comparable sale price and cumulative gross adjustments ≤25%, reconciling adjusted comparable values into final opinion of market value with explanation of weighting factors applied to each comparable's indicated value, recording site_inspection_timestamp and comparable_properties_count, completing URAR Form 1004 with all required sections including neighborhood description, site description, improvements description, sales comparison approach analysis, cost approach if applicable, income approach for 2-4 units, and appraiser certifications of USPAP compliance and independence, producing final_appraised_value rounded to nearest $1,000 representing appraiser's opinion of market value supported by comparable sales evidence."
+    purpose: "Provide independent third-party assessment of property market value to support loan amount determination, calculate loan-to-value ratio for collateral risk assessment, ensure property condition is acceptable for financing without required repairs exceeding borrower capacity, and generate appraisal report suitable for GSE delivery, portfolio retention, or regulatory examination."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "appraisal_order_number"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "property_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "estimated_property_value"
+        data_type: "float"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "site_inspection_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "property_square_footage"
+        data_type: "integer"
+        destination: "storage"
+      - name: "property_condition"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "comparable_properties_count"
+        data_type: "integer"
+        destination: "storage"
+      - name: "final_appraised_value"
+        data_type: "float"
+        destination: "other_api"
+      - name: "appraisal_report_pdf"
+        data_type: "binary"
+        destination: "storage"
+      - name: "appraisal_completion_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "OrderPropertyAppraisal"
+        dependency_type: "temporal_dependency"
+        dependency_reason: "Cannot conduct property valuation until appraisal order is transmitted to AMC, appraiser is assigned, and property access is scheduled, representing sequential workflow where order placement precedes execution by external third party."
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ValidateAppraisalWithAVM"
+    description: "Executes automated appraisal quality control by submitting property_address to institution's Automated Valuation Model platform (CoreLogic, Freddie Mac Home Value Explorer, or proprietary model) which returns avm_estimated_value derived from statistical analysis of historical sales data, property characteristics from public records, hedonic pricing models, and market condition indices along with confidence score and forecast standard deviation, calculates appraisal_avm_variance_percent using formula [(final_appraised_value - avm_estimated_value) / avm_estimated_value] × 100 with precision to two decimal places, compares absolute variance value against 10.00% tolerance threshold established in institutional collateral risk management policy, sets second_review_triggered Boolean to true if variance exceeds ±10.00% indicating potential appraisal quality issue requiring secondary field review appraisal by different independent appraiser, or sets to false if variance is within tolerance indicating acceptable appraisal reliability, documents variance analysis and AVM confidence metrics in loan file for audit trail, and enables underwriter to proceed with final_appraised_value acceptance or initiate additional valuation review workflow based on variance magnitude and AVM confidence level."
+    purpose: "Provide independent statistical validation of manual appraisal to detect potential valuation inflation, appraiser bias, or comparable selection errors that could result in excessive loan-to-value ratios and elevated collateral risk, ensuring institution's collateral valuations are reliable and supportable in loss scenarios."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "property_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "final_appraised_value"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "avm_estimated_value"
+        data_type: "float"
+        destination: "other_api"
+      - name: "appraisal_avm_variance_percent"
+        data_type: "float"
+        destination: "other_api"
+      - name: "second_review_triggered"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "avm_confidence_score"
+        data_type: "float"
+        destination: "storage"
+      - name: "avm_validation_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ConductPropertyValuation"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires final_appraised_value from completed appraisal report to calculate variance percentage against AVM estimate, as the comparison between manual appraisal and statistical model is the core quality control mechanism that cannot execute without the manual valuation input."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "CalculateLoanToValueRatio"
+    description: "Computes definitive loan-to-value ratio using validated final_appraised_value and requested_loan_amount by applying formula LTV = (requested_loan_amount / MIN(final_appraised_value, purchase_price)) × 100 for purchase transactions where the lesser of appraised value or contract price establishes collateral value per prudential lending standards, or LTV = (requested_loan_amount / final_appraised_value) × 100 for refinance transactions where no purchase price exists, expressing result as percentage with precision to two decimal places, comparing calculated loan_to_value_ratio against institutional policy thresholds stratified by credit score tier, property type, and occupancy status (80.00% for no-MI products, 85.00% standard MI, 90.00% expanded MI, 95.00% maximum portfolio), determining LTV policy compliance status and identifying whether mortgage insurance is required if LTV exceeds 80.00%, calculating Combined LTV (CLTV) if subordinate financing exists by adding first and second lien amounts before dividing by value, and updating debt_to_income_ratio calculation if loan amount requires reduction to meet LTV constraints, ensuring final loan amount simultaneously satisfies both DTI capacity limits and LTV collateral limits while documenting any adjustments required to achieve policy compliance."
+    purpose: "Establish final collateral risk metric using validated appraised value to determine maximum supportable loan amount, calculate mortgage insurance requirements, validate that requested loan amount is supportable by collateral value, and enable final underwriting decision by confirming both payment capacity (DTI) and collateral coverage (LTV) are within acceptable risk parameters."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "final_appraised_value"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "requested_loan_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "estimated_property_value"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "loan_purpose"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "representative_credit_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "property_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "property_occupancy"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "loan_to_value_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "ltv_policy_compliance_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "mortgage_insurance_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "maximum_loan_amount_by_ltv"
+        data_type: "float"
+        destination: "other_api"
+      - name: "loan_amount_adjustment_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "ltv_calculation_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ValidateAppraisalWithAVM"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires validated final_appraised_value that has passed AVM quality control check (or second review if variance exceeded tolerance) to ensure LTV ratio is calculated using reliable collateral value, as using inflated or erroneous appraisal values would understate collateral risk and lead to inappropriate lending decisions."
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "RenderFinalLoanDecision"
+    description: "Synthesizes all underwriting findings to render ultimate credit decision by executing comprehensive decision tree logic that evaluates debt_to_income_ratio against 43.00% QM threshold and 50.00% absolute maximum, loan_to_value_ratio against credit-score-stratified policy thresholds, credit_score_grade for A/B acceptability versus C requiring compensating factors or D requiring decline, property_condition for C3 or better acceptability versus C4/C5 requiring repairs or decline, probability_of_default_score for acceptable risk levels, compensating_factors_present Boolean for marginal DTI or LTV cases, and bankruptcy/foreclosure seasoning compliance, populating final_decision field with Approved for applications meeting all policy requirements, Approved with Conditions for applications meeting standards but requiring outstanding documentation satisfaction enumerated in conditions_count and condition descriptions, or Declined for applications failing minimum credit standards with specific decline_reason documented (DTI excessive, insufficient income, LTV excessive, credit score below minimum, bankruptcy/foreclosure seasoning insufficient, employment verification unsuccessful, property condition unacceptable), recording final_decision_timestamp to enable turnaround_time_days calculation, populating approved_loan_amount (may equal requested amount or reduced amount based on DTI/LTV constraints), approved_interest_rate from final_risk_adjusted_interest_rate potentially recalculated with actual LTV, approved_loan_term_months, calculating first_pass_yield as true if conditions_count equals zero indicating clean approval or false if conditions exist indicating file rework required, preparing adverse action notices for declined applications with specific reasons per ECOA Regulation B requirements, and transitioning approved applications to closing preparation workflow with pre-funding quality control review."
+    purpose: "Render authoritative, auditable final credit decision supported by comprehensive quantitative analysis of capacity, credit, collateral, and character factors, ensuring lending decisions are consistent with institutional risk appetite and regulatory requirements while providing clear documentation of decision rationale for approved, conditionally approved, or declined applications to support secondary market delivery, regulatory examination, and fair lending compliance monitoring."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "debt_service_coverage_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "loan_to_value_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "probability_of_default_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "credit_score_grade"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "final_risk_adjusted_interest_rate"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "compensating_factors_present"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "property_condition"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "bankruptcy_seasoning_compliant"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "foreclosure_history_compliant"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "verified_gross_monthly_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "requested_loan_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "loan_term_months"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+      - name: "application_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "final_decision"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "final_decision_timestamp"
+        data_type: "datetime"
+        destination: "other_api"
+      - name: "approved_loan_amount"
+        data_type: "float"
+        destination: "other_api"
+      - name: "approved_interest_rate"
+        data_type: "float"
+        destination: "other_api"
+      - name: "approved_loan_term_months"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "conditions_count"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "decline_reason"
+        data_type: "string"
+        destination: "other_api"
+      - name: "first_pass_yield"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "underwriting_decision_memorandum"
+        data_type: "text"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CalculateDebtRatios"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires debt_to_income_ratio and debt_service_coverage_ratio to evaluate compliance with QM 43% DTI threshold and portfolio 1.15 DSCR requirement, as these capacity metrics are primary approval/decline decision factors that directly determine whether borrower has sufficient income to support the loan."
+      - dependent_api: "CalculateProbabilityOfDefault"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires probability_of_default_score and credit_score_grade to assess overall credit risk level and determine if risk profile is acceptable (Grade A/B), marginal requiring compensating factors (Grade C), or unacceptable requiring decline (Grade D), as these risk metrics govern approval authority levels and pricing adequacy."
+      - dependent_api: "DetermineFinalInterestRate"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires final_risk_adjusted_interest_rate as the approved_interest_rate for the loan, potentially recalculated after final LTV is established, as the interest rate is a critical output of the decision process that must be locked and disclosed to the borrower."
+      - dependent_api: "CalculateLoanToValueRatio"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires loan_to_value_ratio to evaluate collateral coverage adequacy against credit-score-stratified LTV policy limits, determine mortgage insurance requirements, and potentially adjust approved_loan_amount downward if requested amount exceeds maximum supportable by appraised value."
+      - dependent_api: "EvaluateCompensatingFactors"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires compensating_factors_present Boolean to determine if applications with DTI between 43-50% or other marginal risk metrics can be approved through offsetting positive characteristics, as compensating factors enable appropriate credit access for non-traditional but strong borrower profiles."
+      - dependent_api: "AnalyzeCreditHistory"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires bankruptcy_seasoning_compliant and foreclosure_history_compliant Booleans to ensure borrowers with prior adverse credit events have satisfied mandatory waiting periods before new mortgage eligibility, as these are hard policy requirements that supersede other positive factors."
+      - dependent_api: "ConductPropertyValuation"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires property_condition rating to determine if property is acceptable collateral (C3 or better) or requires mandatory repairs before closing (C4) or is unfinanceable without major rehabilitation (C5), as collateral quality directly impacts loan security and foreclosure recovery prospects."
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ExecuteFairLendingMonitoring"
+    description: "Conducts automated fair lending compliance surveillance by capturing demographic information collected per Home Mortgage Disclosure Act requirements including applicant ethnicity, race, sex, and Census tract geocode derived from property_address, performing statistical analysis comparing approval rates across demographic cohorts after controlling for legitimate risk factors (credit score, DTI, LTV) to identify statistically significant disparities indicating potential disparate treatment or disparate impact violations of Equal Credit Opportunity Act, analyzing final_risk_adjusted_interest_rate spreads across demographic groups to detect pricing discrimination after risk adjustment, evaluating conditions_count patterns to identify inconsistent application of underwriting standards across protected classes, setting fair_lending_audit_flag to true for randomly selected applications (2-5% sample) or algorithmically flagged applications showing pricing or decisioning anomalies requiring detailed Fair Lending analyst file review, and documenting surveillance results for quarterly fair lending committee reporting, annual regulatory fair lending examination preparation, and continuous process improvement to ensure non-discriminatory credit access consistent with Regulation B and prudential regulatory guidance on fair lending risk management."
+    purpose: "Ensure institutional compliance with fair lending laws prohibiting discrimination in credit decisions and pricing based on race, ethnicity, sex, or other protected characteristics, enable early detection of potential fair lending risks through ongoing statistical monitoring before they become systemic issues, and maintain audit trails documenting fair lending due diligence for regulatory examination defense."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "final_decision"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "approved_interest_rate"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "conditions_count"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "representative_credit_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "loan_to_value_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "property_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "fair_lending_audit_flag"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "demographic_data_complete"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "pricing_variance_alert"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "decisioning_consistency_alert"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "fair_lending_monitoring_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "RenderFinalLoanDecision"
+        dependency_type: "state_dependency"
+        dependency_reason: "Can only conduct fair lending monitoring after final_decision is rendered, as the compliance surveillance analyzes approval/decline patterns, pricing consistency, and conditions imposed across demographic groups, requiring the completed underwriting decision as input to the statistical discrimination detection algorithms."
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "TrackLoanPerformanceMetrics"
+    description: "Calculates operational and business performance metrics by computing turnaround_time_days as calendar days between application_timestamp and final_decision_timestamp to measure process efficiency against institutional target of ≤25 days for W-2 wage earner applications and ≤35 days for self-employed applications, records first_pass_yield Boolean based on conditions_count equaling zero (true for clean approval, false if conditions exist) to measure operational quality and file preparation completeness, tracks funded_status Boolean indicating whether approved loan ultimately closed and was disbursed, records funding_date when loan funds were advanced to complete the transaction, calculates pull-through rate at portfolio level as percentage of approved applications resulting in funded loans (target 75-85%), monitors early payment default rates during first 12 months post-origination segmented by credit_score_grade to validate probability_of_default_score model accuracy through comparison of predicted versus actual delinquency rates, feeds performance data into continuous improvement processes for cycle time reduction, underwriting model recalibration, and origination process optimization while providing management reporting on volume, decisioning patterns, operational efficiency, and portfolio quality metrics supporting strategic planning and resource allocation decisions."
+    purpose: "Enable data-driven operational management through systematic tracking of process efficiency metrics (turnaround time, first pass yield), business performance indicators (pull-through rate, approval rates), and portfolio quality measures (early payment default correlation to underwriting predictions), supporting continuous improvement initiatives, model validation requirements, and executive reporting on mortgage origination performance."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "application_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "final_decision"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "final_decision_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: true
+      - name: "conditions_count"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "approved_loan_amount"
+        data_type: "float"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "turnaround_time_days"
+        data_type: "integer"
+        destination: "storage"
+      - name: "first_pass_yield"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "funded_status"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "funding_date"
+        data_type: "date"
+        destination: "storage"
+      - name: "performance_metrics_calculated_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "RenderFinalLoanDecision"
+        dependency_type: "temporal_dependency"
+        dependency_reason: "Requires final_decision_timestamp to calculate turnaround_time_days by measuring elapsed time from application submission to decision rendering, and requires conditions_count to determine first_pass_yield status, as these metrics can only be computed after the underwriting decision process completes."
+    complexity_level: "low"
+    business_criticality: "medium"
+</api_dependency_graph>
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件

@@ -1,0 +1,4775 @@
+================================================================================
+BANKING INVESTMENT TRANSACTION PROCESSING RESULTS
+================================================================================
+
+transaction_id:INV_2025041801234
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-04-18T10:15:30Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3161.4786
+front_end_load_amount:1250.0
+net_investment_amount:48750.0
+annual_management_fee_amount:853.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372220
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801235
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T11:22:15Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801236
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-08-10T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2723.5023
+front_end_load_amount:450.0
+net_investment_amount:29550.0
+annual_management_fee_amount:280.73
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372290
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801238
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-04-18T13:45:27Z
+investable_status:Active
+suitability_check_passed:False
+suitability_mismatch_flag:True
+pre_trade_compliance_passed:False
+funds_availability_verified:True
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:False
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372010
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801239
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-02-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4181.3333
+front_end_load_amount:1600.0
+net_investment_amount:78400.0
+annual_management_fee_amount:1136.8
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372325
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801241
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-05-10T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3582.8606
+front_end_load_amount:787.5
+net_investment_amount:44212.5
+annual_management_fee_amount:552.66
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372185
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801242
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-30T00:00:00Z
+investable_status:Active
+suitability_check_passed:False
+suitability_mismatch_flag:True
+pre_trade_compliance_passed:False
+funds_availability_verified:False
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:False
+compliance_defect_flag:True
+compliance_review_notes:Missing_Suitability_Waiver_Documentation
+supervisor_approval_timestamp:
+total_processing_time_minutes:372106
+final_result:True['Missing_Suitability_Waiver_Documentation']Deficiencies_IdentifiedMissing_Suitability_Waiver_Documentation
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801244
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-12-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5469.6894
+front_end_load_amount:412.5
+net_investment_amount:54587.5
+annual_management_fee_amount:354.82
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372270
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801245
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T11:15:33Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801246
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-20T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4965.3333
+front_end_load_amount:1900.0
+net_investment_amount:93100.0
+annual_management_fee_amount:1349.95
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371959
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801247
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-03-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1583.8762
+front_end_load_amount:1100.0
+net_investment_amount:38900.0
+annual_management_fee_amount:758.55
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372193
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801249
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-04-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5175.2431
+front_end_load_amount:1137.5
+net_investment_amount:63862.5
+annual_management_fee_amount:798.28
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372303
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801250
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4426.07
+front_end_load_amount:1750.0
+net_investment_amount:68250.0
+annual_management_fee_amount:1194.38
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371927
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801251
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-30T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4442.6667
+front_end_load_amount:1700.0
+net_investment_amount:83300.0
+annual_management_fee_amount:1207.85
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372070
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801252
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2786.6694
+front_end_load_amount:612.5
+net_investment_amount:34387.5
+annual_management_fee_amount:429.84
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372123
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801254
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-02-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2375.8143
+front_end_load_amount:1650.0
+net_investment_amount:58350.0
+annual_management_fee_amount:1137.83
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371863
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801255
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3763.2
+front_end_load_amount:1440.0
+net_investment_amount:70560.0
+annual_management_fee_amount:1023.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372030
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801256
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T10:18:42Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801257
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-11-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4773.5471
+front_end_load_amount:360.0
+net_investment_amount:47640.0
+annual_management_fee_amount:309.66
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372280
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801259
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T11:35:45Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1433.1442
+front_end_load_amount:315.0
+net_investment_amount:17685.0
+annual_management_fee_amount:221.06
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372140
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801260
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-05-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4808.5333
+front_end_load_amount:1840.0
+net_investment_amount:90160.0
+annual_management_fee_amount:1307.32
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372310
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801261
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2059.0391
+front_end_load_amount:1430.0
+net_investment_amount:50570.0
+annual_management_fee_amount:986.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371997
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801262
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-02-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5628.5714
+front_end_load_amount:930.0
+net_investment_amount:61070.0
+annual_management_fee_amount:580.16
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372212
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801263
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-08-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2402.7237
+front_end_load_amount:950.0
+net_investment_amount:37050.0
+annual_management_fee_amount:648.38
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371917
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801265
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4617.9092
+front_end_load_amount:1015.0
+net_investment_amount:56985.0
+annual_management_fee_amount:712.31
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372247
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801266
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3554.1333
+front_end_load_amount:1360.0
+net_investment_amount:66640.0
+annual_management_fee_amount:966.28
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371850
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801267
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-03-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4176.8537
+front_end_load_amount:315.0
+net_investment_amount:41685.0
+annual_management_fee_amount:270.95
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372327
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801268
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-04-18T14:12:28Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801269
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-01-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5184.8249
+front_end_load_amount:2050.0
+net_investment_amount:79950.0
+annual_management_fee_amount:1399.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372166
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801271
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5971.4344
+front_end_load_amount:1312.5
+net_investment_amount:73687.5
+annual_management_fee_amount:921.09
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372243
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801272
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2874.6667
+front_end_load_amount:1100.0
+net_investment_amount:53900.0
+annual_management_fee_amount:781.55
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372020
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801274
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-04-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2229.3355
+front_end_load_amount:490.0
+net_investment_amount:27510.0
+annual_management_fee_amount:343.88
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372096
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801275
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-10-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3484.5277
+front_end_load_amount:2420.0
+net_investment_amount:85580.0
+annual_management_fee_amount:1668.81
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371867
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801276
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4076.8
+front_end_load_amount:1560.0
+net_investment_amount:76440.0
+annual_management_fee_amount:1108.38
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372263
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801277
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-10T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2547.812
+front_end_load_amount:560.0
+net_investment_amount:31440.0
+annual_management_fee_amount:393.0
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371943
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801278
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-12-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3779.0581
+front_end_load_amount:285.0
+net_investment_amount:37715.0
+annual_management_fee_amount:245.15
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372340
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801280
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-03-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4805.4475
+front_end_load_amount:1900.0
+net_investment_amount:74100.0
+annual_management_fee_amount:1296.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371930
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801281
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T13:12:28Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801282
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4442.6667
+front_end_load_amount:1700.0
+net_investment_amount:83300.0
+annual_management_fee_amount:1207.85
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372230
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801283
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2455.0081
+front_end_load_amount:1705.0
+net_investment_amount:60295.0
+annual_management_fee_amount:1175.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371956
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801284
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-01-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4720.7373
+front_end_load_amount:780.0
+net_investment_amount:51220.0
+annual_management_fee_amount:486.59
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372277
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801286
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-05-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3344.0032
+front_end_load_amount:735.0
+net_investment_amount:41265.0
+annual_management_fee_amount:515.81
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371857
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801287
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5017.6
+front_end_load_amount:1920.0
+net_investment_amount:94080.0
+annual_management_fee_amount:1364.16
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372313
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801288
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-07-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1900.6515
+front_end_load_amount:1320.0
+net_investment_amount:46680.0
+annual_management_fee_amount:910.26
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372127
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801289
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-03-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4475.2004
+front_end_load_amount:337.5
+net_investment_amount:44662.5
+annual_management_fee_amount:290.31
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372290
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801290
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3667.3152
+front_end_load_amount:1450.0
+net_investment_amount:56550.0
+annual_management_fee_amount:989.62
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371910
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801292
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5414.1005
+front_end_load_amount:1190.0
+net_investment_amount:66810.0
+annual_management_fee_amount:835.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372202
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801293
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-04-18T14:18:28Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801294
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3867.7333
+front_end_load_amount:1480.0
+net_investment_amount:72520.0
+annual_management_fee_amount:1051.54
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372123
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801296
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-05-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:6528.7682
+front_end_load_amount:1435.0
+net_investment_amount:80565.0
+annual_management_fee_amount:1007.06
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372257
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801297
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-09-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2138.2329
+front_end_load_amount:1485.0
+net_investment_amount:52515.0
+annual_management_fee_amount:1024.04
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372013
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801298
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-12-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5265.4378
+front_end_load_amount:870.0
+net_investment_amount:57130.0
+annual_management_fee_amount:542.74
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372303
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801299
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1881.6
+front_end_load_amount:720.0
+net_investment_amount:35280.0
+annual_management_fee_amount:511.56
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372107
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801300
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5817.1206
+front_end_load_amount:2300.0
+net_investment_amount:89700.0
+annual_management_fee_amount:1569.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371887
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801302
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3449.6
+front_end_load_amount:1320.0
+net_investment_amount:64680.0
+annual_management_fee_amount:937.86
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371990
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801303
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5732.577
+front_end_load_amount:1260.0
+net_investment_amount:70740.0
+annual_management_fee_amount:884.25
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372270
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801304
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-09-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1821.4577
+front_end_load_amount:1265.0
+net_investment_amount:44735.0
+annual_management_fee_amount:872.33
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372072
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801305
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-10-20T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3812.9032
+front_end_load_amount:630.0
+net_investment_amount:41370.0
+annual_management_fee_amount:393.01
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372340
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801306
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T10:28:55Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801307
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-12-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4599.4667
+front_end_load_amount:1760.0
+net_investment_amount:86240.0
+annual_management_fee_amount:1250.48
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372003
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801308
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-02-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3287.9377
+front_end_load_amount:1300.0
+net_investment_amount:50700.0
+annual_management_fee_amount:887.25
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372157
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801309
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-01-10T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5966.9339
+front_end_load_amount:450.0
+net_investment_amount:59550.0
+annual_management_fee_amount:387.07
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372257
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801310
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-11-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2229.3355
+front_end_load_amount:490.0
+net_investment_amount:27510.0
+annual_management_fee_amount:343.88
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371950
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801312
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4076.8
+front_end_load_amount:1560.0
+net_investment_amount:76440.0
+annual_management_fee_amount:1108.38
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372213
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801313
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-08-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1504.6824
+front_end_load_amount:1045.0
+net_investment_amount:36955.0
+annual_management_fee_amount:720.62
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372106
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801314
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4808.5333
+front_end_load_amount:1840.0
+net_investment_amount:90160.0
+annual_management_fee_amount:1307.32
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372280
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801315
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T13:25:45Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801317
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-03-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3035.0195
+front_end_load_amount:1200.0
+net_investment_amount:46800.0
+annual_management_fee_amount:819.0
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372130
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801318
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-05-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4617.9092
+front_end_load_amount:1015.0
+net_investment_amount:56985.0
+annual_management_fee_amount:712.31
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372313
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801319
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1702.6669
+front_end_load_amount:1182.5
+net_investment_amount:41817.5
+annual_management_fee_amount:815.44
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371867
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801320
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-11-30T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5017.6
+front_end_load_amount:1920.0
+net_investment_amount:94080.0
+annual_management_fee_amount:1364.16
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372180
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801322
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-01-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3477.6265
+front_end_load_amount:1375.0
+net_investment_amount:53625.0
+annual_management_fee_amount:938.44
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372242
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801323
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-02-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4773.5471
+front_end_load_amount:360.0
+net_investment_amount:47640.0
+annual_management_fee_amount:309.66
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372326
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801324
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2547.812
+front_end_load_amount:560.0
+net_investment_amount:31440.0
+annual_management_fee_amount:393.0
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371977
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801326
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4390.4
+front_end_load_amount:1680.0
+net_investment_amount:82320.0
+annual_management_fee_amount:1193.64
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372143
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801327
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-01-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1623.4731
+front_end_load_amount:1127.5
+net_investment_amount:39872.5
+annual_management_fee_amount:777.51
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372039
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801328
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5414.1005
+front_end_load_amount:1190.0
+net_investment_amount:66810.0
+annual_management_fee_amount:835.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372250
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801329
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-03-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3920.2335
+front_end_load_amount:1550.0
+net_investment_amount:60450.0
+annual_management_fee_amount:1057.88
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371943
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801330
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-12-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4720.7373
+front_end_load_amount:780.0
+net_investment_amount:51220.0
+annual_management_fee_amount:486.59
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372320
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801331
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3972.2667
+front_end_load_amount:1520.0
+net_investment_amount:74480.0
+annual_management_fee_amount:1079.96
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372073
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801332
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T10:38:52Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801334
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4651.7333
+front_end_load_amount:1780.0
+net_investment_amount:87220.0
+annual_management_fee_amount:1264.69
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372267
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801335
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3667.3152
+front_end_load_amount:1450.0
+net_investment_amount:56550.0
+annual_management_fee_amount:989.62
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371990
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801336
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-03-10T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:6464.1784
+front_end_load_amount:487.5
+net_investment_amount:64512.5
+annual_management_fee_amount:419.33
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372303
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801337
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2945.9076
+front_end_load_amount:647.5
+net_investment_amount:36352.5
+annual_management_fee_amount:454.41
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372149
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801339
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4285.8667
+front_end_load_amount:1640.0
+net_investment_amount:80360.0
+annual_management_fee_amount:1165.22
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372223
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801341
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1742.2638
+front_end_load_amount:1210.0
+net_investment_amount:42790.0
+annual_management_fee_amount:834.4
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372086
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801342
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4936.3857
+front_end_load_amount:1085.0
+net_investment_amount:60915.0
+annual_management_fee_amount:761.44
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372287
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801343
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-02-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4173.1518
+front_end_load_amount:1650.0
+net_investment_amount:64350.0
+annual_management_fee_amount:1126.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371893
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801344
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3105.1459
+front_end_load_amount:682.5
+net_investment_amount:38317.5
+annual_management_fee_amount:478.97
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372157
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801345
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-11-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4913.0667
+front_end_load_amount:1880.0
+net_investment_amount:92120.0
+annual_management_fee_amount:1335.74
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371970
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801346
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-01-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5768.0361
+front_end_load_amount:435.0
+net_investment_amount:57565.0
+annual_management_fee_amount:374.17
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372336
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801347
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-01-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1940.2484
+front_end_load_amount:1347.5
+net_investment_amount:47652.5
+annual_management_fee_amount:929.22
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372023
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801349
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4494.9333
+front_end_load_amount:1720.0
+net_investment_amount:84280.0
+annual_management_fee_amount:1222.06
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372197
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801350
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2707.0502
+front_end_load_amount:595.0
+net_investment_amount:33405.0
+annual_management_fee_amount:417.56
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372063
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801352
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4233.6
+front_end_load_amount:1620.0
+net_investment_amount:79380.0
+annual_management_fee_amount:1151.01
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372243
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801353
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-10-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1781.8607
+front_end_load_amount:1237.5
+net_investment_amount:43762.5
+annual_management_fee_amount:853.37
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371927
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801354
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-11-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4902.3041
+front_end_load_amount:810.0
+net_investment_amount:53190.0
+annual_management_fee_amount:505.31
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372310
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801355
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3240.5333
+front_end_load_amount:1240.0
+net_investment_amount:60760.0
+annual_management_fee_amount:881.02
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372263
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801356
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T14:22:48Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801357
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-14T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4617.9092
+front_end_load_amount:1015.0
+net_investment_amount:56985.0
+annual_management_fee_amount:712.31
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372217
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801359
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-05-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2229.3355
+front_end_load_amount:490.0
+net_investment_amount:27510.0
+annual_management_fee_amount:343.88
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372146
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801360
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-02-10T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5564.2023
+front_end_load_amount:2200.0
+net_investment_amount:85800.0
+annual_management_fee_amount:1501.5
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372340
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801361
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3763.2
+front_end_load_amount:1440.0
+net_investment_amount:70560.0
+annual_management_fee_amount:1023.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371883
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801362
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-10-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4773.5471
+front_end_load_amount:360.0
+net_investment_amount:47640.0
+annual_management_fee_amount:309.66
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372257
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801363
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-30T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2059.0391
+front_end_load_amount:1430.0
+net_investment_amount:50570.0
+annual_management_fee_amount:986.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372069
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801365
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-01-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5628.5714
+front_end_load_amount:930.0
+net_investment_amount:61070.0
+annual_management_fee_amount:580.16
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372332
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801366
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T10:52:33Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801367
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4076.8
+front_end_load_amount:1560.0
+net_investment_amount:76440.0
+annual_management_fee_amount:1108.38
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372023
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801368
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1504.6824
+front_end_load_amount:1045.0
+net_investment_amount:36955.0
+annual_management_fee_amount:720.62
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372247
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801370
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5414.1005
+front_end_load_amount:1190.0
+net_investment_amount:66810.0
+annual_management_fee_amount:835.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372349
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801371
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5184.8249
+front_end_load_amount:2050.0
+net_investment_amount:79950.0
+annual_management_fee_amount:1399.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371943
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801372
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4808.5333
+front_end_load_amount:1840.0
+net_investment_amount:90160.0
+annual_management_fee_amount:1307.32
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372097
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801373
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2547.812
+front_end_load_amount:560.0
+net_investment_amount:31440.0
+annual_management_fee_amount:393.0
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372170
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801374
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-04-18T13:22:18Z
+investable_status:Active
+suitability_check_passed:False
+suitability_mismatch_flag:True
+pre_trade_compliance_passed:False
+funds_availability_verified:True
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:False
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372033
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801375
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4494.9333
+front_end_load_amount:1720.0
+net_investment_amount:84280.0
+annual_management_fee_amount:1222.06
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372287
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801376
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-01-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2534.202
+front_end_load_amount:1760.0
+net_investment_amount:62240.0
+annual_management_fee_amount:1213.68
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371916
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801377
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2026-11-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5265.4378
+front_end_load_amount:870.0
+net_investment_amount:57130.0
+annual_management_fee_amount:542.74
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372243
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801379
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1910.859
+front_end_load_amount:420.0
+net_investment_amount:23580.0
+annual_management_fee_amount:294.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372196
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801380
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:6006.8093
+front_end_load_amount:2375.0
+net_investment_amount:92625.0
+annual_management_fee_amount:1620.94
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372313
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801381
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3972.2667
+front_end_load_amount:1520.0
+net_investment_amount:74480.0
+annual_management_fee_amount:1079.96
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371967
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801382
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-03-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5171.3427
+front_end_load_amount:390.0
+net_investment_amount:51610.0
+annual_management_fee_amount:335.46
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372279
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801383
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-01-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2217.4267
+front_end_load_amount:1540.0
+net_investment_amount:54460.0
+annual_management_fee_amount:1061.97
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372047
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801385
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-02-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5991.7051
+front_end_load_amount:990.0
+net_investment_amount:65010.0
+annual_management_fee_amount:617.6
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372317
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801386
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T11:42:35Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801387
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3867.7333
+front_end_load_amount:1480.0
+net_investment_amount:72520.0
+annual_management_fee_amount:1051.54
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371976
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801388
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-10-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1663.07
+front_end_load_amount:1155.0
+net_investment_amount:40845.0
+annual_management_fee_amount:796.48
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372207
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801390
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5652.9579
+front_end_load_amount:1242.5
+net_investment_amount:69757.5
+annual_management_fee_amount:871.97
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372326
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801391
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4805.4475
+front_end_load_amount:1900.0
+net_investment_amount:74100.0
+annual_management_fee_amount:1296.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371893
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801392
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4651.7333
+front_end_load_amount:1780.0
+net_investment_amount:87220.0
+annual_management_fee_amount:1264.69
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372049
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801393
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3025.5267
+front_end_load_amount:665.0
+net_investment_amount:37335.0
+annual_management_fee_amount:466.69
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372147
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801394
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-01-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4375.7515
+front_end_load_amount:330.0
+net_investment_amount:43670.0
+annual_management_fee_amount:283.86
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372303
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801395
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2027-01-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2692.5896
+front_end_load_amount:1870.0
+net_investment_amount:66130.0
+annual_management_fee_amount:1289.54
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372243
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801396
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4285.8667
+front_end_load_amount:1640.0
+net_investment_amount:80360.0
+annual_management_fee_amount:1165.22
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371856
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801397
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5095.624
+front_end_load_amount:1120.0
+net_investment_amount:62880.0
+annual_management_fee_amount:786.0
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372227
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801399
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2308.9546
+front_end_load_amount:507.5
+net_investment_amount:28492.5
+annual_management_fee_amount:356.16
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372156
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801400
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-10-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5817.1206
+front_end_load_amount:2300.0
+net_investment_amount:89700.0
+annual_management_fee_amount:1569.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372347
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801401
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4129.0667
+front_end_load_amount:1580.0
+net_investment_amount:77420.0
+annual_management_fee_amount:1122.59
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371926
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801402
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-02-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4574.6493
+front_end_load_amount:345.0
+net_investment_amount:45655.0
+annual_management_fee_amount:296.76
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372263
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801403
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-09-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:False
+funds_availability_verified:False
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372027
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801404
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4494.9333
+front_end_load_amount:1720.0
+net_investment_amount:84280.0
+annual_management_fee_amount:1222.06
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372193
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801405
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T14:18:28Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801407
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-03-10T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5265.4378
+front_end_load_amount:870.0
+net_investment_amount:57130.0
+annual_management_fee_amount:542.74
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372123
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801408
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3763.2
+front_end_load_amount:1440.0
+net_investment_amount:70560.0
+annual_management_fee_amount:1023.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371917
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801409
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5334.4814
+front_end_load_amount:1172.5
+net_investment_amount:65827.5
+annual_management_fee_amount:822.84
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372313
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801410
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5311.284
+front_end_load_amount:2100.0
+net_investment_amount:81900.0
+annual_management_fee_amount:1433.25
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372013
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801411
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4299.4327
+front_end_load_amount:945.0
+net_investment_amount:53055.0
+annual_management_fee_amount:663.19
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372206
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801412
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-10-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:1900.6515
+front_end_load_amount:1320.0
+net_investment_amount:46680.0
+annual_management_fee_amount:910.26
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371987
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801414
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-02-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5171.3427
+front_end_load_amount:390.0
+net_investment_amount:51610.0
+annual_management_fee_amount:335.46
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372106
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801415
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4965.3333
+front_end_load_amount:1900.0
+net_investment_amount:93100.0
+annual_management_fee_amount:1349.95
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371847
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801416
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2547.812
+front_end_load_amount:560.0
+net_investment_amount:31440.0
+annual_management_fee_amount:393.0
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372167
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801417
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-09-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5564.2023
+front_end_load_amount:2200.0
+net_investment_amount:85800.0
+annual_management_fee_amount:1501.5
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372003
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801418
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-10-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2455.0081
+front_end_load_amount:1705.0
+net_investment_amount:60295.0
+annual_management_fee_amount:1175.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372337
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801419
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4024.5333
+front_end_load_amount:1540.0
+net_investment_amount:75460.0
+annual_management_fee_amount:1094.17
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371927
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801420
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-12T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5493.7196
+front_end_load_amount:1207.5
+net_investment_amount:67792.5
+annual_management_fee_amount:847.41
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372182
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801421
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2890.5741
+front_end_load_amount:2007.5
+net_investment_amount:70992.5
+annual_management_fee_amount:1384.35
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372087
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801422
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-01-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4357.6037
+front_end_load_amount:720.0
+net_investment_amount:47280.0
+annual_management_fee_amount:449.16
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372036
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801423
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-28T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3264.3841
+front_end_load_amount:717.5
+net_investment_amount:40282.5
+annual_management_fee_amount:503.53
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372253
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801425
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T16:08:48Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801426
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4233.6
+front_end_load_amount:1620.0
+net_investment_amount:79380.0
+annual_management_fee_amount:1151.01
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372133
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801427
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5652.9579
+front_end_load_amount:1242.5
+net_investment_amount:69757.5
+annual_management_fee_amount:871.97
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372303
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801428
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5943.5798
+front_end_load_amount:2350.0
+net_investment_amount:91650.0
+annual_management_fee_amount:1603.88
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372026
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801429
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2786.6694
+front_end_load_amount:612.5
+net_investment_amount:34387.5
+annual_management_fee_amount:429.84
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372217
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801430
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4442.6667
+front_end_load_amount:1700.0
+net_investment_amount:83300.0
+annual_management_fee_amount:1207.85
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371883
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801431
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-03-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4176.8537
+front_end_load_amount:315.0
+net_investment_amount:41685.0
+annual_management_fee_amount:270.95
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372287
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801432
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-11-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2573.7989
+front_end_load_amount:1787.5
+net_investment_amount:63212.5
+annual_management_fee_amount:1232.64
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372096
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801433
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-22T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4936.3857
+front_end_load_amount:1085.0
+net_investment_amount:60915.0
+annual_management_fee_amount:761.44
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371967
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801435
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T13:08:48Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801436
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4338.1333
+front_end_load_amount:1660.0
+net_investment_amount:81340.0
+annual_management_fee_amount:1179.43
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371907
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801437
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5812.1961
+front_end_load_amount:1277.5
+net_investment_amount:71722.5
+annual_management_fee_amount:896.53
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372147
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801438
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-10-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2296.6205
+front_end_load_amount:1595.0
+net_investment_amount:56405.0
+annual_management_fee_amount:1099.9
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372243
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801439
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-10-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4756.2667
+front_end_load_amount:1820.0
+net_investment_amount:89180.0
+annual_management_fee_amount:1293.11
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371977
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801440
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-09-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:6070.0389
+front_end_load_amount:2400.0
+net_investment_amount:93600.0
+annual_management_fee_amount:1638.0
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372072
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801441
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-25T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4076.8
+front_end_load_amount:1560.0
+net_investment_amount:76440.0
+annual_management_fee_amount:1108.38
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372327
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801442
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-02-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5083.871
+front_end_load_amount:840.0
+net_investment_amount:55160.0
+annual_management_fee_amount:524.02
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371926
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801443
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-07-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3662.4797
+front_end_load_amount:805.0
+net_investment_amount:45195.0
+annual_management_fee_amount:564.94
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372167
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801445
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2027-04-18T10:52:48Z
+investable_status:Active
+suitability_check_passed:
+suitability_mismatch_flag:
+pre_trade_compliance_passed:
+funds_availability_verified:
+estimated_units:
+front_end_load_amount:
+net_investment_amount:
+annual_management_fee_amount:
+trade_reference_number:
+contract_note_number:
+transaction_status:Completed
+execution_timestamp:
+settlement_date:
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:Risk profiling completed successfully
+supervisor_approval_timestamp:
+total_processing_time_minutes:13
+verification_result:Risk Profile Successfully Established
+processing_efficiency_rating:Excellent
+
+transaction_id:INV_2025041801446
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:3920.0
+front_end_load_amount:1500.0
+net_investment_amount:73500.0
+annual_management_fee_amount:1065.75
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372002
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801447
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-06-18T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5414.1005
+front_end_load_amount:1190.0
+net_investment_amount:66810.0
+annual_management_fee_amount:835.12
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372266
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801448
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-05T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:5500.9728
+front_end_load_amount:2175.0
+net_investment_amount:84825.0
+annual_management_fee_amount:1484.44
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372123
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801449
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-08-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2468.1929
+front_end_load_amount:542.5
+net_investment_amount:30457.5
+annual_management_fee_amount:380.72
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372107
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801450
+calculated_risk_profile:Balanced
+risk_profile_expiry_date:2026-09-15T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4808.5333
+front_end_load_amount:1840.0
+net_investment_amount:90160.0
+annual_management_fee_amount:1307.32
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372336
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801451
+calculated_risk_profile:Conservative
+risk_profile_expiry_date:2027-01-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:4872.996
+front_end_load_amount:367.5
+net_investment_amount:48632.5
+annual_management_fee_amount:316.11
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:371987
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+transaction_id:INV_2025041801452
+calculated_risk_profile:Aggressive
+risk_profile_expiry_date:2026-12-08T00:00:00Z
+investable_status:Active
+suitability_check_passed:True
+suitability_mismatch_flag:False
+pre_trade_compliance_passed:True
+funds_availability_verified:True
+estimated_units:2811.3803
+front_end_load_amount:1952.5
+net_investment_amount:69047.5
+annual_management_fee_amount:1346.43
+trade_reference_number:TRF_20260101215545
+contract_note_number:
+transaction_status:Executed
+execution_timestamp:2026-01-01T21:55:45Z
+settlement_date:2026-01-02
+straight_through_processing_flag:True
+compliance_defect_flag:False
+compliance_review_notes:All compliance requirements met
+supervisor_approval_timestamp:
+total_processing_time_minutes:372192
+final_result:FalseNoneNo_Deficiencies_FoundAll compliance requirements met
+verification_result:Transaction Successfully Executed
+processing_efficiency_rating:Below_Target
+
+================================================================================
+PROCESSING COMPLETE
+================================================================================

@@ -1,0 +1,1505 @@
+```python
+<code>
+import json
+import re
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Union
+from pydantic import BaseModel, Field
+from langchain.tools import StructuredTool
+
+# Global data storage - maintain application records
+APPLICATION_DATA = []
+
+def parse_data_entry(entry: List[str]) -> Dict[str, Any]:
+    """Parse a data entry list into a dictionary"""
+    data_dict = {}
+    for item in entry:
+        if ':' in item:
+            key, value = item.split(':', 1)
+            # Handle empty values
+            if value == '':
+                data_dict[key] = None
+            # Handle boolean values
+            elif value in ['True', 'False']:
+                data_dict[key] = value == 'True'
+            # Handle array values
+            elif value.startswith('['):
+                try:
+                    data_dict[key] = json.loads(value.replace("'", '"'))
+                except:
+                    data_dict[key] = []
+            # Handle numeric values
+            else:
+                try:
+                    # Try integer first
+                    if '.' not in value:
+                        data_dict[key] = int(value)
+                    else:
+                        data_dict[key] = float(value)
+                except:
+                    data_dict[key] = value
+    return data_dict
+
+def initialize_data(raw_data: List[List[str]]):
+    """Initialize the APPLICATION_DATA from raw data"""
+    global APPLICATION_DATA
+    APPLICATION_DATA = [parse_data_entry(entry) for entry in raw_data]
+
+def get_application_by_id(application_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieve application data by application_id"""
+    for app in APPLICATION_DATA:
+        if app.get('application_id') == application_id:
+            return app
+    return None
+
+def update_application_data(application_id: str, updates: Dict[str, Any]):
+    """Update application data with new fields"""
+    app = get_application_by_id(application_id)
+    if app:
+        app.update(updates)
+
+def calculate_timestamp_diff_seconds(start_ts: str, end_ts: str) -> int:
+    """Calculate difference between two ISO 8601 timestamps in seconds"""
+    start = datetime.fromisoformat(start_ts.replace('Z', '+00:00'))
+    end = datetime.fromisoformat(end_ts.replace('Z', '+00:00'))
+    return int((end - start).total_seconds())
+
+def add_business_days(start_date: datetime, days: int) -> str:
+    """Add business days to a date (excluding weekends)"""
+    current = start_date
+    added = 0
+    while added < days:
+        current += timedelta(days=1)
+        # Skip weekends (5=Saturday, 6=Sunday)
+        if current.weekday() < 5:
+            added += 1
+    return current.strftime('%Y-%m-%d')
+
+
+# ============================================================================
+# API FUNCTION IMPLEMENTATIONS
+# ============================================================================
+
+def ValidateApplicationData(
+    application_id: str,
+    application_timestamp: str,
+    application_channel: str,
+    business_type: str,
+    product_type: str,
+    applicant_id: str,
+    applicant_age: int,
+    applicant_employment_status: str,
+    applicant_annual_income: float,
+    applicant_housing_status: str,
+    applicant_monthly_housing_cost: float,
+    applicant_years_at_address: int,
+    applicant_years_employed: int,
+    business_entity_name: Optional[str] = None,
+    business_tin_ein: Optional[str] = None,
+    business_incorporation_date: Optional[str] = None,
+    business_annual_revenue: Optional[float] = None,
+    business_industry_code: Optional[str] = None,
+    guarantor_personal_income: Optional[float] = None,
+    security_deposit_amount: Optional[float] = None,
+    deposit_verification_status: Optional[str] = None,
+    deposit_account_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """Performs comprehensive data quality validation on credit card applications"""
+    
+    validation_status = True
+    validation_errors = []
+    fraud_alert_flags = []
+    
+    # Null checks for mandatory fields
+    if not all([application_id, application_timestamp, application_channel, business_type, 
+                product_type, applicant_id]):
+        validation_status = False
+        validation_errors.append("Missing mandatory fields")
+    
+    # Age validation (18-110)
+    if not (18 <= applicant_age <= 110):
+        validation_status = False
+        validation_errors.append(f"Applicant age {applicant_age} outside valid range 18-110")
+    
+    # Income validation ($10,000-$15,000,000)
+    if not (10000 <= applicant_annual_income <= 15000000):
+        validation_status = False
+        validation_errors.append(f"Annual income ${applicant_annual_income} outside valid range $10,000-$15,000,000")
+    
+    # Years employed validation (cannot exceed age-16)
+    if applicant_years_employed > (applicant_age - 16):
+        validation_status = False
+        validation_errors.append(f"Years employed {applicant_years_employed} exceeds age-16 = {applicant_age-16}")
+    
+    # Housing cost validation (should not exceed 50% of monthly income)
+    monthly_income = applicant_annual_income / 12
+    if applicant_monthly_housing_cost > (monthly_income * 0.50):
+        fraud_alert_flags.append("address_mismatch")
+        validation_errors.append(f"Housing cost ${applicant_monthly_housing_cost} exceeds 50% of monthly income ${monthly_income}")
+    
+    # Years at address validation (cannot exceed age)
+    if applicant_years_at_address > applicant_age:
+        validation_status = False
+        validation_errors.append(f"Years at address {applicant_years_at_address} exceeds age {applicant_age}")
+    
+    # Business type specific validations
+    if business_type in ['small_business', 'corporate']:
+        if not business_entity_name or not business_tin_ein or not business_annual_revenue:
+            validation_status = False
+            validation_errors.append("Business applications require entity name, TIN/EIN, and revenue")
+        
+        if business_tin_ein and not re.match(r'^\d{2}-\d{7}$', business_tin_ein):
+            validation_status = False
+            validation_errors.append(f"Invalid TIN/EIN format: {business_tin_ein}")
+    
+    if business_type == 'secured':
+        if not security_deposit_amount or not deposit_verification_status or not deposit_account_id:
+            validation_status = False
+            validation_errors.append("Secured applications require deposit amount, verification status, and account ID")
+    
+    # Set processing start timestamp
+    processing_start_timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    result = {
+        "application_id": application_id,
+        "validation_status": validation_status,
+        "validation_errors": validation_errors,
+        "fraud_alert_flags": fraud_alert_flags,
+        "processing_start_timestamp": processing_start_timestamp
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "validation_status": validation_status,
+        "fraud_alert_flags": fraud_alert_flags,
+        "processing_start_timestamp": processing_start_timestamp
+    })
+    
+    return result
+
+
+def VerifyIdentity(
+    application_id: str,
+    applicant_id: str,
+    applicant_age: int,
+    device_fingerprint_id: str,
+    ip_address_location: str,
+    fraud_alert_flags: List[str]
+) -> Dict[str, Any]:
+    """Executes multi-layered identity verification per USA PATRIOT Act Section 326"""
+    
+    # Determine verification method based on fraud indicators
+    identity_verification_method = "government_database"
+    confidence_score = 100
+    
+    # Check for fraud alerts requiring step-up authentication
+    if fraud_alert_flags and len(fraud_alert_flags) > 0:
+        if any(flag in ['confirmed_synthetic_identity', 'device_linked_to_prior_fraud'] 
+               for flag in fraud_alert_flags):
+            identity_verification_method = "biometric"
+            confidence_score = 85
+        elif any(flag in ['address_mismatch', 'velocity_anomaly', 'device_fingerprint_suspicious'] 
+                 for flag in fraud_alert_flags):
+            identity_verification_method = "kba"
+            confidence_score = 90
+    
+    # Thin file or age inconsistency checks
+    app = get_application_by_id(application_id)
+    if app and app.get('credit_score', 0) == 0:
+        identity_verification_method = "document_scan"
+        confidence_score = 80
+    
+    identity_verification_timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    result = {
+        "application_id": application_id,
+        "identity_verification_method": identity_verification_method,
+        "identity_verification_timestamp": identity_verification_timestamp,
+        "confidence_score": confidence_score
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "identity_verification_method": identity_verification_method,
+        "identity_verification_timestamp": identity_verification_timestamp
+    })
+    
+    return result
+
+
+def ScreenSanctionsWatchlist(
+    application_id: str,
+    applicant_id: str,
+    identity_verification_method: str,
+    business_entity_name: Optional[str] = None
+) -> Dict[str, Any]:
+    """Screens applicant against OFAC SDN list and consolidated sanctions lists"""
+    
+    # Only proceed if identity verification succeeded
+    if identity_verification_method == "failed":
+        return {
+            "application_id": application_id,
+            "watchlist_check_result": "not_performed",
+            "message": "Identity verification failed, sanctions screening not performed"
+        }
+    
+    # Simulate sanctions screening - in real implementation would call OFAC API
+    # For this simulation, check if application already has a watchlist result
+    app = get_application_by_id(application_id)
+    watchlist_check_result = app.get('watchlist_check_result', 'clear')
+    
+    # Calculate confidence score based on match result
+    if watchlist_check_result == 'clear':
+        confidence_score = 5  # Low score = no match
+    elif watchlist_check_result == 'potential_match':
+        confidence_score = 85  # Requires manual review
+    elif watchlist_check_result == 'confirmed_match':
+        confidence_score = 98  # High confidence match
+    else:
+        confidence_score = 5
+        watchlist_check_result = 'clear'
+    
+    result = {
+        "application_id": application_id,
+        "watchlist_check_result": watchlist_check_result,
+        "confidence_score": confidence_score
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "watchlist_check_result": watchlist_check_result
+    })
+    
+    return result
+
+
+def DetectFraudIndicators(
+    application_id: str,
+    watchlist_check_result: str,
+    device_fingerprint_id: str,
+    ip_address_location: str,
+    fraud_alert_flags: List[str]
+) -> Dict[str, Any]:
+    """Analyzes application for fraud risk patterns using multi-factor detection logic"""
+    
+    # Only proceed if sanctions check is clear or false positive
+    if watchlist_check_result == 'confirmed_match':
+        return {
+            "application_id": application_id,
+            "fraud_risk_level": "not_applicable",
+            "message": "Application declined due to sanctions match"
+        }
+    
+    # Analyze fraud indicators
+    updated_fraud_flags = list(fraud_alert_flags) if fraud_alert_flags else []
+    
+    # Check for high-severity fraud patterns
+    high_severity_flags = ['confirmed_synthetic_identity', 'device_linked_to_prior_fraud']
+    medium_severity_flags = ['address_mismatch', 'velocity_anomaly', 'device_fingerprint_suspicious']
+    
+    has_high_severity = any(flag in high_severity_flags for flag in updated_fraud_flags)
+    has_medium_severity = any(flag in medium_severity_flags for flag in updated_fraud_flags)
+    
+    # Determine fraud risk level
+    if has_high_severity:
+        fraud_risk_level = "high"
+    elif has_medium_severity:
+        fraud_risk_level = "medium"
+    else:
+        fraud_risk_level = "low"
+    
+    result = {
+        "application_id": application_id,
+        "fraud_risk_level": fraud_risk_level,
+        "fraud_alert_flags": updated_fraud_flags
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "fraud_risk_level": fraud_risk_level,
+        "fraud_alert_flags": updated_fraud_flags
+    })
+    
+    return result
+
+
+def RetrieveCreditBureauData(
+    application_id: str,
+    applicant_id: str,
+    business_type: str,
+    fraud_risk_level: str,
+    business_tin_ein: Optional[str] = None
+) -> Dict[str, Any]:
+    """Executes hard inquiry to credit bureaus based on business type"""
+    
+    # Only proceed for low or cleared medium risk applications
+    if fraud_risk_level == "high":
+        return {
+            "application_id": application_id,
+            "credit_bureau_inquiry_status": "not_performed",
+            "message": "High fraud risk - credit inquiry not performed"
+        }
+    
+    # Retrieve credit data from stored application
+    app = get_application_by_id(application_id)
+    if not app:
+        return {
+            "application_id": application_id,
+            "error": "Application not found"
+        }
+    
+    credit_bureau_inquiry_timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    
+    # For business applications, use business credit score scale (0-100)
+    # For retail/secured, use consumer credit score (300-850)
+    if business_type in ['small_business', 'corporate']:
+        credit_bureau_source = app.get('credit_bureau_source', 'dnb_commercial')
+    else:
+        credit_bureau_source = app.get('credit_bureau_source', 'experian')
+    
+    result = {
+        "application_id": application_id,
+        "credit_bureau_inquiry_timestamp": credit_bureau_inquiry_timestamp,
+        "credit_bureau_source": credit_bureau_source,
+        "credit_score": app.get('credit_score', 0),
+        "credit_utilization_ratio": app.get('credit_utilization_ratio', 0.0),
+        "number_of_open_accounts": app.get('number_of_open_accounts', 0),
+        "number_of_delinquent_accounts": app.get('number_of_delinquent_accounts', 0),
+        "total_outstanding_debt": app.get('total_outstanding_debt', 0.0),
+        "bankruptcy_flag": app.get('bankruptcy_flag', False),
+        "foreclosure_flag": app.get('foreclosure_flag', False),
+        "months_since_last_delinquency": app.get('months_since_last_delinquency')
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "credit_bureau_inquiry_timestamp": credit_bureau_inquiry_timestamp
+    })
+    
+    return result
+
+
+def CalculateDebtToIncomeRatio(
+    application_id: str,
+    business_type: str,
+    applicant_annual_income: float,
+    applicant_monthly_housing_cost: float,
+    total_outstanding_debt: float,
+    business_annual_revenue: Optional[float] = None,
+    guarantor_personal_income: Optional[float] = None
+) -> Dict[str, Any]:
+    """Computes debt-to-income ratio as primary measure of ability to service credit"""
+    
+    monthly_income = applicant_annual_income / 12
+    
+    # Estimate monthly debt obligations
+    # Revolving debt: 2% of balance minimum payment
+    # Installment debt: estimate using 48-month amortization
+    estimated_monthly_debt = total_outstanding_debt * 0.02
+    
+    # Add housing cost
+    total_monthly_debt_obligations = estimated_monthly_debt + applicant_monthly_housing_cost
+    
+    # Calculate DTI ratio
+    if monthly_income > 0:
+        debt_to_income_ratio = total_monthly_debt_obligations / monthly_income
+    else:
+        debt_to_income_ratio = 999.99  # Invalid income
+    
+    # For business applications, calculate dual metrics
+    if business_type in ['small_business', 'corporate'] and business_annual_revenue:
+        monthly_business_revenue = business_annual_revenue / 12
+        # Assume 20% profit margin for general business
+        monthly_business_cashflow = monthly_business_revenue * 0.20
+        business_debt_service_coverage = monthly_business_cashflow / max(estimated_monthly_debt, 1)
+        
+        # Calculate guarantor DTI if provided
+        guarantor_dti = None
+        if guarantor_personal_income:
+            guarantor_monthly_income = guarantor_personal_income / 12
+            guarantor_dti = total_monthly_debt_obligations / guarantor_monthly_income
+    else:
+        business_debt_service_coverage = None
+        guarantor_dti = None
+    
+    result = {
+        "application_id": application_id,
+        "debt_to_income_ratio": round(debt_to_income_ratio, 4),
+        "monthly_debt_obligations": round(total_monthly_debt_obligations, 2),
+        "monthly_income": round(monthly_income, 2),
+        "business_debt_service_coverage": round(business_debt_service_coverage, 2) if business_debt_service_coverage else None,
+        "guarantor_dti": round(guarantor_dti, 4) if guarantor_dti else None
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "debt_to_income_ratio": round(debt_to_income_ratio, 4),
+        "monthly_debt_obligations": round(total_monthly_debt_obligations, 2)
+    })
+    
+    return result
+
+
+def EvaluateCreditScorecard(
+    application_id: str,
+    business_type: str,
+    credit_score: int,
+    credit_utilization_ratio: float,
+    debt_to_income_ratio: float,
+    number_of_open_accounts: int,
+    number_of_delinquent_accounts: int,
+    bankruptcy_flag: bool,
+    applicant_years_employed: int,
+    applicant_years_at_address: int,
+    months_since_last_delinquency: Optional[int] = None
+) -> Dict[str, Any]:
+    """Executes proprietary credit scorecard model to predict default probability"""
+    
+    internal_risk_score = 0
+    scorecard_reason_codes = []
+    
+    # Credit score points (0-300)
+    if credit_score >= 800:
+        score_points = 300
+    elif credit_score >= 780:
+        score_points = 285
+    elif credit_score >= 760:
+        score_points = 270
+    elif credit_score >= 740:
+        score_points = 255
+    elif credit_score >= 720:
+        score_points = 240
+    elif credit_score >= 700:
+        score_points = 225
+    elif credit_score >= 680:
+        score_points = 210
+    elif credit_score >= 660:
+        score_points = 195
+    elif credit_score >= 640:
+        score_points = 180
+    elif credit_score >= 620:
+        score_points = 165
+    elif credit_score >= 600:
+        score_points = 150
+    elif credit_score > 0:
+        score_points = 100
+    else:  # Thin file
+        score_points = 50
+        scorecard_reason_codes.append("Insufficient credit history")
+    
+    internal_risk_score += score_points
+    
+    # Credit utilization points (0-150)
+    if credit_utilization_ratio < 0.10:
+        util_points = 150
+    elif credit_utilization_ratio < 0.30:
+        util_points = 135
+    elif credit_utilization_ratio < 0.50:
+        util_points = 110
+    elif credit_utilization_ratio < 0.75:
+        util_points = 75
+    else:
+        util_points = 30
+        scorecard_reason_codes.append("Proportion of balances to credit limits too high on revolving accounts")
+    
+    internal_risk_score += util_points
+    
+    # DTI points (0-150)
+    if debt_to_income_ratio < 0.20:
+        dti_points = 150
+    elif debt_to_income_ratio < 0.35:
+        dti_points = 125
+    elif debt_to_income_ratio <= 0.43:
+        dti_points = 90
+    elif debt_to_income_ratio <= 0.50:
+        dti_points = 50
+    else:
+        dti_points = 0
+        scorecard_reason_codes.append("Debt-to-income ratio too high")
+    
+    internal_risk_score += dti_points
+    
+    # Delinquent accounts points (0-100)
+    if number_of_delinquent_accounts == 0:
+        delinq_points = 100
+    elif number_of_delinquent_accounts == 1:
+        delinq_points = 40
+        scorecard_reason_codes.append("Recent delinquencies on credit obligations")
+    else:
+        delinq_points = 0
+        scorecard_reason_codes.append("Multiple recent delinquencies on credit obligations")
+    
+    internal_risk_score += delinq_points
+    
+    # Months since last delinquency points (0-100)
+    if months_since_last_delinquency is None:
+        months_delinq_points = 100
+    elif months_since_last_delinquency >= 24:
+        months_delinq_points = 100
+    elif months_since_last_delinquency >= 12:
+        months_delinq_points = 60
+    elif months_since_last_delinquency >= 6:
+        months_delinq_points = 20
+    else:
+        months_delinq_points = 0
+        if "Recent delinquencies" not in str(scorecard_reason_codes):
+            scorecard_reason_codes.append("Recent delinquencies on credit obligations")
+    
+    internal_risk_score += months_delinq_points
+    
+    # Bankruptcy flag (0-100)
+    if not bankruptcy_flag:
+        bankruptcy_points = 100
+    else:
+        bankruptcy_points = 0
+        scorecard_reason_codes.append("Serious delinquency or public record/collection filed")
+    
+    internal_risk_score += bankruptcy_points
+    
+    # Years employed points (0-50)
+    if applicant_years_employed >= 5:
+        employed_points = 50
+    elif applicant_years_employed >= 2:
+        employed_points = 35
+    elif applicant_years_employed >= 1:
+        employed_points = 20
+    else:
+        employed_points = 5
+        scorecard_reason_codes.append("Limited employment history")
+    
+    internal_risk_score += employed_points
+    
+    # Years at address points (0-50)
+    if applicant_years_at_address >= 5:
+        address_points = 50
+    elif applicant_years_at_address >= 2:
+        address_points = 35
+    elif applicant_years_at_address >= 1:
+        address_points = 20
+    else:
+        address_points = 5
+        scorecard_reason_codes.append("Limited residential stability")
+    
+    internal_risk_score += address_points
+    
+    # Number of open accounts (0-40)
+    if number_of_open_accounts >= 8:
+        accounts_points = 40
+    elif number_of_open_accounts >= 5:
+        accounts_points = 35
+    elif number_of_open_accounts >= 3:
+        accounts_points = 25
+    elif number_of_open_accounts >= 1:
+        accounts_points = 15
+    else:
+        accounts_points = 5
+    
+    internal_risk_score += accounts_points
+    
+    # Limit to top 4 reason codes
+    scorecard_reason_codes = scorecard_reason_codes[:4]
+    
+    result = {
+        "application_id": application_id,
+        "internal_risk_score": internal_risk_score,
+        "scorecard_reason_codes": scorecard_reason_codes,
+        "scorecard_version": "v2025.1"
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "internal_risk_score": internal_risk_score,
+        "scorecard_reason_codes": scorecard_reason_codes
+    })
+    
+    return result
+
+
+def DetermineCreditDecision(
+    application_id: str,
+    business_type: str,
+    product_type: str,
+    internal_risk_score: int,
+    scorecard_reason_codes: List[str],
+    watchlist_check_result: str,
+    identity_verification_method: str,
+    bankruptcy_flag: bool,
+    fraud_alert_flags: List[str],
+    applicant_annual_income: float,
+    business_industry_code: Optional[str] = None
+) -> Dict[str, Any]:
+    """Applies hierarchical decision rule logic to render final credit decision"""
+    
+    final_decision = "approved"
+    decline_reason_code = None
+    manual_review_required = False
+    manual_review_reason = None
+    
+    # Knockout Rule 1: Sanctions match
+    if watchlist_check_result == 'confirmed_match':
+        final_decision = "declined"
+        decline_reason_code = "SANCTIONS_MATCH"
+        return {
+            "application_id": application_id,
+            "final_decision": final_decision,
+            "decline_reason_code": decline_reason_code,
+            "manual_review_required": False
+        }
+    
+    # Knockout Rule 2: Identity verification failed
+    if identity_verification_method == 'failed':
+        final_decision = "declined"
+        decline_reason_code = "IDENTITY_VERIFICATION_FAILURE"
+    
+    # Knockout Rule 3: High-severity fraud
+    elif any(flag in ['confirmed_synthetic_identity', 'device_linked_to_prior_fraud'] 
+             for flag in fraud_alert_flags):
+        final_decision = "declined"
+        decline_reason_code = "ACTIVE_FRAUD_ALERT"
+    
+    # Knockout Rule 4: Prohibited industry (for business applications)
+    elif business_type in ['small_business', 'corporate'] and business_industry_code:
+        prohibited_naics = ['111998', '522320', '332994', '512199']
+        if business_industry_code in prohibited_naics:
+            final_decision = "declined"
+            decline_reason_code = "PROHIBITED_INDUSTRY"
+    
+    # Knockout Rule 5: Insufficient minimum income
+    elif applicant_annual_income < 10000:
+        final_decision = "declined"
+        decline_reason_code = "INSUFFICIENT_INCOME"
+    
+    # Knockout Rule 6: Recent bankruptcy (within 24 months)
+    elif bankruptcy_flag:
+        # Simplified: decline all bankruptcies
+        final_decision = "declined"
+        decline_reason_code = "RECENT_BANKRUPTCY"
+    
+    # Score-based decisioning if passed knockout rules
+    if final_decision == "approved":
+        # Determine product-specific thresholds
+        if product_type in ['Rewards Platinum', 'Cashback Gold']:
+            auto_approve_threshold = 650
+            manual_review_floor = 500
+        elif product_type == 'Business Expense Card':
+            auto_approve_threshold = 550
+            manual_review_floor = 400
+        elif product_type == 'Secured Builder Card':
+            auto_approve_threshold = 400
+            manual_review_floor = 300
+        else:  # Low Interest Silver and others
+            auto_approve_threshold = 550
+            manual_review_floor = 400
+        
+        if internal_risk_score >= auto_approve_threshold:
+            final_decision = "approved"
+        elif internal_risk_score >= manual_review_floor:
+            final_decision = "pending_manual_review"
+            manual_review_required = True
+            manual_review_reason = "Credit score in indeterminate zone requiring underwriter evaluation"
+        else:
+            final_decision = "declined"
+            decline_reason_code = scorecard_reason_codes[0] if scorecard_reason_codes else "INSUFFICIENT_CREDIT_SCORE"
+    
+    # Check for OFAC potential match requiring manual review
+    if watchlist_check_result == 'potential_match':
+        final_decision = "pending_manual_review"
+        manual_review_required = True
+        manual_review_reason = "OFAC potential match review"
+    
+    # Check for medium-severity fraud flags requiring manual review
+    if any(flag in ['address_mismatch', 'velocity_anomaly', 'device_fingerprint_suspicious'] 
+           for flag in fraud_alert_flags):
+        if not manual_review_required:
+            final_decision = "pending_manual_review"
+            manual_review_required = True
+            manual_review_reason = "Fraud alert investigation"
+    
+    result = {
+        "application_id": application_id,
+        "final_decision": final_decision,
+        "decline_reason_code": decline_reason_code,
+        "manual_review_required": manual_review_required,
+        "manual_review_reason": manual_review_reason
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "final_decision": final_decision,
+        "decline_reason_code": decline_reason_code,
+        "manual_review_required": manual_review_required,
+        "manual_review_reason": manual_review_reason
+    })
+    
+    return result
+
+
+def AssignCreditTerms(
+    application_id: str,
+    final_decision: str,
+    business_type: str,
+    product_type: str,
+    internal_risk_score: int,
+    applicant_annual_income: float,
+    business_annual_revenue: Optional[float] = None,
+    security_deposit_amount: Optional[float] = None,
+    deposit_verification_status: Optional[str] = None
+) -> Dict[str, Any]:
+    """Calculates approved credit limit and APR for approved applications"""
+    
+    # Only execute for approved applications
+    if final_decision != "approved":
+        return {
+            "application_id": application_id,
+            "message": "Credit terms not assigned - application not approved"
+        }
+    
+    approved_credit_limit = 0
+    assigned_apr = 0.0
+    credit_limit_to_deposit_ratio = None
+    cardholder_limit_distribution = None
+    
+    # Credit limit assignment based on business type
+    if business_type == 'secured':
+        # Secured cards: limit = deposit × LTV (typically 1.00)
+        if deposit_verification_status == 'verified' and security_deposit_amount:
+            approved_credit_limit = security_deposit_amount * 1.00
+            credit_limit_to_deposit_ratio = 1.00
+        else:
+            return {
+                "application_id": application_id,
+                "message": "Deposit not verified - credit terms pending"
+            }
+    
+    elif business_type in ['small_business', 'corporate']:
+        # Business cards: use business revenue affordability
+        if business_annual_revenue:
+            revenue_based_limit = business_annual_revenue * 0.10
+        else:
+            revenue_based_limit = 50000
+        
+        # Score-based ranges for business
+        if internal_risk_score >= 800:
+            score_based_limit = 75000
+        elif internal_risk_score >= 700:
+            score_based_limit = 37500
+        elif internal_risk_score >= 600:
+            score_based_limit = 17500
+        else:
+            score_based_limit = 10000
+        
+        approved_credit_limit = min(score_based_limit, revenue_based_limit)
+        
+        # Cardholder distribution for business cards
+        cardholder_limit_distribution = {
+            "total_line": approved_credit_limit,
+            "per_card_limit": approved_credit_limit / 10,
+            "max_cards": 20
+        }
+    
+    else:  # Retail
+        # Score-based ranges for retail
+        if internal_risk_score >= 800:
+            score_based_limit = 20000
+        elif internal_risk_score >= 750:
+            score_based_limit = 12500
+        elif internal_risk_score >= 700:
+            score_based_limit = 8500
+        elif internal_risk_score >= 650:
+            score_based_limit = 6000
+        elif internal_risk_score >= 600:
+            score_based_limit = 4000
+        else:
+            score_based_limit = 2000
+        
+        # Income-based affordability (20% of annual income)
+        income_based_limit = applicant_annual_income * 0.20
+        
+        # Take lesser of score-based and income-based
+        approved_credit_limit = min(score_based_limit, income_based_limit)
+        
+        # Product minimums
+        if product_type in ['Rewards Platinum']:
+            approved_credit_limit = max(approved_credit_limit, 5000)
+    
+    # APR assignment based on risk score
+    if internal_risk_score >= 800:
+        base_apr = 0.1399
+    elif internal_risk_score >= 750:
+        base_apr = 0.1599
+    elif internal_risk_score >= 700:
+        base_apr = 0.1799
+    elif internal_risk_score >= 650:
+        base_apr = 0.1999
+    elif internal_risk_score >= 600:
+        base_apr = 0.2299
+    else:
+        base_apr = 0.2599
+    
+    # Product adjustments
+    if 'Low Interest' in product_type:
+        assigned_apr = base_apr - 0.02
+    elif 'Rewards' in product_type or 'Cashback' in product_type:
+        assigned_apr = base_apr + 0.01
+    else:
+        assigned_apr = base_apr
+    
+    # Ensure APR within bounds
+    assigned_apr = max(0.1399, min(assigned_apr, 0.2599))
+    
+    # Round values
+    approved_credit_limit = round(approved_credit_limit, 2)
+    assigned_apr = round(assigned_apr, 4)
+    
+    result = {
+        "application_id": application_id,
+        "approved_credit_limit": approved_credit_limit,
+        "assigned_apr": assigned_apr,
+        "credit_limit_to_deposit_ratio": credit_limit_to_deposit_ratio,
+        "cardholder_limit_distribution": cardholder_limit_distribution
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "approved_credit_limit": approved_credit_limit,
+        "assigned_apr": assigned_apr,
+        "credit_limit_to_deposit_ratio": credit_limit_to_deposit_ratio,
+        "cardholder_limit_distribution": cardholder_limit_distribution
+    })
+    
+    return result
+
+
+def GenerateAdverseActionNotice(
+    application_id: str,
+    final_decision: str,
+    decline_reason_code: Optional[str],
+    applicant_id: str,
+    credit_bureau_source: str,
+    application_timestamp: str
+) -> Dict[str, Any]:
+    """Produces FCRA and ECOA compliant adverse action notices"""
+    
+    # Generate notice for declined applications
+    if final_decision != "declined":
+        # Check if less favorable terms (would need additional logic in real implementation)
+        return {
+            "application_id": application_id,
+            "adverse_action_letter_generated": False,
+            "message": "No adverse action notice required for approved application"
+        }
+    
+    # Map bureau source to contact information
+    bureau_contact_info = {
+        "experian": {
+            "name": "Experian Information Solutions, Inc.",
+            "address": "P.O. Box 9595, Allen TX 75013",
+            "phone": "888-397-3742"
+        },
+        "transunion": {
+            "name": "TransUnion LLC",
+            "address": "P.O. Box 2000, Chester PA 19016",
+            "phone": "800-888-4213"
+        },
+        "equifax": {
+            "name": "Equifax Information Services LLC",
+            "address": "P.O. Box 740241, Atlanta GA 30374",
+            "phone": "800-685-1111"
+        },
+        "dnb_commercial": {
+            "name": "Dun & Bradstreet",
+            "address": "103 JFK Parkway, Short Hills NJ 07078",
+            "phone": "800-234-3867"
+        }
+    }
+    
+    bureau_info = bureau_contact_info.get(credit_bureau_source, bureau_contact_info["experian"])
+    
+    # Translate decline reason code to consumer-friendly language
+    reason_translations = {
+        "SANCTIONS_MATCH": "Regulatory restriction",
+        "IDENTITY_VERIFICATION_FAILURE": "Unable to verify identity",
+        "ACTIVE_FRAUD_ALERT": "Fraud prevention measures",
+        "PROHIBITED_INDUSTRY": "Business type not eligible",
+        "INSUFFICIENT_INCOME": "Income insufficient for credit requested",
+        "RECENT_BANKRUPTCY": "Serious delinquency or public record filed",
+        "INSUFFICIENT_CREDIT_SCORE": "Credit score did not meet minimum requirements for approval",
+        "EXCESSIVE_DEBT_TO_INCOME": "Debt obligations too high relative to income"
+    }
+    
+    principal_reason = reason_translations.get(decline_reason_code, "Credit evaluation criteria not met")
+    
+    # Calculate regulatory deadline (30 days from application)
+    app_date = datetime.fromisoformat(application_timestamp.replace('Z', '+00:00'))
+    regulatory_deadline = (app_date + timedelta(days=30)).strftime('%Y-%m-%d')
+    
+    # Generate adverse action letter
+    adverse_action_letter_id = f"AAL_{application_id}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    
+    letter_content = {
+        "letter_id": adverse_action_letter_id,
+        "applicant_id": applicant_id,
+        "application_id": application_id,
+        "decision": "DECLINED",
+        "principal_reasons": [principal_reason],
+        "credit_bureau": bureau_info,
+        "regulatory_deadline": regulatory_deadline,
+        "generation_timestamp": datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    }
+    
+    result = {
+        "application_id": application_id,
+        "adverse_action_letter_generated": True,
+        "adverse_action_letter_id": adverse_action_letter_id,
+        "letter_content": letter_content,
+        "regulatory_deadline": regulatory_deadline
+    }
+    
+    # Update application data
+    update_application_data(application_id, {
+        "adverse_action_letter_generated": True,
+        "adverse_action_letter_id": adverse_action_letter_id
+    })
+    
+    return result
+
+
+def FinalizeApplicationOutputs(
+    application_id: str,
+    processing_start_timestamp: str,
+    final_decision: str,
+    adverse_action_letter_generated: bool,
+    manual_review_required: bool,
+    fraud_alert_flags: List[str],
+    uploaded_documents: List[Dict[str, str]],
+    approved_credit_limit: Optional[float] = None,
+    assigned_apr: Optional[float] = None,
+    underwriter_id: Optional[str] = None,
+    deposit_verification_status: Optional[str] = None
+) -> Dict[str, Any]:
+    """Consolidates all output fields to complete application processing lifecycle"""
+    
+    # Calculate turnaround time
+    processing_end_timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    turnaround_time_seconds = calculate_timestamp_diff_seconds(
+        processing_start_timestamp, 
+        processing_end_timestamp
+    )
+    
+    # Set auto-decision flag
+    auto_decision_flag = not manual_review_required and underwriter_id is None
+    
+    # Determine account activation eligibility
+    account_activation_eligible = False
+    activation_blockers = []
+    
+    if final_decision == "approved":
+        # Check prerequisites
+        if approved_credit_limit is None or approved_credit_limit <= 0:
+            activation_blockers.append("CREDIT_LIMIT_NOT_ASSIGNED")
+        
+        if assigned_apr is None:
+            activation_blockers.append("APR_NOT_ASSIGNED")
+        
+        # Check for secured card deposit verification
+        app = get_application_by_id(application_id)
+        if app and app.get('business_type') == 'secured':
+            if deposit_verification_status != 'verified':
+                activation_blockers.append("DEPOSIT_VERIFICATION_PENDING")
+        
+        # Check for fraud holds
+        high_severity_fraud = any(flag in ['confirmed_synthetic_identity', 'device_linked_to_prior_fraud'] 
+                                  for flag in fraud_alert_flags)
+        if high_severity_fraud:
+            activation_blockers.append("FRAUD_HOLD")
+        
+        # Check for required documents if manual review
+        if manual_review_required and app:
+            manual_review_reason = app.get('manual_review_reason', '')
+            if 'Income verification' in manual_review_reason:
+                has_income_doc = any(doc.get('doc_type') in ['pay_stub', 'tax_return', 'bank_statement'] 
+                                    for doc in uploaded_documents)
+                if not has_income_doc:
+                    activation_blockers.append("MISSING_REQUIRED_DOCUMENTS")
+        
+        # Set eligibility
+        account_activation_eligible = len(activation_blockers) == 0
+    
+    # Calculate estimated card delivery date (7 business days)
+    if account_activation_eligible:
+        current_date = datetime.utcnow()
+        estimated_card_delivery_date = add_business_days(current_date, 7)
+    else:
+        estimated_card_delivery_date = None
+    
+    result = {
+        "application_id": application_id,
+        "processing_end_timestamp": processing_end_timestamp,
+        "turnaround_time_seconds": turnaround_time_seconds,
+        "auto_decision_flag": auto_decision_flag,
+        "account_activation_eligible": account_activation_eligible,
+        "activation_blockers": activation_blockers if not account_activation_eligible else [],
+        "estimated_card_delivery_date": estimated_card_delivery_date
+    }
+    
+    # Update application data with final outputs
+    update_application_data(application_id, {
+        "processing_end_timestamp": processing_end_timestamp,
+        "turnaround_time_seconds": turnaround_time_seconds,
+        "auto_decision_flag": auto_decision_flag,
+        "account_activation_eligible": account_activation_eligible,
+        "estimated_card_delivery_date": estimated_card_delivery_date
+    })
+    
+    return result
+
+
+# ============================================================================
+# PYDANTIC MODELS FOR TOOL SCHEMAS
+# ============================================================================
+
+class Tool_ValidateApplicationData(BaseModel):
+    application_id: str = Field(..., description="Unique immutable identifier for the credit card application")
+    application_timestamp: str = Field(..., description="ISO 8601 formatted timestamp with millisecond precision in UTC")
+    application_channel: str = Field(..., description="Origination source channel for the application")
+    business_type: str = Field(..., description="Primary workflow routing mechanism determining decisioning pathway")
+    product_type: str = Field(..., description="Specific credit card offering identifier")
+    applicant_id: str = Field(..., description="Hashed or encrypted reference to applicant's master customer record")
+    applicant_age: int = Field(..., description="Integer representing applicant's age in years")
+    applicant_employment_status: str = Field(..., description="Current employment classification")
+    applicant_annual_income: float = Field(..., description="Total gross annual income in USD before taxes")
+    applicant_housing_status: str = Field(..., description="Residential ownership status")
+    applicant_monthly_housing_cost: float = Field(..., description="Monthly housing payment in USD")
+    applicant_years_at_address: int = Field(..., description="Duration at current residential address in integer years")
+    applicant_years_employed: int = Field(..., description="Duration with current employer in integer years")
+    business_entity_name: Optional[str] = Field(None, description="Legal name of business entity")
+    business_tin_ein: Optional[str] = Field(None, description="Tax Identification Number or Employer Identification Number")
+    business_incorporation_date: Optional[str] = Field(None, description="Date when business entity was legally formed")
+    business_annual_revenue: Optional[float] = Field(None, description="Declared total gross revenue in USD")
+    business_industry_code: Optional[str] = Field(None, description="Six-digit NAICS code")
+    guarantor_personal_income: Optional[float] = Field(None, description="Personal annual income of guarantor in USD")
+    security_deposit_amount: Optional[float] = Field(None, description="Cash deposit amount in USD for secured card")
+    deposit_verification_status: Optional[str] = Field(None, description="Status of cash deposit verification")
+    deposit_account_id: Optional[str] = Field(None, description="Unique identifier for deposit account")
+
+
+class Tool_VerifyIdentity(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_id: str = Field(..., description="Customer identifier from validated application")
+    applicant_age: int = Field(..., description="Applicant age from validated application")
+    device_fingerprint_id: str = Field(..., description="Unique identifier for device hardware/software configuration")
+    ip_address_location: str = Field(..., description="Geographic location derived from IP geolocation services")
+    fraud_alert_flags: List[str] = Field(..., description="Array of fraud indicator strings")
+
+
+class Tool_ScreenSanctionsWatchlist(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_id: str = Field(..., description="Customer identifier from validated application")
+    identity_verification_method: str = Field(..., description="Verification method successfully completed")
+    business_entity_name: Optional[str] = Field(None, description="Legal business entity name for business applications")
+
+
+class Tool_DetectFraudIndicators(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    watchlist_check_result: str = Field(..., description="Sanctions screening result")
+    device_fingerprint_id: str = Field(..., description="Device identifier from validated application")
+    ip_address_location: str = Field(..., description="Geolocation string from validated application")
+    fraud_alert_flags: List[str] = Field(..., description="Preliminary fraud indicators array")
+
+
+class Tool_RetrieveCreditBureauData(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_id: str = Field(..., description="Customer identifier from validated application")
+    business_type: str = Field(..., description="Application business type from validated data")
+    fraud_risk_level: str = Field(..., description="Fraud risk classification")
+    business_tin_ein: Optional[str] = Field(None, description="Business Tax Identification Number")
+
+
+class Tool_CalculateDebtToIncomeRatio(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    business_type: str = Field(..., description="Application type determining DTI calculation methodology")
+    applicant_annual_income: float = Field(..., description="Gross annual income in USD")
+    applicant_monthly_housing_cost: float = Field(..., description="Monthly housing payment in USD")
+    total_outstanding_debt: float = Field(..., description="Sum of all account balances in USD")
+    business_annual_revenue: Optional[float] = Field(None, description="Gross annual business revenue in USD")
+    guarantor_personal_income: Optional[float] = Field(None, description="Personal annual income of guarantor in USD")
+
+
+class Tool_EvaluateCreditScorecard(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    business_type: str = Field(..., description="Application type determining scorecard selection")
+    credit_score: int = Field(..., description="FICO Score 8 or VantageScore 3.0")
+    credit_utilization_ratio: float = Field(..., description="Decimal ratio of revolving debt usage")
+    debt_to_income_ratio: float = Field(..., description="Decimal DTI from calculation")
+    number_of_open_accounts: int = Field(..., description="Count of active credit accounts")
+    number_of_delinquent_accounts: int = Field(..., description="Count of accounts with late payments")
+    bankruptcy_flag: bool = Field(..., description="Boolean indicating bankruptcy filing")
+    applicant_years_employed: int = Field(..., description="Employment tenure from validated application")
+    applicant_years_at_address: int = Field(..., description="Residential tenure from validated application")
+    months_since_last_delinquency: Optional[int] = Field(None, description="Integer months since most recent late payment")
+
+
+class Tool_DetermineCreditDecision(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    business_type: str = Field(..., description="Application type from validated data")
+    product_type: str = Field(..., description="Specific card product from validated data")
+    internal_risk_score: int = Field(..., description="Proprietary risk score 0-1000")
+    scorecard_reason_codes: List[str] = Field(..., description="Array of reason code strings")
+    watchlist_check_result: str = Field(..., description="OFAC sanctions screening result")
+    identity_verification_method: str = Field(..., description="Successful verification method")
+    bankruptcy_flag: bool = Field(..., description="Boolean from credit bureau data")
+    fraud_alert_flags: List[str] = Field(..., description="Array of fraud indicator strings")
+    applicant_annual_income: float = Field(..., description="Gross annual income from validated application")
+    business_industry_code: Optional[str] = Field(None, description="Six-digit NAICS code")
+
+
+class Tool_AssignCreditTerms(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    final_decision: str = Field(..., description="Credit decision from determination")
+    business_type: str = Field(..., description="Application type determining credit terms methodology")
+    product_type: str = Field(..., description="Specific card product determining constraints")
+    internal_risk_score: int = Field(..., description="Risk score 0-1000")
+    applicant_annual_income: float = Field(..., description="Gross annual income from validated application")
+    business_annual_revenue: Optional[float] = Field(None, description="Gross business revenue")
+    security_deposit_amount: Optional[float] = Field(None, description="Cash collateral deposit")
+    deposit_verification_status: Optional[str] = Field(None, description="Deposit verification status")
+
+
+class Tool_GenerateAdverseActionNotice(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    final_decision: str = Field(..., description="Credit decision from determination")
+    decline_reason_code: Optional[str] = Field(None, description="Primary decline reason code")
+    applicant_id: str = Field(..., description="Customer identifier from validated application")
+    credit_bureau_source: str = Field(..., description="Bureau identifier indicating which credit report was used")
+    application_timestamp: str = Field(..., description="ISO 8601 timestamp marking submission time")
+
+
+class Tool_FinalizeApplicationOutputs(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    processing_start_timestamp: str = Field(..., description="ISO 8601 timestamp marking processing start")
+    final_decision: str = Field(..., description="Credit decision from determination")
+    adverse_action_letter_generated: bool = Field(..., description="Flag indicating adverse action notice was generated")
+    manual_review_required: bool = Field(..., description="Flag indicating manual review routing")
+    fraud_alert_flags: List[str] = Field(..., description="Array of fraud indicator strings")
+    uploaded_documents: List[Dict[str, str]] = Field(..., description="Array of document objects")
+    approved_credit_limit: Optional[float] = Field(None, description="Credit line amount in USD")
+    assigned_apr: Optional[float] = Field(None, description="Annual Percentage Rate as decimal")
+    underwriter_id: Optional[str] = Field(None, description="Unique identifier of credit underwriter")
+    deposit_verification_status: Optional[str] = Field(None, description="Deposit verification status for secured cards")
+
+
+# ============================================================================
+# TOOL ENCAPSULATION
+# ============================================================================
+
+tools = [
+    StructuredTool.from_function(
+        func=ValidateApplicationData,
+        name="ValidateApplicationData",
+        description="Performs comprehensive data quality validation on submitted credit card applications including null checks, format validation, range validation, and cross-field logical consistency checks",
+        args_schema=Tool_ValidateApplicationData
+    ),
+    StructuredTool.from_function(
+        func=VerifyIdentity,
+        name="VerifyIdentity",
+        description="Executes multi-layered Customer Identification Program (CIP) compliant identity verification procedures per USA PATRIOT Act Section 326",
+        args_schema=Tool_VerifyIdentity
+    ),
+    StructuredTool.from_function(
+        func=ScreenSanctionsWatchlist,
+        name="ScreenSanctionsWatchlist",
+        description="Screens applicant name against OFAC Specially Designated Nationals (SDN) list and consolidated sanctions lists",
+        args_schema=Tool_ScreenSanctionsWatchlist
+    ),
+    StructuredTool.from_function(
+        func=DetectFraudIndicators,
+        name="DetectFraudIndicators",
+        description="Analyzes application for fraud risk patterns using multi-factor fraud detection logic",
+        args_schema=Tool_DetectFraudIndicators
+    ),
+    StructuredTool.from_function(
+        func=RetrieveCreditBureauData,
+        name="RetrieveCreditBureauData",
+        description="Executes hard inquiry API calls to credit bureaus with methodology varying by business type",
+        args_schema=Tool_RetrieveCreditBureauData
+    ),
+    StructuredTool.from_function(
+        func=CalculateDebtToIncomeRatio,
+        name="CalculateDebtToIncomeRatio",
+        description="Computes debt-to-income ratio as primary quantitative measure of applicant's ability to service new credit obligations",
+        args_schema=Tool_CalculateDebtToIncomeRatio
+    ),
+    StructuredTool.from_function(
+        func=EvaluateCreditScorecard,
+        name="EvaluateCreditScorecard",
+        description="Executes proprietary credit scorecard model developed through logistic regression to predict probability of default",
+        args_schema=Tool_EvaluateCreditScorecard
+    ),
+    StructuredTool.from_function(
+        func=DetermineCreditDecision,
+        name="DetermineCreditDecision",
+        description="Applies hierarchical decision rule logic to render final binary credit decision (approve/decline/pending)",
+        args_schema=Tool_DetermineCreditDecision
+    ),
+    StructuredTool.from_function(
+        func=AssignCreditTerms,
+        name="AssignCreditTerms",
+        description="Calculates approved credit limit and assigned APR for applications with approved decision using risk-based tiering",
+        args_schema=Tool_AssignCreditTerms
+    ),
+    StructuredTool.from_function(
+        func=GenerateAdverseActionNotice,
+        name="GenerateAdverseActionNotice",
+        description="Produces FCRA Section 615(a) and ECOA Regulation B compliant adverse action notices for declined applications",
+        args_schema=Tool_GenerateAdverseActionNotice
+    ),
+    StructuredTool.from_function(
+        func=FinalizeApplicationOutputs,
+        name="FinalizeApplicationOutputs",
+        description="Consolidates all required output fields to complete application processing lifecycle and determine account activation eligibility",
+        args_schema=Tool_FinalizeApplicationOutputs
+    )
+]
+
+
+# ============================================================================
+# HELPER FUNCTION FOR PROCESSING TOOL CALLS
+# ============================================================================
+
+def process_tool_call(tool_name: str, tool_input: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Process a tool call by routing to the appropriate API function
+    
+    Args:
+        tool_name: Name of the tool/API to call
+        tool_input: Dictionary of input parameters
+        
+    Returns:
+        Dictionary containing the API result
+    """
+    tool_map = {
+        "ValidateApplicationData": ValidateApplicationData,
+        "VerifyIdentity": VerifyIdentity,
+        "ScreenSanctionsWatchlist": ScreenSanctionsWatchlist,
+        "DetectFraudIndicators": DetectFraudIndicators,
+        "RetrieveCreditBureauData": RetrieveCreditBureauData,
+        "CalculateDebtToIncomeRatio": CalculateDebtToIncomeRatio,
+        "EvaluateCreditScorecard": EvaluateCreditScorecard,
+        "DetermineCreditDecision": DetermineCreditDecision,
+        "AssignCreditTerms": AssignCreditTerms,
+        "GenerateAdverseActionNotice": GenerateAdverseActionNotice,
+        "FinalizeApplicationOutputs": FinalizeApplicationOutputs
+    }
+    
+    if tool_name not in tool_map:
+        return {"error": f"Unknown tool: {tool_name}"}
+    
+    try:
+        result = tool_map[tool_name](**tool_input)
+        return result
+    except Exception as e:
+        return {"error": f"Tool execution failed: {str(e)}"}
+
+
+# ============================================================================
+# TEST CASES
+# ============================================================================
+
+if __name__ == "__main__":
+    # Initialize data from sample
+    sample_raw_data = [
+        ['application_id:APP_CC_2025041801234', 'application_timestamp:2025-04-18T10:23:45Z', 'application_channel:mobile_app', 'business_type:retail', 'product_type:Rewards Platinum', 'applicant_id:CUST_789456', 'applicant_age:34', 'applicant_employment_status:employed_full_time', 'applicant_annual_income:75000.00', 'applicant_housing_status:mortgage', 'applicant_monthly_housing_cost:1800.00', 'applicant_years_at_address:3', 'applicant_years_employed:5', 'business_entity_name:', 'business_tin_ein:', 'business_incorporation_date:', 'business_annual_revenue:', 'business_industry_code:', 'guarantor_personal_income:', 'security_deposit_amount:', 'deposit_verification_status:', 'deposit_account_id:', 'identity_verification_method:government_database', 'identity_verification_timestamp:2025-04-18T10:24:12Z', 'watchlist_check_result:clear', 'fraud_alert_flags:[]', 'device_fingerprint_id:DEV_FP_998877', 'ip_address_location:New York, NY, US', 'credit_bureau_inquiry_timestamp:2025-04-18T10:24:30Z', 'credit_bureau_source:experian', 'credit_score:720', 'credit_utilization_ratio:0.32', 'number_of_open_accounts:8', 'number_of_delinquent_accounts:0', 'total_outstanding_debt:25000.00', 'bankruptcy_flag:False', 'foreclosure_flag:False', 'months_since_last_delinquency:', 'uploaded_documents:[{"doc_type": "pay_stub", "doc_id": "DOC_112233", "upload_timestamp": "2025-04-18T10:22:00Z"}]', 'manual_review_required:False', 'manual_review_reason:', 'underwriter_id:', 'processing_start_timestamp:2025-04-18T10:24:35Z', 'processing_end_timestamp:2025-04-18T10:25:02Z', 'debt_to_income_ratio:', 'internal_risk_score:', 'final_decision:', 'decline_reason_code:', 'adverse_action_letter_generated:', 'approved_credit_limit:', 'assigned_apr:', 'credit_limit_to_deposit_ratio:', 'cardholder_limit_distribution:', 'turnaround_time_seconds:', 'auto_decision_flag:', 'account_activation_eligible:', 'estimated_card_delivery_date:']
+    ]
+    
+    initialize_data(sample_raw_data)
+    
+    print("=" * 80)
+    print("CREDIT CARD APPLICATION PROCESSING - TEST CASES")
+    print("=" * 80)
+    
+    # Test Case 1: Full workflow for retail application
+    print("\n[TEST 1] Processing retail application APP_CC_2025041801234")
+    print("-" * 80)
+    
+    app = get_application_by_id("APP_CC_2025041801234")
+    
+    # Step 1: Validate Application
+    print("\n1. ValidateApplicationData")
+    validation_result = ValidateApplicationData(
+        application_id=app['application_id'],
+        application_timestamp=app['application_timestamp'],
+        application_channel=app['application_channel'],
+        business_type=app['business_type'],
+        product_type=app['product_type'],
+        applicant_id=app['applicant_id'],
+        applicant_age=app['applicant_age'],
+        applicant_employment_status=app['applicant_employment_status'],
+        applicant_annual_income=app['applicant_annual_income'],
+        applicant_housing_status=app['applicant_housing_status'],
+        applicant_monthly_housing_cost=app['applicant_monthly_housing_cost'],
+        applicant_years_at_address=app['applicant_years_at_address'],
+        applicant_years_employed=app['applicant_years_employed']
+    )
+    print(f"   Validation Status: {validation_result['validation_status']}")
+    print(f"   Processing Start: {validation_result['processing_start_timestamp']}")
+    
+    # Step 2: Verify Identity
+    print("\n2. VerifyIdentity")
+    identity_result = VerifyIdentity(
+        application_id=app['application_id'],
+        applicant_id=app['applicant_id'],
+        applicant_age=app['applicant_age'],
+        device_fingerprint_id=app['device_fingerprint_id'],
+        ip_address_location=app['ip_address_location'],
+        fraud_alert_flags=app.get('fraud_alert_flags', [])
+    )
+    print(f"   Verification Method: {identity_result['identity_verification_method']}")
+    print(f"   Confidence Score: {identity_result['confidence_score']}")
+    
+    # Step 3: Screen Sanctions
+    print("\n3. ScreenSanctionsWatchlist")
+    sanctions_result = ScreenSanctionsWatchlist(
+        application_id=app['application_id'],
+        applicant_id=app['applicant_id'],
+        identity_verification_method=identity_result['identity_verification_method']
+    )
+    print(f"   Watchlist Result: {sanctions_result['watchlist_check_result']}")
+    
+    # Step 4: Detect Fraud
+    print("\n4. DetectFraudIndicators")
+    fraud_result = DetectFraudIndicators(
+        application_id=app['application_id'],
+        watchlist_check_result=sanctions_result['watchlist_check_result'],
+        device_fingerprint_id=app['device_fingerprint_id'],
+        ip_address_location=app['ip_address_location'],
+        fraud_alert_flags=app.get('fraud_alert_flags', [])
+    )
+    print(f"   Fraud Risk Level: {fraud_result['fraud_risk_level']}")
+    
+    # Step 5: Retrieve Credit Bureau Data
+    print("\n5. RetrieveCreditBureauData")
+    bureau_result = RetrieveCreditBureauData(
+        application_id=app['application_id'],
+        applicant_id=app['applicant_id'],
+        business_type=app['business_type'],
+        fraud_risk_level=fraud_result['fraud_risk_level']
+    )
+    print(f"   Credit Score: {bureau_result['credit_score']}")
+    print(f"   Credit Utilization: {bureau_result['credit_utilization_ratio']:.2%}")
+    print(f"   Total Debt: ${bureau_result['total_outstanding_debt']:,.2f}")
+    
+    # Step 6: Calculate DTI
+    print("\n6. CalculateDebtToIncomeRatio")
+    dti_result = CalculateDebtToIncomeRatio(
+        application_id=app['application_id'],
+        business_type=app['business_type'],
+        applicant_annual_income=app['applicant_annual_income'],
+        applicant_monthly_housing_cost=app['applicant_monthly_housing_cost'],
+        total_outstanding_debt=bureau_result['total_outstanding_debt']
+    )
+    print(f"   DTI Ratio: {dti_result['debt_to_income_ratio']:.2%}")
+    print(f"   Monthly Income: ${dti_result['monthly_income']:,.2f}")
+    print(f"   Monthly Debt: ${dti_result['monthly_debt_obligations']:,.2f}")
+    
+    # Step 7: Evaluate Scorecard
+    print("\n7. EvaluateCreditScorecard")
+    scorecard_result = EvaluateCreditScorecard(
+        application_id=app['application_id'],
+        business_type=app['business_type'],
+        credit_score=bureau_result['credit_score'],
+        credit_utilization_ratio=bureau_result['credit_utilization_ratio'],
+        debt_to_income_ratio=dti_result['debt_to_income_ratio'],
+        number_of_open_accounts=bureau_result['number_of_open_accounts'],
+        number_of_delinquent_accounts=bureau_result['number_of_delinquent_accounts'],
+        bankruptcy_flag=bureau_result['bankruptcy_flag'],
+        applicant_years_employed=app['applicant_years_employed'],
+        applicant_years_at_address=app['applicant_years_at_address'],
+        months_since_last_delinquency=bureau_result.get('months_since_last_delinquency')
+    )
+    print(f"   Internal Risk Score: {scorecard_result['internal_risk_score']}")
+    print(f"   Reason Codes: {scorecard_result['scorecard_reason_codes']}")
+    
+    # Step 8: Determine Decision
+    print("\n8. DetermineCreditDecision")
+    decision_result = DetermineCreditDecision(
+        application_id=app['application_id'],
+        business_type=app['business_type'],
+        product_type=app['product_type'],
+        internal_risk_score=scorecard_result['internal_risk_score'],
+        scorecard_reason_codes=scorecard_result['scorecard_reason_codes'],
+        watchlist_check_result=sanctions_result['watchlist_check_result'],
+        identity_verification_method=identity_result['identity_verification_method'],
+        bankruptcy_flag=bureau_result['bankruptcy_flag'],
+        fraud_alert_flags=fraud_result['fraud_alert_flags'],
+        applicant_annual_income=app['applicant_annual_income']
+    )
+    print(f"   Final Decision: {decision_result['final_decision']}")
+    print(f"   Manual Review Required: {decision_result['manual_review_required']}")
+    
+    # Step 9: Assign Credit Terms (if approved)
+    if decision_result['final_decision'] == 'approved':
+        print("\n9. AssignCreditTerms")
+        terms_result = AssignCreditTerms(
+            application_id=app['application_id'],
+            final_decision=decision_result['final_decision'],
+            business_type=app['business_type'],
+            product_type=app['product_type'],
+            internal_risk_score=scorecard_result['internal_risk_score'],
+            applicant_annual_income=app['applicant_annual_income']
+        )
+        print(f"   Approved Credit Limit: ${terms_result['approved_credit_limit']:,.2f}")
+        print(f"   Assigned APR: {terms_result['assigned_apr']:.2%}")
+        
+        # Step 10: Generate Adverse Action (not needed for approval with favorable terms)
+        print("\n10. GenerateAdverseActionNotice")
+        adverse_result = GenerateAdverseActionNotice(
+            application_id=app['application_id'],
+            final_decision=decision_result['final_decision'],
+            decline_reason_code=decision_result.get('decline_reason_code'),
+            applicant_id=app['applicant_id'],
+            credit_bureau_source=app['credit_bureau_source'],
+            application_timestamp=app['application_timestamp']
+        )
+        print(f"   Adverse Action Generated: {adverse_result['adverse_action_letter_generated']}")
+        
+        # Step 11: Finalize Outputs
+        print("\n11. FinalizeApplicationOutputs")
+        final_result = FinalizeApplicationOutputs(
+            application_id=app['application_id'],
+            processing_start_timestamp=app['processing_start_timestamp'],
+            final_decision=decision_result['final_decision'],
+            adverse_action_letter_generated=adverse_result['adverse_action_letter_generated'],
+            manual_review_required=decision_result['manual_review_required'],
+            fraud_alert_flags=fraud_result['fraud_alert_flags'],
+            uploaded_documents=app.get('uploaded_documents', []),
+            approved_credit_limit=terms_result['approved_credit_limit'],
+            assigned_apr=terms_result['assigned_apr'],
+            underwriter_id=app.get('underwriter_id'),
+            deposit_verification_status=app.get('deposit_verification_status')
+        )
+        print(f"   Turnaround Time: {final_result['turnaround_time_seconds']} seconds")
+        print(f"   Auto Decision: {final_result['auto_decision_flag']}")
+        print(f"   Account Activation Eligible: {final_result['account_activation_eligible']}")
+        print(f"   Estimated Delivery Date: {final_result['estimated_card_delivery_date']}")
+    
+    print("\n" + "=" * 80)
+    print("APPLICATION DATA AFTER PROCESSING:")
+    print("=" * 80)
+    updated_app = get_application_by_id("APP_CC_2025041801234")
+    print(f"Application ID: {updated_app['application_id']}")
+    print(f"Final Decision: {updated_app.get('final_decision', 'N/A')}")
+    print(f"Internal Risk Score: {updated_app.get('internal_risk_score', 'N/A')}")
+    print(f"DTI Ratio: {updated_app.get('debt_to_income_ratio', 'N/A')}")
+    print(f"Approved Credit Limit: ${updated_app.get('approved_credit_limit', 0):,.2f}")
+    print(f"Assigned APR: {updated_app.get('assigned_apr', 0):.2%}")
+    print(f"Auto Decision: {updated_app.get('auto_decision_flag', 'N/A')}")
+    print(f"Account Activation Eligible: {updated_app.get('account_activation_eligible', 'N/A')}")
+    
+    print("\n" + "=" * 80)
+    print("TEST COMPLETED SUCCESSFULLY")
+    print("=" * 80)
+</code>
+```
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件

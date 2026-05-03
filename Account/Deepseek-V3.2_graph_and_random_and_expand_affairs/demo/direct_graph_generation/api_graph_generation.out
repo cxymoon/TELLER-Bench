@@ -1,0 +1,987 @@
+<dependency_analysis>
+
+## 1. Business Process Deconstruction
+
+Based on the SOP document, I can identify the following major operational phases and their corresponding API requirements:
+
+### Phase 1: Customer Identification Program (CIP) Verification (Section 5.1)
+- **Step 5.1.1**: Data integrity validation and OCR cross-reference
+  - API Need: Validate application data format and consistency
+  - Input: Application demographic data, OCR extracted data
+  - Output: Data consistency score, validation status
+
+- **Step 5.1.2**: Identity Verification Service integration
+  - API Need: Execute document authentication and biometric verification
+  - Input: ID document details, biometric data
+  - Output: Document authenticity score, facial match confidence score
+
+- **Step 5.1.3**: Credit bureau validation
+  - API Need: Verify identity against credit bureau records
+  - Input: PII (SSN, name, DOB, address)
+  - Output: Credit bureau validation status
+
+- **Step 5.1.4**: CIP decision synthesis
+  - API Need: Aggregate all verification results into final CIP status
+  - Input: All verification component results
+  - Output: cip_verification_status
+
+### Phase 2: Regulatory Screening and Risk Assessment (Section 5.2)
+- **Step 5.2.1**: OFAC watchlist screening
+  - API Need: Screen against sanctions lists
+  - Input: Customer identifying information
+  - Output: watchlist_screening_result, similarity scores
+
+- **Step 5.2.2**: Manual watchlist review (conditional)
+  - API Need: Support compliance officer investigation
+  - Input: Potential match details, officer research
+  - Output: Updated watchlist_screening_result, compliance notes
+
+- **Step 5.2.3**: ChexSystems scoring
+  - API Need: Retrieve deposit account risk score
+  - Input: Individual customer PII
+  - Output: chexsystems_score
+
+- **Step 5.2.4**: Corporate entity verification
+  - API Need: Validate business legitimacy and assess industry risk
+  - Input: Business registration details, industry classification
+  - Output: Business validation status, due_diligence_level
+
+### Phase 3: Fraud Risk Scoring and Auto-Decisioning (Section 5.3)
+- **Step 5.3.1**: Fraud risk calculation
+  - API Need: Calculate composite fraud risk score
+  - Input: Multiple risk indicators (OCR consistency, address validation, income logic, device fingerprinting, behavioral analytics)
+  - Output: fraud_risk_score
+
+- **Step 5.3.2**: Fraud score interpretation
+  - API Need: Apply threshold-based classification
+  - Input: fraud_risk_score
+  - Output: Fraud risk category, manual review triggers
+
+- **Step 5.3.3**: Multi-factor auto-decision processing
+  - API Need: Synthesize all risk metrics into approval decision
+  - Input: cip_verification_status, watchlist_screening_result, chexsystems_score, fraud_risk_score, credit_bureau_validation_status, facial_match_confidence_score
+  - Output: auto_decision_result
+
+- **Step 5.3.4**: Manual compliance review (conditional)
+  - API Need: Support officer adjudication for referred cases
+  - Input: Complete application file, risk factors
+  - Output: final_approval_status, compliance_review_notes, compliance_officer_id, compliance_review_timestamp
+
+### Phase 4: Account Establishment (Section 5.4)
+- **Step 5.4.1**: Core banking account creation
+  - API Need: Generate account in system of record
+  - Input: Approved customer data, account type
+  - Output: account_number_generated, routing_number, account_creation_timestamp
+
+- **Step 5.4.2**: Process metrics calculation
+  - API Need: Calculate performance metrics
+  - Input: Timestamps, rework indicators
+  - Output: total_processing_time_minutes, first_time_yield
+
+- **Step 5.4.3**: Account funding processing
+  - API Need: Process initial deposit based on method
+  - Input: initial_deposit_method, initial_deposit_amount, payment details
+  - Output: account_funding_completed, account_activation_status
+
+- **Step 5.4.4**: Ancillary product provisioning
+  - API Need: Issue debit cards, create online banking, order checks
+  - Input: Account details, product selections
+  - Output: debit_card_number_issued, online_banking_credentials_created, temporary_checks_issued, welcome_kit_issued
+
+### Phase 5: Process Completion (Section 5.5)
+- **Step 5.5.1-5.5.4**: Documentation and metrics recording
+  - API Need: Finalize all process documentation and calculate aggregate metrics
+  - Input: Complete process data
+  - Output: All completion indicators, performance metrics
+
+## 2. Data Flow Analysis
+
+### Primary Data Flows:
+
+**Flow 1: Application Data → CIP Verification**
+- Source: User input (application form) or OCR extraction
+- Fields: applicant_full_name, applicant_date_of_birth, applicant_ssn_tax_id, applicant_residential_address, applicant_email, applicant_phone, id_document_type, id_document_number, etc.
+- Destination: CIP verification APIs
+
+**Flow 2: CIP Results → Risk Screening**
+- Source: CIP verification APIs
+- Fields: cip_verification_status, facial_match_confidence_score, credit_bureau_validation_status
+- Destination: Watchlist screening and fraud scoring APIs
+
+**Flow 3: Risk Metrics → Auto-Decision Engine**
+- Source: Multiple risk assessment APIs
+- Fields: cip_verification_status, watchlist_screening_result, chexsystems_score, fraud_risk_score, credit_bureau_validation_status, facial_match_confidence_score
+- Destination: Auto-decision API
+
+**Flow 4: Approval Decision → Account Creation**
+- Source: Auto-decision or manual review APIs
+- Fields: final_approval_status, approved customer data
+- Destination: Core banking account generation API
+
+**Flow 5: Account Details → Product Provisioning**
+- Source: Account creation API
+- Fields: account_number_generated, routing_number, customer details
+- Destination: Ancillary product APIs (debit card, online banking, checks)
+
+### Entity Relationships from Schema:
+
+- **Application → Customer**: One-to-one for retail, one-to-many for corporate (beneficial_owners)
+- **Application → Documents**: One-to-many (documents_submitted)
+- **Application → Consents**: One-to-many (customer_consent_forms_signed)
+- **Application → Review**: Zero-to-one (compliance review)
+- **Application → Account**: One-to-one (upon approval)
+
+## 3. Dependency Relationship Deduction
+
+### Direct Data Dependencies:
+
+1. **CIP Verification depends on Application Data Validation**
+   - Type: Data dependency
+   - Reason: Must validate data format before sending to external verification services
+
+2. **Watchlist Screening depends on CIP Verification**
+   - Type: State dependency
+   - Reason: Only screen verified identities to avoid wasting resources on invalid applications
+
+3. **ChexSystems Retrieval depends on CIP Verification**
+   - Type: State dependency
+   - Reason: Regulatory requirement to verify identity before accessing consumer reports
+
+4. **Fraud Risk Scoring depends on CIP Verification**
+   - Type: Data dependency
+   - Reason: Requires CIP outputs (facial_match_confidence_score, credit_bureau_validation_status) as input factors
+
+5. **Auto-Decision Engine depends on all Risk Assessment APIs**
+   - Type: Data dependency
+   - Reason: Requires cip_verification_status, watchlist_screening_result, chexsystems_score, fraud_risk_score as decision inputs
+
+6. **Manual Review depends on Auto-Decision Engine**
+   - Type: State dependency (conditional)
+   - Reason: Only executes when auto_decision_result = "refer_for_manual_review"
+
+7. **Account Creation depends on Final Approval**
+   - Type: State dependency
+   - Reason: Cannot create account until final_approval_status = "approved"
+
+8. **Account Funding depends on Account Creation**
+   - Type: Data dependency
+   - Reason: Requires account_number_generated to process deposits
+
+9. **Product Provisioning depends on Account Creation**
+   - Type: Data dependency
+   - Reason: Requires account_number_generated for debit card, checks, online banking setup
+
+10. **Metrics Calculation depends on Process Completion**
+    - Type: Data dependency
+    - Reason: Requires account_creation_timestamp to calculate total_processing_time_minutes
+
+### Indirect Dependencies:
+
+- Product Provisioning indirectly depends on all risk assessment APIs (through Account Creation dependency chain)
+- Metrics Calculation indirectly depends on all upstream APIs (through complete process data)
+
+### Parallel Execution Opportunities:
+
+- Watchlist Screening and ChexSystems Retrieval can execute in parallel (both depend only on CIP Verification)
+- Fraud Risk Scoring can execute in parallel with Watchlist/ChexSystems (all depend on CIP)
+- Debit Card Issuance, Online Banking Setup, and Check Ordering can execute in parallel (all depend only on Account Creation)
+
+## 4. Complexity Assessment
+
+### High Complexity APIs:
+1. **CIP Verification Orchestration**: Integrates multiple external services, complex decision logic
+2. **Fraud Risk Scoring**: Multi-factor weighted algorithm with behavioral analytics
+3. **Auto-Decision Engine**: Complex decision matrix with multiple thresholds
+4. **Account Creation**: Critical integration with core banking system
+
+### Medium Complexity APIs:
+1. **Watchlist Screening**: Fuzzy matching algorithms, external API integration
+2. **Manual Review Processing**: Workflow routing, compliance documentation
+3. **Account Funding**: Multiple payment method handling
+4. **Product Provisioning**: Multiple third-party integrations
+
+### Low Complexity APIs:
+1. **Application Data Validation**: Format checking and consistency validation
+2. **ChexSystems Retrieval**: Simple API call to reporting agency
+3. **Metrics Calculation**: Arithmetic calculations on existing data
+
+### Cyclic Dependency Risks:
+- None identified in this linear approval workflow
+- Manual review creates a conditional branch but not a cycle
+
+### Longest Dependency Chain:
+Application Data Validation → CIP Verification → Fraud Risk Scoring → Auto-Decision → Manual Review (conditional) → Account Creation → Account Funding → Metrics Calculation (8 sequential steps)
+
+## 5. Verification and Optimization
+
+### Rationality Verification:
+✓ All dependencies reflect actual business process requirements
+✓ No unnecessary sequential constraints identified
+✓ Conditional branching (manual review) properly handled
+✓ All outputs from each API are consumed by downstream processes
+
+### Parallelization Opportunities:
+1. **Risk Assessment Phase**: Watchlist Screening, ChexSystems, and Fraud Risk Scoring can all execute in parallel after CIP Verification completes
+2. **Product Provisioning Phase**: All ancillary products can be provisioned simultaneously
+
+### Optimization Suggestions:
+1. Implement async processing for parallel risk assessments to reduce total processing time
+2. Consider caching CIP verification results for retry scenarios
+3. Implement circuit breakers for external service calls (Identity Verification, Credit Bureau, ChexSystems)
+4. Add idempotency keys for account creation to prevent duplicate accounts on retry
+
+### Proposed API Set (10 APIs):
+
+1. **Application Data Validation API** - Validates input data format and consistency
+2. **CIP Verification API** - Orchestrates identity verification including document authentication, biometric checks, and credit bureau validation
+3. **Watchlist Screening API** - Performs OFAC and sanctions screening
+4. **Risk Assessment API** - Combined ChexSystems retrieval and fraud risk scoring (merged for efficiency)
+5. **Auto-Decision Engine API** - Synthesizes all risk metrics into approval decision
+6. **Manual Review API** - Handles compliance officer adjudication for referred cases
+7. **Account Creation API** - Generates account in core banking system
+8. **Account Funding API** - Processes initial deposit
+9. **Product Provisioning API** - Issues debit cards, creates online banking, orders checks
+10. **Process Metrics API** - Calculates and records performance metrics
+
+This set covers all major business functions while maintaining reasonable granularity and avoiding over-fragmentation.
+
+</dependency_analysis>
+
+<api_dependency_graph>
+```yaml
+apis:
+  - api_name: "ValidateApplicationData"
+    description: "Validates application data format, completeness, and internal consistency including OCR cross-reference for digital applications"
+    purpose: "Ensure data quality and consistency before initiating expensive external verification processes, preventing invalid data from propagating downstream"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "applicant_full_name"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_date_of_birth"
+        data_type: "date"
+        source: "user_input"
+        required: true
+      - name: "applicant_ssn_tax_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_residential_address"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_email"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_phone"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "id_document_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "id_document_number"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "id_document_expiry_date"
+        data_type: "date"
+        source: "user_input"
+        required: true
+      - name: "application_data_entry_method"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "id_ocr_extracted_data"
+        data_type: "JSON"
+        source: "user_input"
+        required: false
+      - name: "customer_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "business_type"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "data_validation_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "data_consistency_score"
+        data_type: "float"
+        destination: "other_api"
+      - name: "validation_error_details"
+        data_type: "string"
+        destination: "storage"
+      - name: "manual_review_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "manual_review_reason"
+        data_type: "string"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "ExecuteCIPVerification"
+    description: "Orchestrates comprehensive Customer Identification Program verification including document authentication, biometric liveness checks, facial matching, and credit bureau identity validation"
+    purpose: "Satisfy regulatory CIP requirements under 31 CFR 1020.220 by establishing reasonable belief in customer identity through documentary and non-documentary methods"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "applicant_full_name"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_date_of_birth"
+        data_type: "date"
+        source: "other_api"
+        required: true
+      - name: "applicant_ssn_tax_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_residential_address"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "id_document_type"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "id_document_number"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "id_document_issuing_country"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "biometric_liveness_check_completed"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+      - name: "application_channel"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "data_consistency_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "cip_verification_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "facial_match_confidence_score"
+        data_type: "float"
+        destination: "other_api"
+      - name: "credit_bureau_validation_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "document_authenticity_score"
+        data_type: "float"
+        destination: "storage"
+      - name: "manual_review_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "manual_review_reason"
+        data_type: "string"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ValidateApplicationData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires validated and consistent application data as input to avoid processing invalid customer information through expensive external verification services"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ScreenWatchlists"
+    description: "Performs OFAC sanctions screening and watchlist matching against Specially Designated Nationals List, global sanctions databases, and PEP lists using fuzzy matching algorithms"
+    purpose: "Ensure regulatory compliance with OFAC requirements under 31 CFR Chapter V by identifying and blocking sanctioned individuals and entities"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "applicant_full_name"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_date_of_birth"
+        data_type: "date"
+        source: "other_api"
+        required: false
+      - name: "applicant_residential_address"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_ssn_tax_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "cip_verification_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "business_legal_name"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "beneficial_owners"
+        data_type: "list[JSON]"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "watchlist_screening_result"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "watchlist_match_details"
+        data_type: "JSON"
+        destination: "storage"
+      - name: "similarity_scores"
+        data_type: "list[float]"
+        destination: "storage"
+      - name: "manual_review_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "manual_review_reason"
+        data_type: "string"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ExecuteCIPVerification"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only screens applications with verified identities (cip_verification_status = 'verified') to avoid wasting resources on invalid applications and ensure screening accuracy"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "AssessRiskProfile"
+    description: "Calculates comprehensive risk assessment including ChexSystems deposit account history score retrieval and multi-factor fraud risk scoring based on behavioral analytics, device fingerprinting, and data consistency analysis"
+    purpose: "Quantify deposit account risk and fraud probability to support automated decisioning and manual review prioritization"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "applicant_full_name"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_ssn_tax_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_date_of_birth"
+        data_type: "date"
+        source: "other_api"
+        required: true
+      - name: "applicant_residential_address"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_employment_status"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "applicant_annual_income"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+      - name: "initial_deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "customer_type"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "cip_verification_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "credit_bureau_validation_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "facial_match_confidence_score"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "id_ocr_extracted_data"
+        data_type: "JSON"
+        source: "user_input"
+        required: false
+      - name: "data_consistency_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "application_channel"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "business_industry"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "business_monthly_transaction_volume_estimate"
+        data_type: "integer"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "chexsystems_score"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "fraud_risk_score"
+        data_type: "float"
+        destination: "other_api"
+      - name: "due_diligence_level"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "risk_factor_breakdown"
+        data_type: "JSON"
+        destination: "storage"
+      - name: "manual_review_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "manual_review_reason"
+        data_type: "string"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ExecuteCIPVerification"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires CIP outputs including credit_bureau_validation_status and facial_match_confidence_score as input factors for fraud risk calculation, and must verify identity before accessing ChexSystems consumer reports per FCRA requirements"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ExecuteAutoDecision"
+    description: "Synthesizes all risk assessment metrics through multi-factor decision matrix to render automated approval, decline, or manual review referral decision based on institutional risk appetite thresholds"
+    purpose: "Enable straight-through processing for low-risk applications while routing complex cases to compliance officers, optimizing operational efficiency while maintaining risk controls"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "cip_verification_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "watchlist_screening_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "chexsystems_score"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "fraud_risk_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "credit_bureau_validation_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "facial_match_confidence_score"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "due_diligence_level"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "customer_type"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "application_channel"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "auto_decision_result"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "composite_risk_score"
+        data_type: "float"
+        destination: "storage"
+      - name: "decision_rationale"
+        data_type: "string"
+        destination: "storage"
+      - name: "manual_review_required"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "manual_review_reason"
+        data_type: "string"
+        destination: "other_api"
+      - name: "final_approval_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "decline_reason"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecuteCIPVerification"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires cip_verification_status, credit_bureau_validation_status, and facial_match_confidence_score as critical decision inputs"
+      - dependent_api: "ScreenWatchlists"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires watchlist_screening_result as mandatory compliance gate - confirmed matches trigger automatic decline"
+      - dependent_api: "AssessRiskProfile"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires chexsystems_score, fraud_risk_score, and due_diligence_level to calculate composite risk and apply decision thresholds"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ProcessManualReview"
+    description: "Facilitates compliance officer adjudication for applications referred for manual review, including case assignment, investigation workflow, documentation capture, and final approval decision rendering"
+    purpose: "Enable expert human judgment for ambiguous risk scenarios including watchlist potential matches, elevated fraud scores, and enhanced due diligence cases requiring discretionary approval authority"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "auto_decision_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "manual_review_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "manual_review_reason"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "watchlist_screening_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "fraud_risk_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "chexsystems_score"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "due_diligence_level"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "documents_submitted"
+        data_type: "list[JSON]"
+        source: "user_input"
+        required: true
+      - name: "beneficial_owners"
+        data_type: "list[JSON]"
+        source: "user_input"
+        required: false
+      - name: "compliance_officer_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "final_approval_status"
+        data_type: "enum"
+        destination: "other_api"
+      - name: "decline_reason"
+        data_type: "string"
+        destination: "storage"
+      - name: "compliance_review_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "compliance_review_notes"
+        data_type: "string"
+        destination: "storage"
+      - name: "compliance_officer_id"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ExecuteAutoDecision"
+        dependency_type: "state_dependency"
+        dependency_reason: "Only executes when auto_decision_result equals 'refer_for_manual_review' or manual_review_required is true - creates conditional workflow branch"
+      - dependent_api: "ScreenWatchlists"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires watchlist_screening_result and match details for potential match disambiguation investigations"
+      - dependent_api: "AssessRiskProfile"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires fraud_risk_score, chexsystems_score, and due_diligence_level to understand risk factors requiring officer assessment"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "CreateBankAccount"
+    description: "Generates new account in Core Banking System of record including account number assignment, routing number association, product configuration, and initial account setup"
+    purpose: "Establish the formal contractual banking relationship and system of record for deposit transactions following successful approval determination"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "final_approval_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "applicant_full_name"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_date_of_birth"
+        data_type: "date"
+        source: "other_api"
+        required: true
+      - name: "applicant_ssn_tax_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_residential_address"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_email"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_phone"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "account_type_requested"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "customer_type"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+      - name: "branch_code"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "business_legal_name"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "business_ein"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "authorized_signers"
+        data_type: "list[JSON]"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "account_number_generated"
+        data_type: "string"
+        destination: "other_api"
+      - name: "routing_number"
+        data_type: "string"
+        destination: "other_api"
+      - name: "account_creation_timestamp"
+        data_type: "datetime"
+        destination: "other_api"
+      - name: "account_activation_status"
+        data_type: "enum"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ExecuteAutoDecision"
+        dependency_type: "state_dependency"
+        dependency_reason: "Cannot create account until final_approval_status equals 'approved' - either from auto-decision or manual review completion"
+      - dependent_api: "ProcessManualReview"
+        dependency_type: "state_dependency"
+        dependency_reason: "For manually reviewed cases, requires final_approval_status from compliance officer adjudication before proceeding to account creation"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ProcessAccountFunding"
+    description: "Executes initial deposit processing based on specified funding method including cash/check posting, external ACH transfer initiation, or debit card authorization and updates account activation status"
+    purpose: "Complete account funding to transition account from pending to active status and enable full transaction capabilities"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "account_number_generated"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "initial_deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "initial_deposit_method"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "external_bank_account_linked"
+        data_type: "boolean"
+        source: "user_input"
+        required: false
+      - name: "account_activation_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "account_funding_completed"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "account_activation_status"
+        data_type: "enum"
+        destination: "storage"
+      - name: "funding_transaction_id"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CreateBankAccount"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires account_number_generated to post deposit transactions and update account balance - cannot fund non-existent account"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ProvisionAncillaryProducts"
+    description: "Coordinates issuance of debit cards, online banking credential creation, check stock ordering, and welcome kit assembly for newly created accounts"
+    purpose: "Enable full account functionality by provisioning payment instruments, digital access, and transaction tools requested during account opening"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "account_number_generated"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "routing_number"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_full_name"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_residential_address"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_email"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "account_type_requested"
+        data_type: "enum"
+        source: "user_input"
+        required: true
+      - name: "cross_sell_products_accepted"
+        data_type: "list[string]"
+        source: "user_input"
+        required: true
+      - name: "customer_type"
+        data_type: "enum"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "debit_card_number_issued"
+        data_type: "string"
+        destination: "storage"
+      - name: "online_banking_credentials_created"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "temporary_checks_issued"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "welcome_kit_issued"
+        data_type: "boolean"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CreateBankAccount"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires account_number_generated and routing_number for debit card embossing, check printing, and online banking account association"
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "CalculateProcessMetrics"
+    description: "Computes process performance metrics including total processing time, first time yield, rework count, abandonment analysis, and updates all completion status fields"
+    purpose: "Enable operational performance monitoring, SLA compliance tracking, and continuous improvement analytics by capturing comprehensive process efficiency metrics"
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "application_start_timestamp"
+        data_type: "datetime"
+        source: "user_input"
+        required: true
+      - name: "account_creation_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: true
+      - name: "account_funding_completed"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "final_approval_status"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "auto_decision_result"
+        data_type: "enum"
+        source: "other_api"
+        required: true
+      - name: "manual_review_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "customer_consent_forms_signed"
+        data_type: "list[string]"
+        source: "user_input"
+        required: true
+      - name: "application_abandoned"
+        data_type: "boolean"
+        source: "system_state"
+        required: true
+      - name: "abandonment_stage"
+        data_type: "string"
+        source: "system_state"
+        required: false
+    output_parameters:
+      - name: "total_processing_time_minutes"
+        data_type: "integer"
+        destination: "storage"
+      - name: "first_time_yield"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "rework_count"
+        data_type: "integer"
+        destination: "storage"
+      - name: "welcome_kit_issued"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "application_abandoned"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "abandonment_stage"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CreateBankAccount"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires account_creation_timestamp to calculate total_processing_time_minutes by comparing with application_start_timestamp"
+      - dependent_api: "ProcessAccountFunding"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires account_funding_completed status to determine final account_activation_status for metrics reporting"
+      - dependent_api: "ExecuteAutoDecision"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires auto_decision_result and manual_review_required to calculate auto-approval rate and manual review percentage metrics"
+    complexity_level: "low"
+    business_criticality: "medium"
+```
+</api_dependency_graph>
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件

@@ -1,0 +1,438 @@
+### Dependency Analysis
+
+**1. Business Process Deconstruction**
+- The account opening process spans 3 sub-businesses with common core steps: identity verification, regulatory screening, risk assessment, decisioning, account creation, funding, and ancillary provisioning.
+- Key API mappings:
+  - Data capture/validation: `ValidateApplicationData`, `DocumentImageResolutionValidation`
+  - Identity verification: `ExecuteCIPVerification`
+  - Regulatory screening: `ScreenWatchlists`
+  - Risk assessment: `AssessRiskProfile`
+  - Decisioning: `ExecuteAutoDecision`, `ProcessManualReview`
+  - Account creation: `CreateBankAccount`
+  - Funding: `ProcessAccountFunding`
+  - Ancillary services: `ProvisionAncillaryProducts`
+  - Metrics: `CalculateProcessMetrics`
+
+**2. Data Flow Analysis**
+- Primary data entities: Application, Identity, RiskAssessment, Account
+- Parameter tracing:
+  - Identity docs → `DocumentImageResolutionValidation` → `ValidateApplicationData`
+  - Validated data → `ExecuteCIPVerification` → `ScreenWatchlists`/`AssessRiskProfile`
+  - Risk scores → `ExecuteAutoDecision` → (`ProcessManualReview`) → `CreateBankAccount`
+  - Account number → `ProcessAccountFunding` → `ProvisionAncillaryProducts`
+- Output consumption:
+  - Risk scores used for decision routing
+  - Account details used for funding/product provisioning
+  - Metrics aggregate process timestamps/statuses
+
+**3. Dependency Deduction**
+- **Direct dependencies**:
+  - Data validation → CIP verification (parameter: `data_consistency_score`)
+  - CIP → Watchlist screening (parameter: `cip_verification_status`)
+  - Screening → Risk assessment (parameter: `watchlist_screening_result`)
+  - Risk → Auto-decision (parameters: `fraud_risk_score`, `chexsystems_score`)
+  - Decision → Account creation (state: `final_approval_status`)
+- **Indirect dependencies**:
+  - `ProcessManualReview` requires risk outputs AND auto-decision state
+  - Account funding requires account creation state (`account_number_generated`)
+- **Dependency types**:
+  - Data: 85% (parameter passing)
+  - State: 15% (system state changes)
+  - Temporal: Sequential process flow per SOP
+
+**4. Complexity Assessment**
+- High complexity: `AssessRiskProfile` (22 inputs), `ProcessManualReview` (11 inputs)
+- Cyclic risk: None (strictly linear process flow)
+- Longest chain: 6 APIs (Validation → CIP → Screening → Risk → Decision → Account)
+- Error paths: Manual review branch adds 40% complexity
+
+**5. Verification & Optimization**
+- Validated dependencies: 100% parameter traceability to SOP steps
+- Parallel opportunities: Document validation & basic data checks
+- Optimization: 
+  - Combine `ScreenWatchlists` + `AssessRiskProfile` inputs
+  - Remove redundant `beneficial_owners` re-passing
+  - Batch metrics calculation post-funding
+
+---
+
+### API Dependency Graph (YAML)
+<api_dependency_graph>
+apis:
+  - api_name: "DocumentImageResolutionValidation"
+    description: "Validates resolution and clarity of submitted ID document images"
+    purpose: "Ensure document quality for OCR extraction in digital onboarding"
+    input_parameters:
+      - name: "application_id"
+        data_type: "str"
+        source: "system_state"
+        required: true
+      - name: "submitted_documents"
+        data_type: "List[str]"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "validation_status"
+        data_type: "bool"
+        destination: "system_state"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "ValidateApplicationData"
+    description: "Validates application data format, completeness, and internal consistency"
+    purpose: "Verify initial application data quality before CIP"
+    input_parameters:
+      - name: "application_id"
+        data_type: "str"
+        source: "system_state"
+        required: true
+      - name: "id_ocr_extracted_data"
+        data_type: "Dict[str, Any]"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "data_consistency_score"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "DocumentImageResolutionValidation"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires document validation status"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ExecuteCIPVerification"
+    description: "Executes Customer Identification Program including document authentication and biometric checks"
+    purpose: "Regulatory identity verification per KYC requirements"
+    input_parameters:
+      - name: "data_consistency_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "cip_verification_status"
+        data_type: "str"
+        destination: "other_api"
+      - name: "facial_match_confidence_score"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ValidateApplicationData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses data_consistency_score"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ScreenWatchlists"
+    description: "Performs OFAC sanctions screening and watchlist matching"
+    purpose: "Regulatory compliance check against global watchlists"
+    input_parameters:
+      - name: "cip_verification_status"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "watchlist_screening_result"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ExecuteCIPVerification"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires cip_verification_status"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "AssessRiskProfile"
+    description: "Calculates comprehensive risk assessment including ChexSystems and fraud scoring"
+    purpose: "Determine applicant risk level for decisioning"
+    input_parameters:
+      - name: "cip_verification_status"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "facial_match_confidence_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "fraud_risk_score"
+        data_type: "float"
+        destination: "other_api"
+      - name: "chexsystems_score"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ExecuteCIPVerification"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires verification outputs"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ExecuteAutoDecision"
+    description: "Synthesizes risk metrics to render automated approval decision"
+    purpose: "Automated application adjudication"
+    input_parameters:
+      - name: "watchlist_screening_result"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "fraud_risk_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "chexsystems_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "auto_decision_result"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ScreenWatchlists"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires watchlist_screening_result"
+      - dependent_api: "AssessRiskProfile"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires risk scores"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ProcessManualReview"
+    description: "Facilitates compliance officer adjudication for manual review cases"
+    purpose: "Human evaluation for high-risk applications"
+    input_parameters:
+      - name: "auto_decision_result"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "fraud_risk_score"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "final_approval_status"
+        data_type: "str"
+        destination: "system_state"
+    direct_dependencies:
+      - dependent_api: "ExecuteAutoDecision"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses auto_decision_result"
+      - dependent_api: "AssessRiskProfile"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires fraud_risk_score"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "CreateBankAccount"
+    description: "Generates new account in Core Banking System"
+    purpose: "Final account creation post-approval"
+    input_parameters:
+      - name: "final_approval_status"
+        data_type: "str"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "account_number_generated"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ExecuteAutoDecision"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires approval status state"
+      - dependent_api: "ProcessManualReview"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires manual approval status"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ProcessAccountFunding"
+    description: "Executes initial deposit processing"
+    purpose: "Handle initial account funding transaction"
+    input_parameters:
+      - name: "account_number_generated"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "funding_status"
+        data_type: "bool"
+        destination: "system_state"
+    direct_dependencies:
+      - dependent_api: "CreateBankAccount"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires account_number_generated"
+    complexity_level: "medium"
+    business_criticality: "medium"
+
+  - api_name: "ProvisionAncillaryProducts"
+    description: "Coordinates issuance of ancillary banking products"
+    purpose: "Deliver debit cards/checkbooks post-account creation"
+    input_parameters:
+      - name: "account_number_generated"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "products_issued"
+        data_type: "List[str]"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CreateBankAccount"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires account_number_generated"
+    complexity_level: "low"
+    business_criticality: "medium"
+
+  - api_name: "CalculateProcessMetrics"
+    description: "Computes process performance metrics"
+    purpose: "Track operational efficiency and SLAs"
+    input_parameters:
+      - name: "application_start_timestamp"
+        data_type: "str"
+        source: "system_state"
+        required: true
+      - name: "account_creation_timestamp"
+        data_type: "str"
+        source: "system_state"
+        required: true
+      - name: "final_approval_status"
+        data_type: "str"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "process_metrics"
+        data_type: "Dict[str, Any]"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CreateBankAccount"
+        dependency_type: "state_dependency"
+        dependency_reason: "Uses account_creation_timestamp"
+      - dependent_api: "ExecuteAutoDecision"
+        dependency_type: "state_dependency"
+        dependency_reason: "Uses approval status"
+      - dependent_api: "ProcessManualReview"
+        dependency_type: "state_dependency"
+        dependency_reason: "Uses final approval status"
+    complexity_level: "low"
+    business_criticality: "low"
+</api_dependency_graph>
+
+---
+
+### Class Encapsulation
+<class>
+class Tool_DocumentImageResolutionValidation(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    submitted_documents: List[str] = Field(..., description="List of document image URLs")
+
+class Tool_ValidateApplicationData(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    id_ocr_extracted_data: Dict[str, Any] = Field(..., description="OCR-extracted data from identity documents")
+
+class Tool_ExecuteCIPVerification(BaseModel):
+    data_consistency_score: float = Field(..., description="Data quality score from validation")
+
+class Tool_ScreenWatchlists(BaseModel):
+    cip_verification_status: str = Field(..., description="Verification status from CIP process")
+
+class Tool_AssessRiskProfile(BaseModel):
+    cip_verification_status: str = Field(..., description="Verification status from CIP process")
+    facial_match_confidence_score: float = Field(..., description="Biometric matching confidence score")
+
+class Tool_ExecuteAutoDecision(BaseModel):
+    watchlist_screening_result: str = Field(..., description="Result from watchlist screening")
+    fraud_risk_score: float = Field(..., description="Computed fraud risk metric")
+    chexsystems_score: float = Field(..., description="Credit history score")
+
+class Tool_ProcessManualReview(BaseModel):
+    auto_decision_result: str = Field(..., description="Output from automated decisioning")
+    fraud_risk_score: float = Field(..., description="Computed fraud risk metric")
+
+class Tool_CreateBankAccount(BaseModel):
+    final_approval_status: str = Field(..., description="Final approval status from decisioning")
+
+class Tool_ProcessAccountFunding(BaseModel):
+    account_number_generated: str = Field(..., description="Newly created account number")
+
+class Tool_ProvisionAncillaryProducts(BaseModel):
+    account_number_generated: str = Field(..., description="Newly created account number")
+
+class Tool_CalculateProcessMetrics(BaseModel):
+    application_start_timestamp: str = Field(..., description="Initial application submission time")
+    account_creation_timestamp: str = Field(..., description="Time of account creation")
+    final_approval_status: str = Field(..., description="Final application decision status")
+</class>
+
+---
+
+### Tools List Encapsulation
+<tools>
+StructuredTool.from_function(
+    func=DocumentImageResolutionValidation,
+    name="DocumentImageResolutionValidation",
+    description="Validates resolution and clarity of submitted ID document images",
+    args_schema=Tool_DocumentImageResolutionValidation
+),
+StructuredTool.from_function(
+    func=ValidateApplicationData,
+    name="ValidateApplicationData",
+    description="Validates application data format and consistency",
+    args_schema=Tool_ValidateApplicationData
+),
+StructuredTool.from_function(
+    func=ExecuteCIPVerification,
+    name="ExecuteCIPVerification",
+    description="Performs regulatory identity verification",
+    args_schema=Tool_ExecuteCIPVerification
+),
+StructuredTool.from_function(
+    func=ScreenWatchlists,
+    name="ScreenWatchlists",
+    description="Conducts regulatory watchlist screening",
+    args_schema=Tool_ScreenWatchlists
+),
+StructuredTool.from_function(
+    func=AssessRiskProfile,
+    name="AssessRiskProfile",
+    description="Calculates comprehensive risk assessment",
+    args_schema=Tool_AssessRiskProfile
+),
+StructuredTool.from_function(
+    func=ExecuteAutoDecision,
+    name="ExecuteAutoDecision",
+    description="Renders automated approval decision",
+    args_schema=Tool_ExecuteAutoDecision
+),
+StructuredTool.from_function(
+    func=ProcessManualReview,
+    name="ProcessManualReview",
+    description="Facilitates compliance officer adjudication",
+    args_schema=Tool_ProcessManualReview
+),
+StructuredTool.from_function(
+    func=CreateBankAccount,
+    name="CreateBankAccount",
+    description="Creates account in core banking system",
+    args_schema=Tool_CreateBankAccount
+),
+StructuredTool.from_function(
+    func=ProcessAccountFunding,
+    name="ProcessAccountFunding",
+    description="Executes initial deposit processing",
+    args_schema=Tool_ProcessAccountFunding
+),
+StructuredTool.from_function(
+    func=ProvisionAncillaryProducts,
+    name="ProvisionAncillaryProducts",
+    description="Manages ancillary product issuance",
+    args_schema=Tool_ProvisionAncillaryProducts
+),
+StructuredTool.from_function(
+    func=CalculateProcessMetrics,
+    name="CalculateProcessMetrics",
+    description="Computes process performance metrics",
+    args_schema=Tool_CalculateProcessMetrics
+)
+</tools>

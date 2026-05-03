@@ -1,0 +1,72 @@
+```xml
+<schema>
+  <Existing_fields>
+    transaction_id - string, unique identifier for the deposit transaction (e.g., "TXN_DEP_20250418_001234").
+    customer_id - string, unique customer identifier in the Core Banking System (e.g., "CIF_789456123").
+    account_number - string, target account number for the deposit (e.g., "4532100012345678").
+    transaction_timestamp - datetime, timestamp when the deposit transaction was initiated (e.g., "2025-04-18T10:23:45Z").
+    deposit_type - enum, type of deposit transaction; options: ["RETAIL_DEMAND", "TERM_DEPOSIT", "CORPORATE_DEPOSIT", "CASH_COUNTER", "ATM_DEPOSIT", "MOBILE_DEPOSIT"] (e.g., "CASH_COUNTER").
+    account_type - enum, type of account receiving the deposit; options: ["SAVINGS", "CHECKING", "CD_6M", "CD_1Y", "CD_5Y", "BUSINESS_CHECKING", "MONEY_MARKET"] (e.g., "SAVINGS").
+    deposit_channel - enum, channel through which deposit is made; options: ["BRANCH_TELLER", "ATM", "MOBILE_APP", "ONLINE_BANKING", "WIRE_TRANSFER"] (e.g., "BRANCH_TELLER").
+    branch_code - string, branch identifier where transaction occurred (e.g., "BR_NY_5012").
+    teller_id - string, employee ID of the teller or banker handling the transaction (e.g., "EMP_45823").
+    customer_name - string, full name of the customer (e.g., "John Michael Smith").
+    customer_id_type - enum, type of identification document; options: ["PASSPORT", "DRIVERS_LICENSE", "NATIONAL_ID", "SSN"] (e.g., "DRIVERS_LICENSE").
+    customer_id_number - string, identification document number (e.g., "D1234567").
+    customer_address - string, current residential address of customer (e.g., "123 Main Street, New York, NY 10001").
+    customer_tax_id - string, tax identification number (e.g., "123-45-6789").
+    customer_phone - string, contact phone number (e.g., "+1-212-555-0123").
+    customer_email - string, email address (e.g., "john.smith@email.com").
+    deposit_amount - float, principal amount being deposited in USD (e.g., 5000.00).
+    deposit_currency - string, currency code (e.g., "USD").
+    funding_source_type - enum, source of funds; options: ["CASH", "CHECK", "INTERNAL_TRANSFER", "WIRE", "ACH"] (e.g., "CASH").
+    funding_source_account - string, source account number if internal transfer (e.g., "4532100087654321" or null).
+    cash_denomination_breakdown - JSON, breakdown of physical cash by denomination; format: {"100": 20, "50": 10, "20": 15, "10": 5, "5": 10, "1": 25} representing count per denomination (e.g., {"100": 50, "20": 0, "10": 0, "5": 0, "1": 0}).
+    term_length_months - integer, duration of term deposit in months; null for non-term deposits (e.g., 12 or null).
+    interest_rate_apy - float, annual percentage yield for the deposit product (e.g., 3.75).
+    maturity_date - datetime, maturity date for term deposits; null for demand deposits (e.g., "2026-04-18T00:00:00Z" or null).
+    early_withdrawal_penalty_rate - float, penalty rate for early CD withdrawal as percentage (e.g., 0.5 or null).
+    minimum_balance_requirement - float, minimum balance required to avoid fees (e.g., 500.00).
+    monthly_maintenance_fee - float, monthly account maintenance fee in USD (e.g., 5.00).
+    previous_account_balance - float, account balance before this deposit transaction (e.g., 1234.56).
+    kyc_verification_status - enum, KYC verification completion status; options: ["PENDING", "VERIFIED", "FAILED", "REQUIRES_REVIEW"] (e.g., "VERIFIED").
+    kyc_verification_timestamp - datetime, timestamp of KYC verification completion (e.g., "2025-04-18T10:15:32Z").
+    aml_screening_result - enum, AML/sanctions screening result; options: ["CLEAR", "WATCHLIST_HIT", "MANUAL_REVIEW_REQUIRED"] (e.g., "CLEAR").
+    aml_risk_score - integer, automated risk score from AML system; range: 0-100 (e.g., 15).
+    sanctions_screening_timestamp - datetime, timestamp of sanctions screening (e.g., "2025-04-18T10:16:05Z").
+    counterfeit_detection_result - enum, result from currency discriminator; options: ["PASS", "FAIL", "NOT_APPLICABLE"] (e.g., "PASS").
+    cash_counter_machine_id - string, identifier of currency counting machine used (e.g., "CCM_BR5012_01" or null).
+    supervisor_approval_required - boolean, whether transaction requires supervisor override (e.g., false).
+    supervisor_id - string, employee ID of approving supervisor; null if not required (e.g., "EMP_12034" or null).
+    supervisor_approval_timestamp - datetime, timestamp of supervisor approval; null if not required (e.g., "2025-04-18T10:25:12Z" or null).
+    ctr_filing_required - boolean, whether Currency Transaction Report filing is required (e.g., false).
+    ctr_threshold_amount - float, threshold amount triggering CTR filing (e.g., 10000.00).
+    debit_card_issued - boolean, whether debit card was issued with this account (e.g., true).
+    debit_card_number - string, masked debit card number; null if not issued (e.g., "****-****-****-1234" or null).
+    online_banking_enabled - boolean, whether online banking access was set up (e.g., true).
+    mobile_app_enabled - boolean, whether mobile app access was enabled (e.g., true).
+    checkbook_ordered - boolean, whether physical checkbook was ordered (e.g., false).
+    cross_sell_products_offered - list[string], additional products offered during interaction (e.g., ["CREDIT_CARD", "PERSONAL_LOAN"]).
+    customer_signature_captured - boolean, whether customer signature was obtained (e.g., true).
+    signature_capture_method - enum, method of signature capture; options: ["ELECTRONIC_PAD", "PAPER_SCANNED", "MOBILE_APP", "NOT_CAPTURED"] (e.g., "ELECTRONIC_PAD").
+    receipt_delivery_method - enum, how receipt was delivered; options: ["PRINTED", "EMAIL", "SMS", "MOBILE_APP"] (e.g., "PRINTED").
+    transaction_notes - string, free-text notes from teller or banker (e.g., "Customer requested expedited card delivery").
+  </Existing_fields>
+  
+  <Field_to_be_obtained>
+    transaction_approved - boolean, whether the deposit transaction was successfully approved and processed (e.g., true).
+    approval_rejection_reason - string, reason for rejection if transaction was not approved; null if approved (e.g., "Failed AML screening" or null).
+    new_account_balance - float, updated account balance after deposit is posted (e.g., 6234.56).
+    transaction_reference_id - string, unique reference ID generated upon successful transaction completion (e.g., "REF_2025041810234567").
+    cd_certificate_number - string, certificate number for term deposits; null for demand deposits (e.g., "CD_CERT_2025_987654" or null).
+    calculated_interest_at_maturity - float, projected interest earnings at maturity for term deposits; null for demand deposits (e.g., 187.50 or null).
+    account_status - enum, current status of the account; options: ["ACTIVE", "DORMANT", "FROZEN", "CLOSED"] (e.g., "ACTIVE").
+    processing_time_seconds - integer, total time taken to process the transaction in seconds (e.g., 142).
+    cash_drawer_total_after_transaction - float, total cash in teller drawer after this transaction; null for non-cash deposits (e.g., 25678.50 or null).
+    fraud_detection_score - float, real-time fraud risk score; range: 0.0-1.0, where 1.0 is highest risk (e.g., 0.12).
+    compliance_check_passed - boolean, whether all compliance checks (KYC, AML, sanctions) passed (e.g., true).
+    final_transaction_fee - float, any transaction fees charged to customer in USD (e.g., 0.00).
+    receipt_number - string, unique receipt number printed for customer (e.g., "RCPT_20250418_5012_089").
+  </Field_to_be_obtained>
+</schema>
+```

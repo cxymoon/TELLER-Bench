@@ -1,0 +1,3029 @@
+```python
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field
+from langchain.tools import StructuredTool
+
+
+# API Functions
+
+def adopt_a_pet(location: str, animal_type: str) -> dict:
+    return {"pets": [{"name": f"{animal_type}_1", "location": location, "available": True}]}
+
+def get_axolotl_info(fact_id: int) -> dict:
+    return {"fact_id": fact_id, "fact": "Axolotls can regenerate limbs", "image_url": f"https://axolotl.com/{fact_id}.jpg"}
+
+def get_cat_fact() -> dict:
+    return {"fact": "Cats sleep 70% of their lives"}
+
+def get_cat_image(tag: Optional[str] = None) -> dict:
+    return {"url": f"https://cataas.com/cat/{tag or 'random'}", "tags": [tag or "random"]}
+
+def search_anime(query: str) -> dict:
+    return {"results": [{"title": query, "episodes": 12, "score": 8.5}]}
+
+def get_anime_info(anime_id: int) -> dict:
+    return {"id": anime_id, "title": f"Anime_{anime_id}", "episodes": 24}
+
+def get_anime_list(status: str) -> dict:
+    return {"anime_list": [{"id": 1, "title": "Anime 1", "status": status}]}
+
+def get_anime_quote() -> dict:
+    return {"quote": "Believe in yourself!", "character": "Naruto", "anime": "Naruto"}
+
+def check_ip_reputation(ip_address: str) -> dict:
+    return {"ip": ip_address, "abuse_confidence_score": 15, "is_malicious": False}
+
+def check_threat_intelligence(indicator: str) -> dict:
+    return {"indicator": indicator, "threat_level": "low", "pulses": 3}
+
+def analyze_malware(file_hash: str) -> dict:
+    return {"hash": file_hash, "malware_detected": False, "analysis_complete": True}
+
+def check_safe_browsing(url: str) -> dict:
+    return {"url": url, "is_safe": True, "threats": []}
+
+def generate_discord_image(user_id: str, effect: str) -> dict:
+    return {"image_url": f"https://api.amethyste.com/{effect}/{user_id}.png"}
+
+def get_artwork(artwork_id: int) -> dict:
+    return {"id": artwork_id, "title": f"Artwork_{artwork_id}", "artist": "Unknown"}
+
+def generate_color_scheme() -> dict:
+    return {"colors": ["#4A90E2", "#50E3C2", "#F5A623", "#D0021B"]}
+
+def get_color_palette(palette_id: int) -> dict:
+    return {"id": palette_id, "colors": ["#FF6B6B", "#4ECDC4", "#45B7D1"]}
+
+def authenticate_user(username: str, password: str) -> dict:
+    return {"user_id": f"user_{username}", "token": f"token_{username}", "authenticated": True}
+
+def generate_otp(phone_number: str) -> dict:
+    return {"phone": phone_number, "otp": "123456", "expires_in": 300}
+
+def create_user(username: str, email: str) -> dict:
+    return {"user_id": f"usr_{username}", "username": username, "email": email}
+
+def passwordless_login(email: str) -> dict:
+    return {"email": email, "magic_link": f"https://auth.com/login/{email}", "sent": True}
+
+def query_blockchain(chain: str, query: str) -> dict:
+    return {"chain": chain, "data": {"transactions": 100, "query": query}}
+
+def get_chainlink_data(feed_id: str) -> dict:
+    return {"feed_id": feed_id, "price": 1850.50, "timestamp": 1234567890}
+
+def anchor_to_blockchain(data: str) -> dict:
+    return {"data_hash": f"hash_{data}", "anchored": True, "block_height": 750000}
+
+def get_blockchain_data(chain: str, address: str) -> dict:
+    return {"chain": chain, "address": address, "balance": 1.5, "transactions": 42}
+
+def get_bhagavad_gita_verse(chapter: int, verse: int) -> dict:
+    return {"chapter": chapter, "verse": verse, "text": "Sample verse text", "translation": "Sample translation"}
+
+def get_bhagavad_gita_telugu(chapter: int, verse: int) -> dict:
+    return {"chapter": chapter, "verse": verse, "text_telugu": "తెలుగు వచనం"}
+
+def get_bible_verse(reference: str) -> dict:
+    return {"reference": reference, "text": "In the beginning...", "translation": "KJV"}
+
+def get_persian_poetry(poet: str) -> dict:
+    return {"poet": poet, "poem": "Sample Persian poetry", "recitation_url": "https://ganjoor.com/audio.mp3"}
+
+def manage_dashboard(dashboard_id: int, action: str) -> dict:
+    return {"dashboard_id": dashboard_id, "action": action, "status": "success"}
+
+def search_charity(name: str) -> dict:
+    return {"charities": [{"name": name, "ein": "12-3456789", "category": "Education"}]}
+
+def get_company_logo(domain: str) -> dict:
+    return {"domain": domain, "logo_url": f"https://logo.clearbit.com/{domain}"}
+
+def search_domains(keyword: str) -> dict:
+    return {"domains": [f"{keyword}.com", f"{keyword}.net", f"{keyword}.org"]}
+
+def get_public_holidays(country: str, year: int) -> dict:
+    return {"country": country, "year": year, "holidays": [{"name": "New Year", "date": f"{year}-01-01"}]}
+
+def get_holidays_calendarific(country: str, year: int) -> dict:
+    return {"country": country, "year": year, "holidays": [{"name": "Christmas", "date": f"{year}-12-25"}]}
+
+def get_national_holiday(date: str) -> dict:
+    return {"date": date, "holidays": [{"name": "Independence Day", "type": "National"}]}
+
+def get_church_calendar(date: str) -> dict:
+    return {"date": date, "event": "Easter Sunday", "liturgical_color": "white"}
+
+def upload_file_anon(file_content: str) -> dict:
+    return {"file_id": f"anon_{hash(file_content)}", "url": f"https://anonfiles.com/file_{hash(file_content)}"}
+
+def upload_to_box(file_name: str, file_content: str) -> dict:
+    return {"file_id": f"box_{file_name}", "shared_link": f"https://box.com/s/{file_name}"}
+
+def upload_to_fileio(file_content: str) -> dict:
+    return {"link": f"https://file.io/{hash(file_content)}", "expires": "14 days"}
+
+def check_azure_health(resource_id: str) -> dict:
+    return {"resource_id": resource_id, "status": "healthy", "issues": []}
+
+def trigger_bitrise_build(app_id: str, workflow: str) -> dict:
+    return {"app_id": app_id, "workflow": workflow, "build_number": 123, "status": "started"}
+
+def trigger_buddy_pipeline(pipeline_id: int) -> dict:
+    return {"pipeline_id": pipeline_id, "execution_id": f"exec_{pipeline_id}", "status": "running"}
+
+def trigger_circleci_build(project: str, branch: str) -> dict:
+    return {"project": project, "branch": branch, "build_num": 456, "status": "queued"}
+
+def get_crypto_rate(crypto: str, fiat: str) -> dict:
+    return {"crypto": crypto, "fiat": fiat, "rate": 45000.50}
+
+def get_binance_price(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 1.2345, "volume": 1000000}
+
+def get_bitcambio_assets() -> dict:
+    return {"assets": ["BTC", "ETH", "USDT", "BNB"]}
+
+def get_bitcoin_average(symbol: str) -> dict:
+    return {"symbol": symbol, "last": 45123.45, "bid": 45120.00, "ask": 45125.00}
+
+def convert_currency(from_currency: str, to_currency: str, amount: float) -> dict:
+    return {"from": from_currency, "to": to_currency, "amount": amount, "result": amount * 1.2}
+
+def get_exchange_rate(base: str, target: str) -> dict:
+    return {"base": base, "target": target, "rate": 1.18}
+
+def get_currency_rate(base: str, target: str) -> dict:
+    return {"base": base, "target": target, "rate": 0.85, "date": "2024-01-01"}
+
+def get_currency_freaks_rate(base: str) -> dict:
+    return {"base": base, "rates": {"USD": 1.0, "EUR": 0.85, "GBP": 0.73}}
+
+def postman_echo_test(method: str, data: dict) -> dict:
+    return {"method": method, "data": data, "success": True}
+
+def check_profanity(text: str) -> dict:
+    return {"text": text, "is_clean": True, "censored": text}
+
+def autocomplete_address(partial: str) -> dict:
+    return {"suggestions": [f"{partial} Street, City, State", f"{partial} Avenue, Town, State"]}
+
+def extract_address(text: str) -> dict:
+    return {"addresses": ["123 Main St, City, State 12345"]}
+
+def get_pull_requests(year: int) -> dict:
+    return {"year": year, "total_prs": 24, "projects": 10}
+
+def take_screenshot(url: str) -> dict:
+    return {"url": url, "screenshot_url": f"https://screenshot.com/{hash(url)}.png"}
+
+def estimate_age(name: str) -> dict:
+    return {"name": name, "age": 35, "count": 12345}
+
+def get_api_gratis(service: str) -> dict:
+    return {"service": service, "data": "Sample public API data", "available": True}
+
+def get_chinese_character(character: str) -> dict:
+    return {"character": character, "pinyin": "zhong", "definition": "middle"}
+
+def search_chinese_text(query: str) -> dict:
+    return {"query": query, "results": [{"text": "古文样本", "source": "论语"}]}
+
+def lookup_collins(word: str, lang_from: str, lang_to: str) -> dict:
+    return {"word": word, "translation": f"{word}_translated", "examples": []}
+
+def get_free_dictionary(word: str) -> dict:
+    return {"word": word, "phonetic": "/wɜːrd/", "meanings": [{"partOfSpeech": "noun", "definitions": []}]}
+
+def manage_asana_task(task_id: str, action: str) -> dict:
+    return {"task_id": task_id, "action": action, "status": "completed"}
+
+def manage_clickup_task(task_id: str, action: str) -> dict:
+    return {"task_id": task_id, "action": action, "updated": True}
+
+def get_clockify_time_entries(user_id: str) -> dict:
+    return {"user_id": user_id, "entries": [{"duration": 3600, "description": "Work"}]}
+
+def convert_file(input_format: str, output_format: str, file_content: str) -> dict:
+    return {"input": input_format, "output": output_format, "converted_url": f"https://cloudconvert.com/{hash(file_content)}"}
+
+def validate_email_mailboxlayer(email: str) -> dict:
+    return {"email": email, "valid": True, "smtp_check": True}
+
+def validate_email_address(email: str) -> dict:
+    return {"email": email, "is_valid": True, "disposable": False}
+
+def validate_cloudmersive(value: str, validation_type: str) -> dict:
+    return {"value": value, "type": validation_type, "is_valid": True}
+
+def check_disposable_email(email: str) -> dict:
+    return {"email": email, "is_disposable": False}
+
+def get_chuck_norris_joke() -> dict:
+    return {"joke": "Chuck Norris can divide by zero", "category": "dev"}
+
+def get_corporate_buzzword() -> dict:
+    return {"buzzword": "synergy", "definition": "cooperative interaction"}
+
+def get_excuse(category: str) -> dict:
+    return {"excuse": f"Sample {category} excuse", "category": category}
+
+def get_fun_fact() -> dict:
+    return {"fact": "Honey never spoils", "category": "science"}
+
+def get_pollen_forecast(lat: float, lon: float) -> dict:
+    return {"lat": lat, "lon": lon, "tree_pollen": "low", "grass_pollen": "medium"}
+
+def calculate_carbon_emissions(activity: str, amount: float) -> dict:
+    return {"activity": activity, "amount": amount, "co2_kg": amount * 0.5}
+
+def get_emission_factor(activity: str) -> dict:
+    return {"activity": activity, "co2_per_unit": 2.3, "unit": "kg"}
+
+def offset_carbon(kg_co2: float) -> dict:
+    return {"kg_co2": kg_co2, "offset_cost_usd": kg_co2 * 0.02, "projects": ["reforestation"]}
+
+def search_events_eventbrite(query: str, location: str) -> dict:
+    return {"events": [{"name": query, "location": location, "date": "2024-06-01"}]}
+
+def search_events_seatgeek(query: str) -> dict:
+    return {"events": [{"title": query, "venue": "Arena", "datetime": "2024-07-15T19:00:00"}]}
+
+def search_events_ticketmaster(keyword: str, city: str) -> dict:
+    return {"events": [{"name": keyword, "city": city, "date": "2024-08-20"}]}
+
+def validate_vat(vat_number: str, country_code: str) -> dict:
+    return {"vat_number": vat_number, "country": country_code, "valid": True}
+
+def get_insider_trading(ticker: str) -> dict:
+    return {"ticker": ticker, "trades": [{"exec": "John Doe", "shares": 1000, "price": 150.0}]}
+
+def get_alpaca_market_data(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 175.50, "volume": 5000000}
+
+def get_alpha_vantage_stock(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 150.25, "change": 2.5}
+
+def get_marketstack_data(symbol: str) -> dict:
+    return {"symbol": symbol, "open": 100.0, "close": 102.5, "volume": 1500000}
+
+def get_banco_brasil_transactions(account_id: str) -> dict:
+    return {"account_id": account_id, "transactions": [{"amount": 100.0, "type": "debit"}]}
+
+def validate_iban(iban: str) -> dict:
+    return {"iban": iban, "valid": True, "bank": "Sample Bank"}
+
+def create_billplz_bill(amount: float, description: str) -> dict:
+    return {"bill_id": f"bill_{int(amount)}", "amount": amount, "url": "https://billplz.com/pay"}
+
+def get_bin_info(bin_number: str) -> dict:
+    return {"bin": bin_number, "bank": "Sample Bank", "type": "debit", "country": "US"}
+
+def generate_boleto(amount: float, payer_name: str) -> dict:
+    return {"boleto_id": f"bol_{payer_name}", "amount": amount, "barcode": "12345678901234567890"}
+
+def get_citi_account(account_id: str) -> dict:
+    return {"account_id": account_id, "balance": 5000.0, "currency": "USD"}
+
+def get_econdb_data(dataset: str, country: str) -> dict:
+    return {"dataset": dataset, "country": country, "value": 3.5, "date": "2024-01"}
+
+def get_fed_treasury_data(series: str) -> dict:
+    return {"series": series, "value": 4.5, "date": "2024-01-15"}
+
+def get_finage_stock(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 200.0, "timestamp": 1234567890}
+
+def get_financial_modeling_prep(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 155.0, "pe_ratio": 25.5}
+
+def get_finnhub_quote(symbol: str) -> dict:
+    return {"symbol": symbol, "current_price": 180.0, "high": 185.0, "low": 178.0}
+
+def get_fred_data(series_id: str) -> dict:
+    return {"series_id": series_id, "value": 2.5, "date": "2024-01-01"}
+
+def front_accounting_api(operation: str) -> dict:
+    return {"operation": operation, "status": "success", "data": {}}
+
+def get_hotstoks_data(ticker: str) -> dict:
+    return {"ticker": ticker, "price": 95.0, "volume": 2000000}
+
+def get_iex_cloud_quote(symbol: str) -> dict:
+    return {"symbol": symbol, "latest_price": 145.0, "market_cap": 2000000000}
+
+def get_ig_market_data(epic: str) -> dict:
+    return {"epic": epic, "bid": 100.5, "offer": 101.0}
+
+def get_indian_mutual_fund(scheme_code: str) -> dict:
+    return {"scheme_code": scheme_code, "nav": 150.0, "date": "2024-01-15"}
+
+def get_intrinio_data(ticker: str, data_point: str) -> dict:
+    return {"ticker": ticker, "data_point": data_point, "value": 75.5}
+
+def create_klarna_session(amount: int, currency: str) -> dict:
+    return {"session_id": f"klarna_{amount}", "amount": amount, "currency": currency}
+
+def create_mercadopago_payment(amount: float, description: str) -> dict:
+    return {"payment_id": f"mp_{int(amount)}", "amount": amount, "status": "pending"}
+
+def connect_mono_account(account_id: str) -> dict:
+    return {"account_id": account_id, "connected": True, "balance": 10000.0}
+
+def create_moov_transfer(amount: float, destination: str) -> dict:
+    return {"transfer_id": f"moov_{destination}", "amount": amount, "status": "pending"}
+
+def connect_nordigen_bank(bank_id: str) -> dict:
+    return {"bank_id": bank_id, "connected": True, "accounts": ["acc1", "acc2"]}
+
+def get_openfigi(id_value: str, id_type: str) -> dict:
+    return {"figi": f"BBG{id_value}", "name": "Sample Security", "exchange": "NYSE"}
+
+def connect_plaid_account(public_token: str) -> dict:
+    return {"access_token": f"plaid_{public_token}", "item_id": "item123"}
+
+def get_polygon_data(ticker: str, date: str) -> dict:
+    return {"ticker": ticker, "date": date, "close": 150.0, "volume": 1000000}
+
+def optimize_portfolio(tickers: list, weights: list) -> dict:
+    return {"tickers": tickers, "optimal_weights": weights, "expected_return": 8.5}
+
+def get_ifsc_details(ifsc_code: str) -> dict:
+    return {"ifsc": ifsc_code, "bank": "State Bank", "branch": "Main Branch"}
+
+def get_realtime_finance(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 165.0, "timestamp": 1234567890}
+
+def get_sec_edgar(cik: str, filing_type: str) -> dict:
+    return {"cik": cik, "filing_type": filing_type, "filings": [{"date": "2024-01-01", "url": "https://sec.gov"}]}
+
+def smartapi_trade(symbol: str, action: str, quantity: int) -> dict:
+    return {"symbol": symbol, "action": action, "quantity": quantity, "order_id": f"ord_{symbol}"}
+
+def get_stockdata(ticker: str) -> dict:
+    return {"ticker": ticker, "price": 140.0, "sentiment": "positive"}
+
+def get_styvio_data(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 132.0, "sentiment_score": 0.75}
+
+def validate_tax_number(tax_number: str, country: str) -> dict:
+    return {"tax_number": tax_number, "country": country, "valid": True}
+
+def get_tradier_quote(symbol: str) -> dict:
+    return {"symbol": symbol, "last": 155.0, "bid": 154.5, "ask": 155.5}
+
+def get_twelve_data(symbol: str, interval: str) -> dict:
+    return {"symbol": symbol, "interval": interval, "price": 148.0}
+
+def get_wallstreetbets_sentiment(ticker: str) -> dict:
+    return {"ticker": ticker, "sentiment": "bullish", "comment_count": 150}
+
+def get_yahoo_finance(symbol: str) -> dict:
+    return {"symbol": symbol, "price": 175.0, "change_percent": 1.5}
+
+def get_ynab_budget(budget_id: str) -> dict:
+    return {"budget_id": budget_id, "name": "Monthly Budget", "balance": 1500.0}
+
+def get_zoho_books_invoice(invoice_id: str) -> dict:
+    return {"invoice_id": invoice_id, "total": 500.0, "status": "paid"}
+
+def get_bacon_image(width: int, height: int) -> dict:
+    return {"url": f"https://baconmockup.com/{width}/{height}", "width": width, "height": height}
+
+def get_food_product(barcode: str) -> dict:
+    return {"barcode": barcode, "name": "Sample Product", "calories": 200}
+
+def get_brewery(brewery_id: int) -> dict:
+    return {"id": brewery_id, "name": f"Brewery_{brewery_id}", "city": "Portland"}
+
+def get_food_facts(barcode: str) -> dict:
+    return {"barcode": barcode, "product_name": "Sample Food", "nutrition_grade": "a"}
+
+def get_aoe2_resource(resource_id: int) -> dict:
+    return {"id": resource_id, "name": "Villager", "cost": {"food": 50}}
+
+def get_amiibo(amiibo_id: str) -> dict:
+    return {"id": amiibo_id, "name": "Mario", "series": "Super Mario"}
+
+def get_autochess_data(player_id: str) -> dict:
+    return {"player_id": player_id, "rank": 1500, "matches": 100}
+
+def get_barter_game(game_id: int) -> dict:
+    return {"id": game_id, "title": "Sample Game", "platform": "PC"}
+
+def geolocate_ip(ip_address: str) -> dict:
+    return {"ip": ip_address, "country": "United States", "city": "New York", "lat": 40.7128, "lon": -74.0060}
+
+def process_grass_gis(operation: str, parameters: dict) -> dict:
+    return {"operation": operation, "parameters": parameters, "status": "completed"}
+
+def get_administrative_division(country: str, level: int) -> dict:
+    return {"country": country, "level": level, "divisions": ["Division1", "Division2"]}
+
+def geocode_address_france(address: str) -> dict:
+    return {"address": address, "lat": 48.8566, "lon": 2.3522}
+
+def get_bc_law(law_id: str) -> dict:
+    return {"law_id": law_id, "title": "Sample Law", "content": "Law content..."}
+
+def get_brazil_data(dataset: str) -> dict:
+    return {"dataset": dataset, "data": {"population": 213000000}}
+
+def get_brazil_company(cnpj: str) -> dict:
+    return {"cnpj": cnpj, "name": "Sample Company", "status": "active"}
+
+def get_federal_code(agency: str) -> dict:
+    return {"agency": agency, "projects": 50, "languages": ["Python", "JavaScript"]}
+
+def get_cms_data(dataset: str) -> dict:
+    return {"dataset": dataset, "records": 1000, "updated": "2024-01-01"}
+
+def get_covid_data(country: str) -> dict:
+    return {"country": country, "cases": 1000000, "deaths": 50000}
+
+def get_covid_datenhub(region: str) -> dict:
+    return {"region": region, "datasets": 10, "last_updated": "2024-01-15"}
+
+def get_government_response(country: str) -> dict:
+    return {"country": country, "stringency_index": 65.5, "measures": 15}
+
+def search_job_adzuna(query: str, location: str) -> dict:
+    return {"jobs": [{"title": query, "location": location, "salary": 50000}]}
+
+def search_job_arbeitnow(query: str) -> dict:
+    return {"jobs": [{"title": query, "company": "Tech Corp", "remote": True}]}
+
+def search_job_arbeitsamt(occupation: str, region: str) -> dict:
+    return {"jobs": [{"title": occupation, "region": region, "openings": 5}]}
+
+def search_job_careerjet(query: str, location: str) -> dict:
+    return {"jobs": [{"title": query, "location": location, "url": "https://careerjet.com/job"}]}
+
+def process_thai_ai(text: str, operation: str) -> dict:
+    return {"text": text, "operation": operation, "result": "processed"}
+
+def analyze_image_cloudmersive(image_url: str, analysis_type: str) -> dict:
+    return {"image_url": image_url, "type": analysis_type, "nsfw_score": 0.05}
+
+def process_dialogflow(text: str, session_id: str) -> dict:
+    return {"text": text, "intent": "greeting", "confidence": 0.95}
+
+def filter_text_exude(text: str, operation: str) -> dict:
+    return {"original": text, "filtered": text.replace("stop", ""), "operation": operation}
+
+def get_7digital_track(track_id: int) -> dict:
+    return {"id": track_id, "title": f"Track_{track_id}", "artist": "Artist"}
+
+def master_audio(audio_url: str) -> dict:
+    return {"input_url": audio_url, "mastered_url": f"https://master.com/{hash(audio_url)}.mp3"}
+
+def get_audiomack_track(track_id: str) -> dict:
+    return {"id": track_id, "title": "Sample Track", "artist": "Artist", "plays": 10000}
+
+def search_bandcamp(query: str) -> dict:
+    return {"results": [{"title": query, "artist": "Indie Artist", "url": "https://bandcamp.com"}]}
+
+def get_news_mediastack(category: str, country: str) -> dict:
+    return {"articles": [{"title": "News Title", "category": category, "country": country}]}
+
+def search_news_ap(query: str) -> dict:
+    return {"articles": [{"headline": query, "date": "2024-01-15", "url": "https://ap.org"}]}
+
+def search_historical_newspapers(query: str, year: int) -> dict:
+    return {"results": [{"title": query, "year": year, "page_url": "https://chronicling.loc.gov"}]}
+
+def get_currents_news(category: str, language: str) -> dict:
+    return {"news": [{"title": "Breaking News", "category": category, "language": language}]}
+
+def get_api_setu_service(service: str) -> dict:
+    return {"service": service, "available": True, "description": "Government API service"}
+
+def get_black_history_fact(fact_id: int) -> dict:
+    return {"id": fact_id, "fact": "Sample black history fact", "date": "1963-08-28"}
+
+def get_telegram_bot(bot_username: str) -> dict:
+    return {"username": bot_username, "description": "Sample bot", "rating": 4.5}
+
+def get_carto_prediction(lat: float, lon: float, data_type: str) -> dict:
+    return {"lat": lat, "lon": lon, "prediction": 75.5, "type": data_type}
+
+def get_countly_analytics(app_id: str, metric: str) -> dict:
+    return {"app_id": app_id, "metric": metric, "value": 1500}
+
+def search_creative_commons(query: str, license_type: str) -> dict:
+    return {"results": [{"title": query, "license": license_type, "url": "https://creativecommons.org"}]}
+
+def search_datamuse(word: str, relation: str) -> dict:
+    return {"word": word, "results": ["synonym1", "synonym2"], "relation": relation}
+
+def query_metabase(query_id: int) -> dict:
+    return {"query_id": query_id, "results": [{"col1": "data1", "col2": "data2"}]}
+
+def search_epo_patent(query: str) -> dict:
+    return {"patents": [{"title": query, "patent_number": "EP1234567", "date": "2020-01-01"}]}
+
+def search_patentsview(query: str) -> dict:
+    return {"patents": [{"title": query, "inventor": "John Doe", "year": 2019}]}
+
+def search_tipo_patent(query: str) -> dict:
+    return {"patents": [{"title": query, "number": "TW123456", "date": "2021-05-01"}]}
+
+def search_uspto_patent(query: str) -> dict:
+    return {"patents": [{"title": query, "patent_number": "US10123456", "grant_date": "2022-03-15"}]}
+
+def get_advice() -> dict:
+    return {"slip": {"id": 123, "advice": "Always be yourself"}}
+
+def get_biriyani_image() -> dict:
+    return {"url": "https://biriyani.anoram.com/random.jpg", "type": "Hyderabadi"}
+
+def get_dev_article(article_id: int) -> dict:
+    return {"id": article_id, "title": "Sample Article", "author": "Dev User", "tags": ["python"]}
+
+def get_dictum_quote(quote_id: int) -> dict:
+    return {"id": quote_id, "quote": "Be the change you wish to see", "author": "Gandhi"}
+
+def validate_phone_number(phone: str, country_code: str) -> dict:
+    return {"phone": phone, "country": country_code, "valid": True, "type": "mobile"}
+
+def validate_numverify(phone: str) -> dict:
+    return {"phone": phone, "valid": True, "country_code": "US", "carrier": "Verizon"}
+
+def validate_phone_cloudmersive(phone: str) -> dict:
+    return {"phone": phone, "is_valid": True, "phone_type": "Mobile"}
+
+def get_phone_specs(brand: str, model: str) -> dict:
+    return {"brand": brand, "model": model, "specs": {"screen": "6.1 inch", "ram": "8GB"}}
+
+def generate_image_bruzu(text: str, template: str) -> dict:
+    return {"text": text, "template": template, "image_url": f"https://bruzu.com/{hash(text)}.png"}
+
+def optimize_image_cheetaho(image_url: str, width: int, height: int) -> dict:
+    return {"original": image_url, "optimized": f"https://cheetaho.com/opt/{width}x{height}.jpg"}
+
+def manipulate_image_dagpi(image_url: str, effect: str) -> dict:
+    return {"original": image_url, "effect": effect, "result_url": f"https://dagpi.com/{effect}.png"}
+
+def generate_image_duply(template_id: str, data: dict) -> dict:
+    return {"template": template_id, "data": data, "url": f"https://duply.co/img/{template_id}.png"}
+
+def get_codeforces_user(handle: str) -> dict:
+    return {"handle": handle, "rating": 1800, "rank": "Expert"}
+
+def compile_code_hackerearth(code: str, language: str) -> dict:
+    return {"code": code, "language": language, "output": "Hello World", "status": "success"}
+
+def get_coding_contests() -> dict:
+    return {"contests": [{"name": "Codeforces Round", "start_time": "2024-06-01T14:00:00"}]}
+
+def generate_docs_mintlify(code: str, language: str) -> dict:
+    return {"code": code, "language": language, "documentation": "Function does X"}
+
+def get_astronomy_data(object_name: str) -> dict:
+    return {"name": object_name, "type": "galaxy", "distance_ly": 2500000}
+
+def search_arxiv(query: str, category: str) -> dict:
+    return {"papers": [{"title": query, "category": category, "authors": ["Author 1"]}]}
+
+def search_core(query: str) -> dict:
+    return {"papers": [{"title": query, "year": 2023, "url": "https://core.ac.uk"}]}
+
+def get_gbif_species(species_name: str) -> dict:
+    return {"name": species_name, "scientific_name": "Species scientificus", "kingdom": "Animalia"}
+
+def scan_binaryedge(target: str) -> dict:
+    return {"target": target, "open_ports": [80, 443], "services": ["http", "https"]}
+
+def get_bitwarden_vault(user_id: str) -> dict:
+    return {"user_id": user_id, "items": 15, "folders": 3}
+
+def detect_bot(user_agent: str, ip: str) -> dict:
+    return {"user_agent": user_agent, "ip": ip, "is_bot": False, "bot_type": None}
+
+def get_bugcrowd_submission(submission_id: str) -> dict:
+    return {"id": submission_id, "severity": "medium", "status": "triaged"}
+
+def search_bestbuy_product(query: str) -> dict:
+    return {"products": [{"name": query, "price": 299.99, "sku": "12345"}]}
+
+def search_digikey_part(part_number: str) -> dict:
+    return {"part_number": part_number, "price": 1.50, "stock": 1000}
+
+def get_dummy_product(product_id: int) -> dict:
+    return {"id": product_id, "name": f"Product_{product_id}", "price": 29.99}
+
+def search_ebay(query: str, category: str) -> dict:
+    return {"items": [{"title": query, "price": 49.99, "category": category}]}
+
+def get_4chan_board(board: str) -> dict:
+    return {"board": board, "threads": 100, "posts_per_hour": 500}
+
+def post_to_social_ayrshare(message: str, platforms: list) -> dict:
+    return {"message": message, "platforms": platforms, "status": "posted", "post_ids": ["123", "456"]}
+
+def get_horoscope_aztro(sign: str, day: str) -> dict:
+    return {"sign": sign, "day": day, "horoscope": "Today is a good day", "mood": "happy"}
+
+def get_blogger_posts(blog_id: str) -> dict:
+    return {"blog_id": blog_id, "posts": [{"title": "Post 1", "content": "Content..."}]}
+
+def get_football_info(league: str, season: int) -> dict:
+    return {"league": league, "season": season, "teams": 20, "matches": 380}
+
+def check_symptoms(symptoms: list, age: int, gender: str) -> dict:
+    return {"symptoms": symptoms, "diagnosis": [{"issue": "Common Cold", "accuracy": 75}]}
+
+def get_nba_stats(player: str) -> dict:
+    return {"player": player, "ppg": 25.5, "rpg": 7.2, "apg": 5.0}
+
+def get_city_bikes(city: str) -> dict:
+    return {"city": city, "stations": 50, "available_bikes": 300}
+
+def generate_bacon_ipsum(paragraphs: int) -> dict:
+    return {"paragraphs": paragraphs, "text": "Bacon ipsum dolor amet..."}
+
+def generate_avatar_dicebear(seed: str, style: str) -> dict:
+    return {"seed": seed, "style": style, "url": f"https://avatars.dicebear.com/api/{style}/{seed}.svg"}
+
+def get_random_word(count: int) -> dict:
+    return {"words": [f"word{i}" for i in range(count)], "pronunciation": ["wɜːrd"]}
+
+def generate_fake_data(schema: dict) -> dict:
+    return {"data": [{"name": "John Doe", "email": "john@example.com"}], "schema": schema}
+
+def detect_code_language(code: str) -> dict:
+    return {"code": code, "language": "python", "confidence": 0.95}
+
+def detect_language_apilayer(text: str) -> dict:
+    return {"text": text, "language": "en", "confidence": 0.98}
+
+def analyze_text_aylien(text: str, analysis_type: str) -> dict:
+    return {"text": text, "type": analysis_type, "sentiment": "positive"}
+
+def detect_language_api(text: str) -> dict:
+    return {"text": text, "language": "English", "iso_code": "en"}
+
+def track_shipment_aftership(tracking_number: str) -> dict:
+    return {"tracking": tracking_number, "status": "in_transit", "location": "New York"}
+
+def track_correios(tracking_code: str) -> dict:
+    return {"code": tracking_code, "status": "Em trânsito", "location": "São Paulo"}
+
+def track_habit_pixela(user: str, graph_id: str, date: str) -> dict:
+    return {"user": user, "graph": graph_id, "date": date, "quantity": 1}
+
+def get_pincode_info(pincode: str) -> dict:
+    return {"pincode": pincode, "area": "Mumbai", "state": "Maharashtra", "country": "India"}
+
+def get_adsb_flight(icao24: str) -> dict:
+    return {"icao24": icao24, "callsign": "UAL123", "altitude": 35000, "velocity": 450}
+
+def get_airport_info(icao_code: str) -> dict:
+    return {"icao": icao_code, "name": "Sample Airport", "url": "https://airport.com"}
+
+def get_ais_vessel(mmsi: str) -> dict:
+    return {"mmsi": mmsi, "name": "Ship Name", "lat": 40.7128, "lon": -74.0060}
+
+def search_flights_amadeus(origin: str, destination: str, date: str) -> dict:
+    return {"flights": [{"origin": origin, "destination": destination, "price": 350, "date": date}]}
+
+def shorten_url_cleanuri(url: str) -> dict:
+    return {"original": url, "shortened": f"https://cleanuri.com/{hash(url)}"}
+
+def track_link_clickmeter(link_id: str) -> dict:
+    return {"link_id": link_id, "clicks": 150, "unique_clicks": 100}
+
+def shorten_url_drivet(url: str) -> dict:
+    return {"original": url, "short_url": f"https://drvt.it/{hash(url)[:6]}"}
+
+def shorten_url_free(url: str) -> dict:
+    return {"original_url": url, "short_url": f"https://free.us/{hash(url)[:8]}"}
+
+def get_helipad(helipad_id: str) -> dict:
+    return {"id": helipad_id, "name": "Downtown Helipad", "lat": 34.0522, "lon": -118.2437}
+
+def get_kbb_vehicle(vin: str) -> dict:
+    return {"vin": vin, "make": "Toyota", "model": "Camry", "year": 2022, "value": 25000}
+
+def get_mercedes_vehicle(vin: str) -> dict:
+    return {"vin": vin, "model": "C-Class", "fuel_level": 75, "location": {"lat": 48.8566, "lon": 2.3522}}
+
+def get_nhtsa_vehicle(vin: str) -> dict:
+    return {"vin": vin, "make": "Ford", "model": "F-150", "year": 2021, "recalls": 0}
+
+def get_doctor_who_info(episode_id: int) -> dict:
+    return {"id": episode_id, "title": "The Doctor's Episode", "doctor": "13th Doctor"}
+
+def get_next_episode(show: str) -> dict:
+    return {"show": show, "next_episode": "S05E10", "air_date": "2024-06-15"}
+
+def get_czech_tv_schedule(channel: str, date: str) -> dict:
+    return {"channel": channel, "date": date, "programs": [{"time": "20:00", "title": "News"}]}
+
+def get_dailymotion_video(video_id: str) -> dict:
+    return {"id": video_id, "title": "Sample Video", "views": 10000, "duration": 300}
+
+def get_weather_micro(lat: float, lon: float) -> dict:
+    return {"lat": lat, "lon": lon, "temp": 22, "condition": "sunny"}
+
+def get_odweather_forecast(location: str) -> dict:
+    return {"location": location, "temp": 18, "humidity": 65, "webcam_url": "https://webcam.com"}
+
+def get_oikolab_weather(lat: float, lon: float, date: str) -> dict:
+    return {"lat": lat, "lon": lon, "date": date, "temp": 15, "precipitation": 5}
+
+def get_open_meteo_forecast(lat: float, lon: float) -> dict:
+    return {"lat": lat, "lon": lon, "temperature": 20, "wind_speed": 10, "forecast": "partly_cloudy"}
+
+
+# Class Wrappers
+
+class Tool_adopt_a_pet(BaseModel):
+    location: str = Field(..., description="Geographic location to search for adoptable pets")
+    animal_type: str = Field(..., description="Type of animal to search for (e.g., dog, cat, rabbit)")
+
+class Tool_get_axolotl_info(BaseModel):
+    fact_id: int = Field(..., description="Unique identifier for a specific axolotl fact")
+
+class Tool_get_cat_fact(BaseModel):
+    pass
+
+class Tool_get_cat_image(BaseModel):
+    tag: Optional[str] = Field(None, description="Optional tag to filter cat images by category")
+
+class Tool_search_anime(BaseModel):
+    query: str = Field(..., description="Search query string to find anime titles")
+
+class Tool_get_anime_info(BaseModel):
+    anime_id: int = Field(..., description="Unique identifier for a specific anime")
+
+class Tool_get_anime_list(BaseModel):
+    status: str = Field(..., description="Status filter for anime list (e.g., airing, completed)")
+
+class Tool_get_anime_quote(BaseModel):
+    pass
+
+class Tool_check_ip_reputation(BaseModel):
+    ip_address: str = Field(..., description="IP address to check for abuse and reputation")
+
+class Tool_check_threat_intelligence(BaseModel):
+    indicator: str = Field(..., description="IP, domain, or URL indicator to check for threats")
+
+class Tool_analyze_malware(BaseModel):
+    file_hash: str = Field(..., description="Hash of the file to analyze for malware")
+
+class Tool_check_safe_browsing(BaseModel):
+    url: str = Field(..., description="URL to check against Google Safe Browsing database")
+
+class Tool_generate_discord_image(BaseModel):
+    user_id: str = Field(..., description="Discord user ID for generating personalized images")
+    effect: str = Field(..., description="Image effect or filter to apply")
+
+class Tool_get_artwork(BaseModel):
+    artwork_id: int = Field(..., description="Unique identifier for artwork from Art Institute of Chicago")
+
+class Tool_generate_color_scheme(BaseModel):
+    pass
+
+class Tool_get_color_palette(BaseModel):
+    palette_id: int = Field(..., description="Unique identifier for a specific color palette")
+
+class Tool_authenticate_user(BaseModel):
+    username: str = Field(..., description="Username for authentication")
+    password: str = Field(..., description="Password for authentication")
+
+class Tool_generate_otp(BaseModel):
+    phone_number: str = Field(..., description="Phone number to send OTP to")
+
+class Tool_create_user(BaseModel):
+    username: str = Field(..., description="Username for the new user account")
+    email: str = Field(..., description="Email address for the new user account")
+
+class Tool_passwordless_login(BaseModel):
+    email: str = Field(..., description="Email address for passwordless authentication")
+
+class Tool_query_blockchain(BaseModel):
+    chain: str = Field(..., description="Blockchain network to query (e.g., ethereum, bitcoin)")
+    query: str = Field(..., description="GraphQL query string for blockchain data")
+
+class Tool_get_chainlink_data(BaseModel):
+    feed_id: str = Field(..., description="Chainlink price feed identifier")
+
+class Tool_anchor_to_blockchain(BaseModel):
+    data: str = Field(..., description="Data to anchor to the blockchain")
+
+class Tool_get_blockchain_data(BaseModel):
+    chain: str = Field(..., description="Blockchain network name")
+    address: str = Field(..., description="Wallet or contract address to query")
+
+class Tool_get_bhagavad_gita_verse(BaseModel):
+    chapter: int = Field(..., description="Chapter number in Bhagavad Gita")
+    verse: int = Field(..., description="Verse number within the chapter")
+
+class Tool_get_bhagavad_gita_telugu(BaseModel):
+    chapter: int = Field(..., description="Chapter number in Bhagavad Gita")
+    verse: int = Field(..., description="Verse number in Telugu language")
+
+class Tool_get_bible_verse(BaseModel):
+    reference: str = Field(..., description="Bible verse reference (e.g., John 3:16)")
+
+class Tool_get_persian_poetry(BaseModel):
+    poet: str = Field(..., description="Name of Persian poet")
+
+class Tool_manage_dashboard(BaseModel):
+    dashboard_id: int = Field(..., description="Dashboard identifier in Apache Superset")
+    action: str = Field(..., description="Action to perform on dashboard (e.g., view, edit, delete)")
+
+class Tool_search_charity(BaseModel):
+    name: str = Field(..., description="Charity name to search for")
+
+class Tool_get_company_logo(BaseModel):
+    domain: str = Field(..., description="Company domain name to retrieve logo")
+
+class Tool_search_domains(BaseModel):
+    keyword: str = Field(..., description="Keyword to search for registered domain names")
+
+class Tool_get_public_holidays(BaseModel):
+    country: str = Field(..., description="Country code for retrieving public holidays")
+    year: int = Field(..., description="Year for which to retrieve holidays")
+
+class Tool_get_holidays_calendarific(BaseModel):
+    country: str = Field(..., description="Country code for Calendarific API")
+    year: int = Field(..., description="Year for holiday data")
+
+class Tool_get_national_holiday(BaseModel):
+    date: str = Field(..., description="Date to check for national holidays (YYYY-MM-DD)")
+
+class Tool_get_church_calendar(BaseModel):
+    date: str = Field(..., description="Date to retrieve church calendar events")
+
+class Tool_upload_file_anon(BaseModel):
+    file_content: str = Field(..., description="Content of file to upload anonymously")
+
+class Tool_upload_to_box(BaseModel):
+    file_name: str = Field(..., description="Name of file to upload to Box")
+    file_content: str = Field(..., description="Content of file to upload")
+
+class Tool_upload_to_fileio(BaseModel):
+    file_content: str = Field(..., description="Content of file to upload to File.io")
+
+class Tool_check_azure_health(BaseModel):
+    resource_id: str = Field(..., description="Azure resource ID to check health status")
+
+class Tool_trigger_bitrise_build(BaseModel):
+    app_id: str = Field(..., description="Bitrise application ID")
+    workflow: str = Field(..., description="Workflow name to trigger")
+
+class Tool_trigger_buddy_pipeline(BaseModel):
+    pipeline_id: int = Field(..., description="Buddy pipeline identifier to trigger")
+
+class Tool_trigger_circleci_build(BaseModel):
+    project: str = Field(..., description="CircleCI project name")
+    branch: str = Field(..., description="Git branch to build")
+
+class Tool_get_crypto_rate(BaseModel):
+    crypto: str = Field(..., description="Cryptocurrency symbol")
+    fiat: str = Field(..., description="Fiat currency code")
+
+class Tool_get_binance_price(BaseModel):
+    symbol: str = Field(..., description="Trading pair symbol on Binance")
+
+class Tool_get_bitcambio_assets(BaseModel):
+    pass
+
+class Tool_get_bitcoin_average(BaseModel):
+    symbol: str = Field(..., description="Bitcoin trading pair symbol")
+
+class Tool_convert_currency(BaseModel):
+    from_currency: str = Field(..., description="Source currency code")
+    to_currency: str = Field(..., description="Target currency code")
+    amount: float = Field(..., description="Amount to convert")
+
+class Tool_get_exchange_rate(BaseModel):
+    base: str = Field(..., description="Base currency code")
+    target: str = Field(..., description="Target currency code")
+
+class Tool_get_currency_rate(BaseModel):
+    base: str = Field(..., description="Base currency for exchange rate")
+    target: str = Field(..., description="Target currency for exchange rate")
+
+class Tool_get_currency_freaks_rate(BaseModel):
+    base: str = Field(..., description="Base currency code for multiple exchange rates")
+
+class Tool_postman_echo_test(BaseModel):
+    method: str = Field(..., description="HTTP method to test (GET, POST, etc.)")
+    data: dict = Field(..., description="Data to send in the test request")
+
+class Tool_check_profanity(BaseModel):
+    text: str = Field(..., description="Text to check for profanity and obscenity")
+
+class Tool_autocomplete_address(BaseModel):
+    partial: str = Field(..., description="Partial address string for autocomplete suggestions")
+
+class Tool_extract_address(BaseModel):
+    text: str = Field(..., description="Text from which to extract postal addresses")
+
+class Tool_get_pull_requests(BaseModel):
+    year: int = Field(..., description="Year for 24 Pull Requests data")
+
+class Tool_take_screenshot(BaseModel):
+    url: str = Field(..., description="URL of webpage to screenshot")
+
+class Tool_estimate_age(BaseModel):
+    name: str = Field(..., description="First name to estimate age from")
+
+class Tool_get_api_gratis(BaseModel):
+    service: str = Field(..., description="Service name from API Gratis")
+
+class Tool_get_chinese_character(BaseModel):
+    character: str = Field(..., description="Chinese character to get definition and pronunciation")
+
+class Tool_search_chinese_text(BaseModel):
+    query: str = Field(..., description="Search query for Chinese classical texts")
+
+class Tool_lookup_collins(BaseModel):
+    word: str = Field(..., description="Word to lookup in Collins dictionary")
+    lang_from: str = Field(..., description="Source language code")
+    lang_to: str = Field(..., description="Target language code")
+
+class Tool_get_free_dictionary(BaseModel):
+    word: str = Field(..., description="Word to lookup definition, phonetics, and synonyms")
+
+class Tool_manage_asana_task(BaseModel):
+    task_id: str = Field(..., description="Asana task identifier")
+    action: str = Field(..., description="Action to perform on task")
+
+class Tool_manage_clickup_task(BaseModel):
+    task_id: str = Field(..., description="ClickUp task identifier")
+    action: str = Field(..., description="Action to perform on task")
+
+class Tool_get_clockify_time_entries(BaseModel):
+    user_id: str = Field(..., description="Clockify user identifier")
+
+class Tool_convert_file(BaseModel):
+    input_format: str = Field(..., description="Input file format")
+    output_format: str = Field(..., description="Desired output file format")
+    file_content: str = Field(..., description="File content to convert")
+
+class Tool_validate_email_mailboxlayer(BaseModel):
+    email: str = Field(..., description="Email address to validate")
+
+class Tool_validate_email_address(BaseModel):
+    email: str = Field(..., description="Email address to validate for deliverability")
+
+class Tool_validate_cloudmersive(BaseModel):
+    value: str = Field(..., description="Value to validate (email, phone, VAT, domain)")
+    validation_type: str = Field(..., description="Type of validation to perform")
+
+class Tool_check_disposable_email(BaseModel):
+    email: str = Field(..., description="Email address to check if disposable")
+
+class Tool_get_chuck_norris_joke(BaseModel):
+    pass
+
+class Tool_get_corporate_buzzword(BaseModel):
+    pass
+
+class Tool_get_excuse(BaseModel):
+    category: str = Field(..., description="Category of excuse to generate")
+
+class Tool_get_fun_fact(BaseModel):
+    pass
+
+class Tool_get_pollen_forecast(BaseModel):
+    lat: float = Field(..., description="Latitude coordinate for pollen forecast")
+    lon: float = Field(..., description="Longitude coordinate for pollen forecast")
+
+class Tool_calculate_carbon_emissions(BaseModel):
+    activity: str = Field(..., description="Activity type for carbon calculation")
+    amount: float = Field(..., description="Amount or quantity of activity")
+
+class Tool_get_emission_factor(BaseModel):
+    activity: str = Field(..., description="Activity to get emission factor for")
+
+class Tool_offset_carbon(BaseModel):
+    kg_co2: float = Field(..., description="Kilograms of CO2 to offset")
+
+class Tool_search_events_eventbrite(BaseModel):
+    query: str = Field(..., description="Event search query")
+    location: str = Field(..., description="Location to search for events")
+
+class Tool_search_events_seatgeek(BaseModel):
+    query: str = Field(..., description="Event search query for SeatGeek")
+
+class Tool_search_events_ticketmaster(BaseModel):
+    keyword: str = Field(..., description="Event keyword to search")
+    city: str = Field(..., description="City to search for events")
+
+class Tool_validate_vat(BaseModel):
+    vat_number: str = Field(..., description="VAT number to validate")
+    country_code: str = Field(..., description="Country code for VAT validation")
+
+class Tool_get_insider_trading(BaseModel):
+    ticker: str = Field(..., description="Stock ticker symbol for insider trading data")
+
+class Tool_get_alpaca_market_data(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Alpaca market data")
+
+class Tool_get_alpha_vantage_stock(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Alpha Vantage data")
+
+class Tool_get_marketstack_data(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for marketstack data")
+
+class Tool_get_banco_brasil_transactions(BaseModel):
+    account_id: str = Field(..., description="Banco do Brasil account identifier")
+
+class Tool_validate_iban(BaseModel):
+    iban: str = Field(..., description="IBAN number to validate")
+
+class Tool_create_billplz_bill(BaseModel):
+    amount: float = Field(..., description="Bill amount in currency")
+    description: str = Field(..., description="Bill description")
+
+class Tool_get_bin_info(BaseModel):
+    bin_number: str = Field(..., description="Bank Identification Number to lookup")
+
+class Tool_generate_boleto(BaseModel):
+    amount: float = Field(..., description="Boleto payment amount")
+    payer_name: str = Field(..., description="Name of payer")
+
+class Tool_get_citi_account(BaseModel):
+    account_id: str = Field(..., description="Citi account identifier")
+
+class Tool_get_econdb_data(BaseModel):
+    dataset: str = Field(..., description="Economic dataset identifier")
+    country: str = Field(..., description="Country code for economic data")
+
+class Tool_get_fed_treasury_data(BaseModel):
+    series: str = Field(..., description="Treasury data series identifier")
+
+class Tool_get_finage_stock(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Finage data")
+
+class Tool_get_financial_modeling_prep(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Financial Modeling Prep")
+
+class Tool_get_finnhub_quote(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Finnhub quote")
+
+class Tool_get_fred_data(BaseModel):
+    series_id: str = Field(..., description="FRED data series identifier")
+
+class Tool_front_accounting_api(BaseModel):
+    operation: str = Field(..., description="Accounting operation to perform")
+
+class Tool_get_hotstoks_data(BaseModel):
+    ticker: str = Field(..., description="Stock ticker for Hotstoks data")
+
+class Tool_get_iex_cloud_quote(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for IEX Cloud quote")
+
+class Tool_get_ig_market_data(BaseModel):
+    epic: str = Field(..., description="IG market epic identifier")
+
+class Tool_get_indian_mutual_fund(BaseModel):
+    scheme_code: str = Field(..., description="Indian mutual fund scheme code")
+
+class Tool_get_intrinio_data(BaseModel):
+    ticker: str = Field(..., description="Stock ticker symbol")
+    data_point: str = Field(..., description="Specific data point to retrieve")
+
+class Tool_create_klarna_session(BaseModel):
+    amount: int = Field(..., description="Payment amount in cents")
+    currency: str = Field(..., description="Currency code")
+
+class Tool_create_mercadopago_payment(BaseModel):
+    amount: float = Field(..., description="Payment amount")
+    description: str = Field(..., description="Payment description")
+
+class Tool_connect_mono_account(BaseModel):
+    account_id: str = Field(..., description="Bank account identifier for Mono")
+
+class Tool_create_moov_transfer(BaseModel):
+    amount: float = Field(..., description="Transfer amount")
+    destination: str = Field(..., description="Destination account identifier")
+
+class Tool_connect_nordigen_bank(BaseModel):
+    bank_id: str = Field(..., description="Bank identifier for Nordigen connection")
+
+class Tool_get_openfigi(BaseModel):
+    id_value: str = Field(..., description="Security identifier value")
+    id_type: str = Field(..., description="Type of identifier (e.g., ISIN, CUSIP)")
+
+class Tool_connect_plaid_account(BaseModel):
+    public_token: str = Field(..., description="Plaid public token for account connection")
+
+class Tool_get_polygon_data(BaseModel):
+    ticker: str = Field(..., description="Stock ticker symbol")
+    date: str = Field(..., description="Date for historical data (YYYY-MM-DD)")
+
+class Tool_optimize_portfolio(BaseModel):
+    tickers: list = Field(..., description="List of stock ticker symbols")
+    weights: list = Field(..., description="List of portfolio weights")
+
+class Tool_get_ifsc_details(BaseModel):
+    ifsc_code: str = Field(..., description="Indian Financial System Code")
+
+class Tool_get_realtime_finance(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for real-time data")
+
+class Tool_get_sec_edgar(BaseModel):
+    cik: str = Field(..., description="Central Index Key for company")
+    filing_type: str = Field(..., description="Type of SEC filing (e.g., 10-K, 10-Q)")
+
+class Tool_smartapi_trade(BaseModel):
+    symbol: str = Field(..., description="Trading symbol")
+    action: str = Field(..., description="Trade action (buy/sell)")
+    quantity: int = Field(..., description="Number of shares to trade")
+
+class Tool_get_stockdata(BaseModel):
+    ticker: str = Field(..., description="Stock ticker for StockData API")
+
+class Tool_get_styvio_data(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Styvio data")
+
+class Tool_validate_tax_number(BaseModel):
+    tax_number: str = Field(..., description="Tax identification number")
+    country: str = Field(..., description="Country code for tax validation")
+
+class Tool_get_tradier_quote(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Tradier quote")
+
+class Tool_get_twelve_data(BaseModel):
+    symbol: str = Field(..., description="Stock symbol")
+    interval: str = Field(..., description="Time interval (e.g., 1min, 1hour, 1day)")
+
+class Tool_get_wallstreetbets_sentiment(BaseModel):
+    ticker: str = Field(..., description="Stock ticker for WallStreetBets sentiment")
+
+class Tool_get_yahoo_finance(BaseModel):
+    symbol: str = Field(..., description="Stock symbol for Yahoo Finance")
+
+class Tool_get_ynab_budget(BaseModel):
+    budget_id: str = Field(..., description="YNAB budget identifier")
+
+class Tool_get_zoho_books_invoice(BaseModel):
+    invoice_id: str = Field(..., description="Zoho Books invoice identifier")
+
+class Tool_get_bacon_image(BaseModel):
+    width: int = Field(..., description="Width of bacon placeholder image")
+    height: int = Field(..., description="Height of bacon placeholder image")
+
+class Tool_get_food_product(BaseModel):
+    barcode: str = Field(..., description="Product barcode for food information")
+
+class Tool_get_brewery(BaseModel):
+    brewery_id: int = Field(..., description="Brewery identifier")
+
+class Tool_get_food_facts(BaseModel):
+    barcode: str = Field(..., description="Product barcode for Open Food Facts")
+
+class Tool_get_aoe2_resource(BaseModel):
+    resource_id: int = Field(..., description="Age of Empires II resource identifier")
+
+class Tool_get_amiibo(BaseModel):
+    amiibo_id: str = Field(..., description="Nintendo Amiibo identifier")
+
+class Tool_get_autochess_data(BaseModel):
+    player_id: str = Field(..., description="Autochess VNG player identifier")
+
+class Tool_get_barter_game(BaseModel):
+    game_id: int = Field(..., description="Game identifier from Barter.VG")
+
+class Tool_geolocate_ip(BaseModel):
+    ip_address: str = Field(..., description="IP address to geolocate")
+
+class Tool_process_grass_gis(BaseModel):
+    operation: str = Field(..., description="GRASS GIS operation to perform")
+    parameters: dict = Field(..., description="Parameters for GIS operation")
+
+class Tool_get_administrative_division(BaseModel):
+    country: str = Field(..., description="Country code")
+    level: int = Field(..., description="Administrative division level")
+
+class Tool_geocode_address_france(BaseModel):
+    address: str = Field(..., description="French address to geocode")
+
+class Tool_get_bc_law(BaseModel):
+    law_id: str = Field(..., description="British Columbia law identifier")
+
+class Tool_get_brazil_data(BaseModel):
+    dataset: str = Field(..., description="Brazil public dataset identifier")
+
+class Tool_get_brazil_company(BaseModel):
+    cnpj: str = Field(..., description="Brazilian company CNPJ number")
+
+class Tool_get_federal_code(BaseModel):
+    agency: str = Field(..., description="Federal agency name")
+
+class Tool_get_cms_data(BaseModel):
+    dataset: str = Field(..., description="CMS dataset identifier")
+
+class Tool_get_covid_data(BaseModel):
+    country: str = Field(..., description="Country for COVID-19 data")
+
+class Tool_get_covid_datenhub(BaseModel):
+    region: str = Field(..., description="Region for COVID-19 datenhub")
+
+class Tool_get_government_response(BaseModel):
+    country: str = Field(..., description="Country for government response data")
+
+class Tool_search_job_adzuna(BaseModel):
+    query: str = Field(..., description="Job search query")
+    location: str = Field(..., description="Job location")
+
+class Tool_search_job_arbeitnow(BaseModel):
+    query: str = Field(..., description="Job search query for Europe/Remote")
+
+class Tool_search_job_arbeitsamt(BaseModel):
+    occupation: str = Field(..., description="Occupation to search for")
+    region: str = Field(..., description="Region in Germany")
+
+class Tool_search_job_careerjet(BaseModel):
+    query: str = Field(..., description="Job search query")
+    location: str = Field(..., description="Job location")
+
+class Tool_process_thai_ai(BaseModel):
+    text: str = Field(..., description="Thai text to process")
+    operation: str = Field(..., description="AI operation to perform")
+
+class Tool_analyze_image_cloudmersive(BaseModel):
+    image_url: str = Field(..., description="Image URL to analyze")
+    analysis_type: str = Field(..., description="Type of analysis (captioning, face recognition, NSFW)")
+
+class Tool_process_dialogflow(BaseModel):
+    text: str = Field(..., description="Text to process with Dialogflow")
+    session_id: str = Field(..., description="Session identifier")
+
+class Tool_filter_text_exude(BaseModel):
+    text: str = Field(..., description="Text data to filter")
+    operation: str = Field(..., description="Filter operation (stopping, stemming)")
+
+class Tool_get_7digital_track(BaseModel):
+    track_id: int = Field(..., description="7digital track identifier")
+
+class Tool_master_audio(BaseModel):
+    audio_url: str = Field(..., description="URL of audio file to master")
+
+class Tool_get_audiomack_track(BaseModel):
+    track_id: str = Field(..., description="Audiomack track identifier")
+
+class Tool_search_bandcamp(BaseModel):
+    query: str = Field(..., description="Search query for Bandcamp music")
+
+class Tool_get_news_mediastack(BaseModel):
+    category: str = Field(..., description="News category")
+    country: str = Field(..., description="Country code for news")
+
+class Tool_search_news_ap(BaseModel):
+    query: str = Field(..., description="Search query for Associated Press news")
+
+class Tool_search_historical_newspapers(BaseModel):
+    query: str = Field(..., description="Search query for historical newspapers")
+    year: int = Field(..., description="Year to search in")
+
+class Tool_get_currents_news(BaseModel):
+    category: str = Field(..., description="News category")
+    language: str = Field(..., description="Language code")
+
+class Tool_get_api_setu_service(BaseModel):
+    service: str = Field(..., description="API Setu service identifier")
+
+class Tool_get_black_history_fact(BaseModel):
+    fact_id: int = Field(..., description="Black history fact identifier")
+
+class Tool_get_telegram_bot(BaseModel):
+    bot_username: str = Field(..., description="Telegram bot username")
+
+class Tool_get_carto_prediction(BaseModel):
+    lat: float = Field(..., description="Latitude for location prediction")
+    lon: float = Field(..., description="Longitude for location prediction")
+    data_type: str = Field(..., description="Type of prediction data")
+
+class Tool_get_countly_analytics(BaseModel):
+    app_id: str = Field(..., description="Countly app identifier")
+    metric: str = Field(..., description="Analytics metric to retrieve")
+
+class Tool_search_creative_commons(BaseModel):
+    query: str = Field(..., description="Search query")
+    license_type: str = Field(..., description="Creative Commons license type")
+
+class Tool_search_datamuse(BaseModel):
+    word: str = Field(..., description="Word to search")
+    relation: str = Field(..., description="Word relation type (synonym, rhyme, etc.)")
+
+class Tool_query_metabase(BaseModel):
+    query_id: int = Field(..., description="Metabase query identifier")
+
+class Tool_search_epo_patent(BaseModel):
+    query: str = Field(..., description="European patent search query")
+
+class Tool_search_patentsview(BaseModel):
+    query: str = Field(..., description="US patent search query")
+
+class Tool_search_tipo_patent(BaseModel):
+    query: str = Field(..., description="Taiwan patent search query")
+
+class Tool_search_uspto_patent(BaseModel):
+    query: str = Field(..., description="USPTO patent search query")
+
+class Tool_get_advice(BaseModel):
+    pass
+
+class Tool_get_biriyani_image(BaseModel):
+    pass
+
+class Tool_get_dev_article(BaseModel):
+    article_id: int = Field(..., description="Dev.to article identifier")
+
+class Tool_get_dictum_quote(BaseModel):
+    quote_id: int = Field(..., description="Dictum quote identifier")
+
+class Tool_validate_phone_number(BaseModel):
+    phone: str = Field(..., description="Phone number to validate")
+    country_code: str = Field(..., description="Country code for validation")
+
+class Tool_validate_numverify(BaseModel):
+    phone: str = Field(..., description="Phone number to validate with numverify")
+
+class Tool_validate_phone_cloudmersive(BaseModel):
+    phone: str = Field(..., description="Phone number to validate with Cloudmersive")
+
+class Tool_get_phone_specs(BaseModel):
+    brand: str = Field(..., description="Phone brand name")
+    model: str = Field(..., description="Phone model name")
+
+class Tool_generate_image_bruzu(BaseModel):
+    text: str = Field(..., description="Text to include in generated image")
+    template: str = Field(..., description="Template identifier for image generation")
+
+class Tool_optimize_image_cheetaho(BaseModel):
+    image_url: str = Field(..., description="Image URL to optimize")
+    width: int = Field(..., description="Target width")
+    height: int = Field(..., description="Target height")
+
+class Tool_manipulate_image_dagpi(BaseModel):
+    image_url: str = Field(..., description="Image URL to manipulate")
+    effect: str = Field(..., description="Effect to apply to image")
+
+class Tool_generate_image_duply(BaseModel):
+    template_id: str = Field(..., description="Template identifier")
+    data: dict = Field(..., description="Data to populate template")
+
+class Tool_get_codeforces_user(BaseModel):
+    handle: str = Field(..., description="Codeforces user handle")
+
+class Tool_compile_code_hackerearth(BaseModel):
+    code: str = Field(..., description="Source code to compile")
+    language: str = Field(..., description="Programming language")
+
+class Tool_get_coding_contests(BaseModel):
+    pass
+
+class Tool_generate_docs_mintlify(BaseModel):
+    code: str = Field(..., description="Code to generate documentation for")
+    language: str = Field(..., description="Programming language")
+
+class Tool_get_astronomy_data(BaseModel):
+    object_name: str = Field(..., description="Astronomical object name")
+
+class Tool_search_arxiv(BaseModel):
+    query: str = Field(..., description="arXiv search query")
+    category: str = Field(..., description="arXiv category")
+
+class Tool_search_core(BaseModel):
+    query: str = Field(..., description="CORE research paper search query")
+
+class Tool_get_gbif_species(BaseModel):
+    species_name: str = Field(..., description="Species name to lookup")
+
+class Tool_scan_binaryedge(BaseModel):
+    target: str = Field(..., description="Target IP or domain to scan")
+
+class Tool_get_bitwarden_vault(BaseModel):
+    user_id: str = Field(..., description="Bitwarden user identifier")
+
+class Tool_detect_bot(BaseModel):
+    user_agent: str = Field(..., description="User agent string")
+    ip: str = Field(..., description="IP address")
+
+class Tool_get_bugcrowd_submission(BaseModel):
+    submission_id: str = Field(..., description="Bugcrowd submission identifier")
+
+class Tool_search_bestbuy_product(BaseModel):
+    query: str = Field(..., description="Best Buy product search query")
+
+class Tool_search_digikey_part(BaseModel):
+    part_number: str = Field(..., description="Digi-Key part number")
+
+class Tool_get_dummy_product(BaseModel):
+    product_id: int = Field(..., description="Dummy product identifier")
+
+class Tool_search_ebay(BaseModel):
+    query: str = Field(..., description="eBay search query")
+    category: str = Field(..., description="eBay category")
+
+class Tool_get_4chan_board(BaseModel):
+    board: str = Field(..., description="4chan board identifier")
+
+class Tool_post_to_social_ayrshare(BaseModel):
+    message: str = Field(..., description="Message to post")
+    platforms: list = Field(..., description="List of social media platforms")
+
+class Tool_get_horoscope_aztro(BaseModel):
+    sign: str = Field(..., description="Zodiac sign")
+    day: str = Field(..., description="Day (today, tomorrow, yesterday)")
+
+class Tool_get_blogger_posts(BaseModel):
+    blog_id: str = Field(..., description="Blogger blog identifier")
+
+class Tool_get_football_info(BaseModel):
+    league: str = Field(..., description="Football league name")
+    season: int = Field(..., description="Season year")
+
+class Tool_check_symptoms(BaseModel):
+    symptoms: list = Field(..., description="List of symptoms")
+    age: int = Field(..., description="Patient age")
+    gender: str = Field(..., description="Patient gender")
+
+class Tool_get_nba_stats(BaseModel):
+    player: str = Field(..., description="NBA player name")
+
+class Tool_get_city_bikes(BaseModel):
+    city: str = Field(..., description="City name for bike sharing data")
+
+class Tool_generate_bacon_ipsum(BaseModel):
+    paragraphs: int = Field(..., description="Number of paragraphs to generate")
+
+class Tool_generate_avatar_dicebear(BaseModel):
+    seed: str = Field(..., description="Seed for avatar generation")
+    style: str = Field(..., description="Avatar style")
+
+class Tool_get_random_word(BaseModel):
+    count: int = Field(..., description="Number of random words to generate")
+
+class Tool_generate_fake_data(BaseModel):
+    schema: dict = Field(..., description="Schema for fake data generation")
+
+class Tool_detect_code_language(BaseModel):
+    code: str = Field(..., description="Code snippet to detect language")
+
+class Tool_detect_language_apilayer(BaseModel):
+    text: str = Field(..., description="Text to detect language")
+
+class Tool_analyze_text_aylien(BaseModel):
+    text: str = Field(..., description="Text to analyze")
+    analysis_type: str = Field(..., description="Type of analysis")
+
+class Tool_detect_language_api(BaseModel):
+    text: str = Field(..., description="Text for language detection")
+
+class Tool_track_shipment_aftership(BaseModel):
+    tracking_number: str = Field(..., description="Shipment tracking number")
+
+class Tool_track_correios(BaseModel):
+    tracking_code: str = Field(..., description="Correios tracking code")
+
+class Tool_track_habit_pixela(BaseModel):
+    user: str = Field(..., description="Pixela username")
+    graph_id: str = Field(..., description="Graph identifier")
+    date: str = Field(..., description="Date for habit tracking")
+
+class Tool_get_pincode_info(BaseModel):
+    pincode: str = Field(..., description="Indian postal pincode")
+
+class Tool_get_adsb_flight(BaseModel):
+    icao24: str = Field(..., description="ICAO24 aircraft identifier")
+
+class Tool_get_airport_info(BaseModel):
+    icao_code: str = Field(..., description="ICAO airport code")
+
+class Tool_get_ais_vessel(BaseModel):
+    mmsi: str = Field(..., description="Maritime Mobile Service Identity")
+
+class Tool_search_flights_amadeus(BaseModel):
+    origin: str = Field(..., description="Origin airport code")
+    destination: str = Field(..., description="Destination airport code")
+    date: str = Field(..., description="Flight date")
+
+class Tool_shorten_url_cleanuri(BaseModel):
+    url: str = Field(..., description="URL to shorten")
+
+class Tool_track_link_clickmeter(BaseModel):
+    link_id: str = Field(..., description="ClickMeter link identifier")
+
+class Tool_shorten_url_drivet(BaseModel):
+    url: str = Field(..., description="URL to shorten with Drivet")
+
+class Tool_shorten_url_free(BaseModel):
+    url: str = Field(..., description="URL to shorten with Free URL Shortener")
+
+class Tool_get_helipad(BaseModel):
+    helipad_id: str = Field(..., description="Helipad identifier")
+
+class Tool_get_kbb_vehicle(BaseModel):
+    vin: str = Field(..., description="Vehicle Identification Number")
+
+class Tool_get_mercedes_vehicle(BaseModel):
+    vin: str = Field(..., description="Mercedes vehicle VIN")
+
+class Tool_get_nhtsa_vehicle(BaseModel):
+    vin: str = Field(..., description="Vehicle VIN for NHTSA data")
+
+class Tool_get_doctor_who_info(BaseModel):
+    episode_id: int = Field(..., description="Doctor Who episode identifier")
+
+class Tool_get_next_episode(BaseModel):
+    show: str = Field(..., description="TV show name")
+
+class Tool_get_czech_tv_schedule(BaseModel):
+    channel: str = Field(..., description="Czech TV channel")
+    date: str = Field(..., description="Schedule date")
+
+class Tool_get_dailymotion_video(BaseModel):
+    video_id: str = Field(..., description="Dailymotion video identifier")
+
+class Tool_get_weather_micro(BaseModel):
+    lat: float = Field(..., description="Latitude")
+    lon: float = Field(..., description="Longitude")
+
+class Tool_get_odweather_forecast(BaseModel):
+    location: str = Field(..., description="Location name")
+
+class Tool_get_oikolab_weather(BaseModel):
+    lat: float = Field(..., description="Latitude")
+    lon: float = Field(..., description="Longitude")
+    date: str = Field(..., description="Date for weather data")
+
+class Tool_get_open_meteo_forecast(BaseModel):
+    lat: float = Field(..., description="Latitude")
+    lon: float = Field(..., description="Longitude")
+
+
+# Tools List
+
+tools = [
+    StructuredTool.from_function(
+        func=adopt_a_pet,
+        name="adopt_a_pet",
+        description="Search for adoptable pets by location and animal type using AdoptAPet resource",
+        args_schema=Tool_adopt_a_pet
+    ),
+    StructuredTool.from_function(
+        func=get_axolotl_info,
+        name="get_axolotl_info",
+        description="Retrieve axolotl pictures and facts by fact ID from the Axolotl collection",
+        args_schema=Tool_get_axolotl_info
+    ),
+    StructuredTool.from_function(
+        func=get_cat_fact,
+        name="get_cat_fact",
+        description="Get a random daily cat fact",
+        args_schema=Tool_get_cat_fact
+    ),
+    StructuredTool.from_function(
+        func=get_cat_image,
+        name="get_cat_image",
+        description="Retrieve cat pictures and gifs from Cataas service with optional tag filtering",
+        args_schema=Tool_get_cat_image
+    ),
+    StructuredTool.from_function(
+        func=search_anime,
+        name="search_anime",
+        description="Search for anime titles using AniAPI anime discovery service",
+        args_schema=Tool_search_anime
+    ),
+    StructuredTool.from_function(
+        func=get_anime_info,
+        name="get_anime_info",
+        description="Get detailed information about specific anime from AniDB database",
+        args_schema=Tool_get_anime_info
+    ),
+    StructuredTool.from_function(
+        func=get_anime_list,
+        name="get_anime_list",
+        description="Discover and track anime by status using AniList",
+        args_schema=Tool_get_anime_list
+    ),
+    StructuredTool.from_function(
+        func=get_anime_quote,
+        name="get_anime_quote",
+        description="Get random anime quotes from AnimeChan database with over 10k+ quotes",
+        args_schema=Tool_get_anime_quote
+    ),
+    StructuredTool.from_function(
+        func=check_ip_reputation,
+        name="check_ip_reputation",
+        description="Check IP address reputation and abuse confidence score using AbuseIPDB",
+        args_schema=Tool_check_ip_reputation
+    ),
+    StructuredTool.from_function(
+        func=check_threat_intelligence,
+        name="check_threat_intelligence",
+        description="Check domain/URL reputation using AlienVault Open Threat Exchange",
+        args_schema=Tool_check_threat_intelligence
+    ),
+    StructuredTool.from_function(
+        func=analyze_malware,
+        name="analyze_malware",
+        description="Execute and analyze malware using CAPEsandbox environment",
+        args_schema=Tool_analyze_malware
+    ),
+    StructuredTool.from_function(
+        func=check_safe_browsing,
+        name="check_safe_browsing",
+        description="Check if link or domain is flagged by Google Safe Browsing",
+        args_schema=Tool_check_safe_browsing
+    ),
+    StructuredTool.from_function(
+        func=generate_discord_image,
+        name="generate_discord_image",
+        description="Generate customized images for Discord users using Améthyste API",
+        args_schema=Tool_generate_discord_image
+    ),
+    StructuredTool.from_function(
+        func=get_artwork,
+        name="get_artwork",
+        description="Retrieve artwork information from Art Institute of Chicago collection",
+        args_schema=Tool_get_artwork
+    ),
+    StructuredTool.from_function(
+        func=generate_color_scheme,
+        name="generate_color_scheme",
+        description="Generate harmonious color schemes using Colormind AI",
+        args_schema=Tool_generate_color_scheme
+    ),
+    StructuredTool.from_function(
+        func=get_color_palette,
+        name="get_color_palette",
+        description="Get color patterns and palettes from ColourLovers community",
+        args_schema=Tool_get_color_palette
+    ),
+    StructuredTool.from_function(
+        func=authenticate_user,
+        name="authenticate_user",
+        description="Authenticate users with Auth0 authentication platform",
+        args_schema=Tool_authenticate_user
+    ),
+    StructuredTool.from_function(
+        func=generate_otp,
+        name="generate_otp",
+        description="Generate and send One-Time Password for authentication using GetOTP",
+        args_schema=Tool_generate_otp
+    ),
+    StructuredTool.from_function(
+        func=create_user,
+        name="create_user",
+        description="Create new user account using Micro User Service for user management",
+        args_schema=Tool_create_user
+    ),
+    StructuredTool.from_function(
+        func=passwordless_login,
+        name="passwordless_login",
+        description="Implement passwordless authentication using MojoAuth platform",
+        args_schema=Tool_passwordless_login
+    ),
+    StructuredTool.from_function(
+        func=query_blockchain,
+        name="query_blockchain",
+        description="Query blockchain data using Bitquery GraphQL APIs for DEX and onchain data",
+        args_schema=Tool_query_blockchain
+    ),
+    StructuredTool.from_function(
+        func=get_chainlink_data,
+        name="get_chainlink_data",
+        description="Get price feed data from Chainlink decentralized oracle network",
+        args_schema=Tool_get_chainlink_data
+    ),
+    StructuredTool.from_function(
+        func=anchor_to_blockchain,
+        name="anchor_to_blockchain",
+        description="Anchor data to Bitcoin blockchain using Chainpoint network",
+        args_schema=Tool_anchor_to_blockchain
+    ),
+    StructuredTool.from_function(
+        func=get_blockchain_data,
+        name="get_blockchain_data",
+        description="Access multi-blockchain data using Covalent aggregator platform",
+        args_schema=Tool_get_blockchain_data
+    ),
+    StructuredTool.from_function(
+        func=get_bhagavad_gita_verse,
+        name="get_bhagavad_gita_verse",
+        description="Retrieve Bhagavad Gita verses with translations in Sanskrit/English/Hindi from 21+ authors",
+        args_schema=Tool_get_bhagavad_gita_verse
+    ),
+    StructuredTool.from_function(
+        func=get_bhagavad_gita_telugu,
+        name="get_bhagavad_gita_telugu",
+        description="Access Bhagavad Gita content in Telugu and Odia languages",
+        args_schema=Tool_get_bhagavad_gita_telugu
+    ),
+    StructuredTool.from_function(
+        func=get_bible_verse,
+        name="get_bible_verse",
+        description="Get Bible verses in multiple languages from Bible-api",
+        args_schema=Tool_get_bible_verse
+    ),
+    StructuredTool.from_function(
+        func=get_persian_poetry,
+        name="get_persian_poetry",
+        description="Access classic Persian poetry works with manuscripts and recitations from Ganjoor",
+        args_schema=Tool_get_persian_poetry
+    ),
+    StructuredTool.from_function(
+        func=manage_dashboard,
+        name="manage_dashboard",
+        description="Manage BI dashboards and data sources on Apache Superset",
+        args_schema=Tool_manage_dashboard
+    ),
+    StructuredTool.from_function(
+        func=search_charity,
+        name="search_charity",
+        description="Search non-profit charity data using Charity Search API",
+        args_schema=Tool_search_charity
+    ),
+    StructuredTool.from_function(
+        func=get_company_logo,
+        name="get_company_logo",
+        description="Search and embed company logos using Clearbit Logo API",
+        args_schema=Tool_get_company_logo
+    ),
+    StructuredTool.from_function(
+        func=search_domains,
+        name="search_domains",
+        description="Search registered domain names using Domainsdb.info",
+        args_schema=Tool_search_domains
+    ),
+    StructuredTool.from_function(
+        func=get_public_holidays,
+        name="get_public_holidays",
+        description="Get national, regional, and religious holiday data via Public Holidays API",
+        args_schema=Tool_get_public_holidays
+    ),
+    StructuredTool.from_function(
+        func=get_holidays_calendarific,
+        name="get_holidays_calendarific",
+        description="Access worldwide holiday information using Calendarific API",
+        args_schema=Tool_get_holidays_calendarific
+    ),
+    StructuredTool.from_function(
+        func=get_national_holiday,
+        name="get_national_holiday",
+        description="Get national holidays with descriptions using Checkiday API trusted by leading companies",
+        args_schema=Tool_get_national_holiday
+    ),
+    StructuredTool.from_function(
+        func=get_church_calendar,
+        name="get_church_calendar",
+        description="Access church calendar events and liturgical information",
+        args_schema=Tool_get_church_calendar
+    ),
+    StructuredTool.from_function(
+        func=upload_file_anon,
+        name="upload_file_anon",
+        description="Upload and share files anonymously using AnonFiles",
+        args_schema=Tool_upload_file_anon
+    ),
+    StructuredTool.from_function(
+        func=upload_to_box,
+        name="upload_to_box",
+        description="Upload and share files using Box file sharing and storage",
+        args_schema=Tool_upload_to_box
+    ),
+    StructuredTool.from_function(
+        func=upload_to_fileio,
+        name="upload_to_fileio",
+        description="Simple, anonymous, and secure file sharing with File.io",
+        args_schema=Tool_upload_to_fileio
+    ),
+    StructuredTool.from_function(
+        func=check_azure_health,
+        name="check_azure_health",
+        description="Check Azure resource health status using Azure DevOps Health API",
+        args_schema=Tool_check_azure_health
+    ),
+    StructuredTool.from_function(
+        func=trigger_bitrise_build,
+        name="trigger_bitrise_build",
+        description="Trigger builds and integrate development pipelines with Bitrise",
+        args_schema=Tool_trigger_bitrise_build
+    ),
+    StructuredTool.from_function(
+        func=trigger_buddy_pipeline,
+        name="trigger_buddy_pipeline",
+        description="Execute continuous integration and delivery pipelines using Buddy",
+        args_schema=Tool_trigger_buddy_pipeline
+    ),
+    StructuredTool.from_function(
+        func=trigger_circleci_build,
+        name="trigger_circleci_build",
+        description="Automate software development with CircleCI continuous integration",
+        args_schema=Tool_trigger_circleci_build
+    ),
+    StructuredTool.from_function(
+        func=get_crypto_rate,
+        name="get_crypto_rate",
+        description="Get real-time cryptocurrency exchange rates using apilayer coinlayer",
+        args_schema=Tool_get_crypto_rate
+    ),
+    StructuredTool.from_function(
+        func=get_binance_price,
+        name="get_binance_price",
+        description="Get cryptocurrency trading prices from Binance exchange",
+        args_schema=Tool_get_binance_price
+    ),
+    StructuredTool.from_function(
+        func=get_bitcambio_assets,
+        name="get_bitcambio_assets",
+        description="Get list of all traded assets in Bitcambio exchange",
+        args_schema=Tool_get_bitcambio_assets
+    ),
+    StructuredTool.from_function(
+        func=get_bitcoin_average,
+        name="get_bitcoin_average",
+        description="Access digital asset price data for blockchain industry from BitcoinAverage",
+        args_schema=Tool_get_bitcoin_average
+    ),
+    StructuredTool.from_function(
+        func=convert_currency,
+        name="convert_currency",
+        description="Convert between 150+ currencies using Amdoren free currency API",
+        args_schema=Tool_convert_currency
+    ),
+    StructuredTool.from_function(
+        func=get_exchange_rate,
+        name="get_exchange_rate",
+        description="Get exchange rates and currency conversion using apilayer fixer.io",
+        args_schema=Tool_get_exchange_rate
+    ),
+    StructuredTool.from_function(
+        func=get_currency_rate,
+        name="get_currency_rate",
+        description="Free currency exchange rates with 150+ currencies and no rate limits",
+        args_schema=Tool_get_currency_rate
+    ),
+    StructuredTool.from_function(
+        func=get_currency_freaks_rate,
+        name="get_currency_freaks_rate",
+        description="Get current and historical currency exchange rates with 1K requests/month free plan",
+        args_schema=Tool_get_currency_freaks_rate
+    ),
+    StructuredTool.from_function(
+        func=postman_echo_test,
+        name="postman_echo_test",
+        description="Test API server to receive and return values from HTTP methods using Postman Echo",
+        args_schema=Tool_postman_echo_test
+    ),
+    StructuredTool.from_function(
+        func=check_profanity,
+        name="check_profanity",
+        description="Validate content against profanity and obscenity using PurgoMalum",
+        args_schema=Tool_check_profanity
+    ),
+    StructuredTool.from_function(
+        func=autocomplete_address,
+        name="autocomplete_address",
+        description="Get real-time US address suggestions for quick data entry",
+        args_schema=Tool_autocomplete_address
+    ),
+    StructuredTool.from_function(
+        func=extract_address,
+        name="extract_address",
+        description="Extract US postal addresses from any text including emails",
+        args_schema=Tool_extract_address
+    ),
+    StructuredTool.from_function(
+        func=get_pull_requests,
+        name="get_pull_requests",
+        description="Access data from 24 Pull Requests project promoting open source collaboration in December",
+        args_schema=Tool_get_pull_requests
+    ),
+    StructuredTool.from_function(
+        func=take_screenshot,
+        name="take_screenshot",
+        description="Take programmatic screenshots of web pages from any website",
+        args_schema=Tool_take_screenshot
+    ),
+    StructuredTool.from_function(
+        func=estimate_age,
+        name="estimate_age",
+        description="Estimate age from a first name using Agify.io",
+        args_schema=Tool_estimate_age
+    ),
+    StructuredTool.from_function(
+        func=get_api_gratis,
+        name="get_api_gratis",
+        description="Access multiple services and public APIs from API Gratis",
+        args_schema=Tool_get_api_gratis
+    ),
+    StructuredTool.from_function(
+        func=get_chinese_character,
+        name="get_chinese_character",
+        description="Get Chinese character definitions and pronunciations from Chinese Character Web",
+        args_schema=Tool_get_chinese_character
+    ),
+    StructuredTool.from_function(
+        func=search_chinese_text,
+        name="search_chinese_text",
+        description="Search pre-modern Chinese texts in digital library from Chinese Text Project",
+        args_schema=Tool_search_chinese_text
+    ),
+    StructuredTool.from_function(
+        func=lookup_collins,
+        name="lookup_collins",
+        description="Access bilingual dictionary and thesaurus data from Collins",
+        args_schema=Tool_lookup_collins
+    ),
+    StructuredTool.from_function(
+        func=get_free_dictionary,
+        name="get_free_dictionary",
+        description="Get word definitions, phonetics, pronunciations, parts of speech, examples, and synonyms",
+        args_schema=Tool_get_free_dictionary
+    ),
+    StructuredTool.from_function(
+        func=manage_asana_task,
+        name="manage_asana_task",
+        description="Programmatic access to all data in Asana project management system",
+        args_schema=Tool_manage_asana_task
+    ),
+    StructuredTool.from_function(
+        func=manage_clickup_task,
+        name="manage_clickup_task",
+        description="Manage tasks in ClickUp cloud-based project management tool",
+        args_schema=Tool_manage_clickup_task
+    ),
+    StructuredTool.from_function(
+        func=get_clockify_time_entries,
+        name="get_clockify_time_entries",
+        description="Access time tracking data using Clockify REST-based API",
+        args_schema=Tool_get_clockify_time_entries
+    ),
+    StructuredTool.from_function(
+        func=convert_file,
+        name="convert_file",
+        description="Convert audio, video, document, ebook, archive, image, spreadsheet, and presentation files with CloudConvert",
+        args_schema=Tool_convert_file
+    ),
+    StructuredTool.from_function(
+        func=validate_email_mailboxlayer,
+        name="validate_email_mailboxlayer",
+        description="Validate email addresses using apilayer mailboxlayer",
+        args_schema=Tool_validate_email_mailboxlayer
+    ),
+    StructuredTool.from_function(
+        func=validate_email_address,
+        name="validate_email_address",
+        description="Validate email addresses for deliverability and spam detection",
+        args_schema=Tool_validate_email_address
+    ),
+    StructuredTool.from_function(
+        func=validate_cloudmersive,
+        name="validate_cloudmersive",
+        description="Validate email addresses, phone numbers, VAT numbers and domain names with Cloudmersive",
+        args_schema=Tool_validate_cloudmersive
+    ),
+    StructuredTool.from_function(
+        func=check_disposable_email,
+        name="check_disposable_email",
+        description="Validate and detect disposable and temporary email addresses using Disify",
+        args_schema=Tool_check_disposable_email
+    ),
+    StructuredTool.from_function(
+        func=get_chuck_norris_joke,
+        name="get_chuck_norris_joke",
+        description="Get hand curated Chuck Norris jokes from chucknorris.io JSON API",
+        args_schema=Tool_get_chuck_norris_joke
+    ),
+    StructuredTool.from_function(
+        func=get_corporate_buzzword,
+        name="get_corporate_buzzword",
+        description="Get random corporate buzzwords via REST API",
+        args_schema=Tool_get_corporate_buzzword
+    ),
+    StructuredTool.from_function(
+        func=get_excuse,
+        name="get_excuse",
+        description="Get random excuses for various situations using Excuser API",
+        args_schema=Tool_get_excuse
+    ),
+    StructuredTool.from_function(
+        func=get_fun_fact,
+        name="get_fun_fact",
+        description="Get random fun facts from FFA database via HTTPS API",
+        args_schema=Tool_get_fun_fact
+    ),
+    StructuredTool.from_function(
+        func=get_pollen_forecast,
+        name="get_pollen_forecast",
+        description="Get daily pollen condition forecasts for specific location from BreezoMeter",
+        args_schema=Tool_get_pollen_forecast
+    ),
+    StructuredTool.from_function(
+        func=calculate_carbon_emissions,
+        name="calculate_carbon_emissions",
+        description="Calculate carbon emissions estimates for common activities using Carbon Interface",
+        args_schema=Tool_calculate_carbon_emissions
+    ),
+    StructuredTool.from_function(
+        func=get_emission_factor,
+        name="get_emission_factor",
+        description="Calculate environmental footprint for emission-generating activities with Climatiq",
+        args_schema=Tool_get_emission_factor
+    ),
+    StructuredTool.from_function(
+        func=offset_carbon,
+        name="offset_carbon",
+        description="Calculate real-time impact of carbon-intensive activities using Cloverly",
+        args_schema=Tool_offset_carbon
+    ),
+    StructuredTool.from_function(
+        func=search_events_eventbrite,
+        name="search_events_eventbrite",
+        description="Search and find events using Eventbrite API",
+        args_schema=Tool_search_events_eventbrite
+    ),
+    StructuredTool.from_function(
+        func=search_events_seatgeek,
+        name="search_events_seatgeek",
+        description="Search events, venues and performers using SeatGeek",
+        args_schema=Tool_search_events_seatgeek
+    ),
+    StructuredTool.from_function(
+        func=search_events_ticketmaster,
+        name="search_events_ticketmaster",
+        description="Search events, attractions, and venues using Ticketmaster API",
+        args_schema=Tool_search_events_ticketmaster
+    ),
+    StructuredTool.from_function(
+        func=validate_vat,
+        name="validate_vat",
+        description="Validate VAT numbers and calculate VAT rates",
+        args_schema=Tool_validate_vat
+    ),
+    StructuredTool.from_function(
+        func=get_insider_trading,
+        name="get_insider_trading",
+        description="Access insider trading data and earnings call analysis from Aletheia",
+        args_schema=Tool_get_insider_trading
+    ),
+    StructuredTool.from_function(
+        func=get_alpaca_market_data,
+        name="get_alpaca_market_data",
+        description="Get realtime and historical market data on US equities and ETFs from Alpaca",
+        args_schema=Tool_get_alpaca_market_data
+    ),
+    StructuredTool.from_function(
+        func=get_alpha_vantage_stock,
+        name="get_alpha_vantage_stock",
+        description="Access realtime and historical stock data from Alpha Vantage",
+        args_schema=Tool_get_alpha_vantage_stock
+    ),
+    StructuredTool.from_function(
+        func=get_marketstack_data,
+        name="get_marketstack_data",
+        description="Get real-time, intraday and historical market data using apilayer marketstack",
+        args_schema=Tool_get_marketstack_data
+    ),
+    StructuredTool.from_function(
+        func=get_banco_brasil_transactions,
+        name="get_banco_brasil_transactions",
+        description="Access Banco do Brasil financial transaction APIs",
+        args_schema=Tool_get_banco_brasil_transactions
+    ),
+    StructuredTool.from_function(
+        func=validate_iban,
+        name="validate_iban",
+        description="Instant IBAN and SWIFT number validation globally using Bank Data API",
+        args_schema=Tool_validate_iban
+    ),
+    StructuredTool.from_function(
+        func=create_billplz_bill,
+        name="create_billplz_bill",
+        description="Create payment bills using Billplz payment platform",
+        args_schema=Tool_create_billplz_bill
+    ),
+    StructuredTool.from_function(
+        func=get_bin_info,
+        name="get_bin_info",
+        description="Public access to IIN/BIN card information database",
+        args_schema=Tool_get_bin_info
+    ),
+    StructuredTool.from_function(
+        func=generate_boleto,
+        name="generate_boleto",
+        description="Generate boletos for Brazilian payments using Boleto.Cloud API",
+        args_schema=Tool_generate_boleto
+    ),
+    StructuredTool.from_function(
+        func=get_citi_account,
+        name="get_citi_account",
+        description="Access Citigroup account and statement data via APIs",
+        args_schema=Tool_get_citi_account
+    ),
+    StructuredTool.from_function(
+        func=get_econdb_data,
+        name="get_econdb_data",
+        description="Access global macroeconomic data from Econdb",
+        args_schema=Tool_get_econdb_data
+    ),
+    StructuredTool.from_function(
+        func=get_fed_treasury_data,
+        name="get_fed_treasury_data",
+        description="Get U.S. Department of the Treasury data",
+        args_schema=Tool_get_fed_treasury_data
+    ),
+    StructuredTool.from_function(
+        func=get_finage_stock,
+        name="get_finage_stock",
+        description="Real-time and historical data for stocks, currencies, crypto, indices, and ETFs from Finage",
+        args_schema=Tool_get_finage_stock
+    ),
+    StructuredTool.from_function(
+        func=get_financial_modeling_prep,
+        name="get_financial_modeling_prep",
+        description="Access realtime and historical stock data from Financial Modeling Prep",
+        args_schema=Tool_get_financial_modeling_prep
+    ),
+    StructuredTool.from_function(
+        func=get_finnhub_quote,
+        name="get_finnhub_quote",
+        description="Real-time RESTful APIs and Websocket for stocks, currencies, and crypto from Finnhub",
+        args_schema=Tool_get_finnhub_quote
+    ),
+    StructuredTool.from_function(
+        func=get_fred_data,
+        name="get_fred_data",
+        description="Economic data from Federal Reserve Bank of St. Louis FRED database",
+        args_schema=Tool_get_fred_data
+    ),
+    StructuredTool.from_function(
+        func=front_accounting_api,
+        name="front_accounting_api",
+        description="Access multilingual and multicurrency Front Accounting for small businesses",
+        args_schema=Tool_front_accounting_api
+    ),
+    StructuredTool.from_function(
+        func=get_hotstoks_data,
+        name="get_hotstoks_data",
+        description="Stock market data powered by SQL from Hotstoks",
+        args_schema=Tool_get_hotstoks_data
+    ),
+    StructuredTool.from_function(
+        func=get_iex_cloud_quote,
+        name="get_iex_cloud_quote",
+        description="Realtime and historical stock and market data from IEX Cloud",
+        args_schema=Tool_get_iex_cloud_quote
+    ),
+    StructuredTool.from_function(
+        func=get_ig_market_data,
+        name="get_ig_market_data",
+        description="Spreadbetting and CFD market data from IG",
+        args_schema=Tool_get_ig_market_data
+    ),
+    StructuredTool.from_function(
+        func=get_indian_mutual_fund,
+        name="get_indian_mutual_fund",
+        description="Get complete history of India Mutual Funds data",
+        args_schema=Tool_get_indian_mutual_fund
+    ),
+    StructuredTool.from_function(
+        func=get_intrinio_data,
+        name="get_intrinio_data",
+        description="Access wide selection of financial data feeds from Intrinio",
+        args_schema=Tool_get_intrinio_data
+    ),
+    StructuredTool.from_function(
+        func=create_klarna_session,
+        name="create_klarna_session",
+        description="Create payment and shopping sessions using Klarna",
+        args_schema=Tool_create_klarna_session
+    ),
+    StructuredTool.from_function(
+        func=create_mercadopago_payment,
+        name="create_mercadopago_payment",
+        description="Develop integrations with MercadoPago payment API",
+        args_schema=Tool_create_mercadopago_payment
+    ),
+    StructuredTool.from_function(
+        func=connect_mono_account,
+        name="connect_mono_account",
+        description="Connect with users' bank accounts and access transaction data in Africa using Mono",
+        args_schema=Tool_connect_mono_account
+    ),
+    StructuredTool.from_function(
+        func=create_moov_transfer,
+        name="create_moov_transfer",
+        description="Send, receive, and store money using Moov API",
+        args_schema=Tool_create_moov_transfer
+    ),
+    StructuredTool.from_function(
+        func=connect_nordigen_bank,
+        name="connect_nordigen_bank",
+        description="Connect to bank accounts using official bank APIs with Nordigen",
+        args_schema=Tool_connect_nordigen_bank
+    ),
+    StructuredTool.from_function(
+        func=get_openfigi,
+        name="get_openfigi",
+        description="Get equity, index, futures, options symbology from Bloomberg OpenFIGI",
+        args_schema=Tool_get_openfigi
+    ),
+    StructuredTool.from_function(
+        func=connect_plaid_account,
+        name="connect_plaid_account",
+        description="Connect with user's bank accounts and access transaction data using Plaid",
+        args_schema=Tool_connect_plaid_account
+    ),
+    StructuredTool.from_function(
+        func=get_polygon_data,
+        name="get_polygon_data",
+        description="Access historical stock market data from Polygon",
+        args_schema=Tool_get_polygon_data
+    ),
+    StructuredTool.from_function(
+        func=optimize_portfolio,
+        name="optimize_portfolio",
+        description="Portfolio analysis and optimization using Portfolio Optimizer",
+        args_schema=Tool_optimize_portfolio
+    ),
+    StructuredTool.from_function(
+        func=get_ifsc_details,
+        name="get_ifsc_details",
+        description="Get Indian Financial Systems Code bank branch details using Razorpay IFSC",
+        args_schema=Tool_get_ifsc_details
+    ),
+    StructuredTool.from_function(
+        func=get_realtime_finance,
+        name="get_realtime_finance",
+        description="Access realtime stock data via Websocket using Real Time Finance API",
+        args_schema=Tool_get_realtime_finance
+    ),
+    StructuredTool.from_function(
+        func=get_sec_edgar,
+        name="get_sec_edgar",
+        description="Access annual reports of public US companies from SEC EDGAR database",
+        args_schema=Tool_get_sec_edgar
+    ),
+    StructuredTool.from_function(
+        func=smartapi_trade,
+        name="smartapi_trade",
+        description="Create end-to-end broking services using SmartAPI",
+        args_schema=Tool_smartapi_trade
+    ),
+    StructuredTool.from_function(
+        func=get_stockdata,
+        name="get_stockdata",
+        description="Real-time, intraday, historical market data, news and sentiment from StockData",
+        args_schema=Tool_get_stockdata
+    ),
+    StructuredTool.from_function(
+        func=get_styvio_data,
+        name="get_styvio_data",
+        description="Realtime and historical stock data with current sentiment from Styvio",
+        args_schema=Tool_get_styvio_data
+    ),
+    StructuredTool.from_function(
+        func=validate_tax_number,
+        name="validate_tax_number",
+        description="Instant VAT number and tax validation globally using Tax Data API",
+        args_schema=Tool_validate_tax_number
+    ),
+    StructuredTool.from_function(
+        func=get_tradier_quote,
+        name="get_tradier_quote",
+        description="US equity/option market data (delayed, intraday, historical) from Tradier",
+        args_schema=Tool_get_tradier_quote
+    ),
+    StructuredTool.from_function(
+        func=get_twelve_data,
+        name="get_twelve_data",
+        description="Stock market data (real-time and historical) from Twelve Data",
+        args_schema=Tool_get_twelve_data
+    ),
+    StructuredTool.from_function(
+        func=get_wallstreetbets_sentiment,
+        name="get_wallstreetbets_sentiment",
+        description="WallStreetBets stock comments sentiment analysis",
+        args_schema=Tool_get_wallstreetbets_sentiment
+    ),
+    StructuredTool.from_function(
+        func=get_yahoo_finance,
+        name="get_yahoo_finance",
+        description="Real time low latency data for stocks, crypto, and currency exchange from Yahoo Finance",
+        args_schema=Tool_get_yahoo_finance
+    ),
+    StructuredTool.from_function(
+        func=get_ynab_budget,
+        name="get_ynab_budget",
+        description="Access budgeting and planning data from YNAB",
+        args_schema=Tool_get_ynab_budget
+    ),
+    StructuredTool.from_function(
+        func=get_zoho_books_invoice,
+        name="get_zoho_books_invoice",
+        description="Access Zoho Books online accounting software built for business",
+        args_schema=Tool_get_zoho_books_invoice
+    ),
+    StructuredTool.from_function(
+        func=get_bacon_image,
+        name="get_bacon_image",
+        description="Get resizable bacon placeholder images from BaconMockup",
+        args_schema=Tool_get_bacon_image
+    ),
+    StructuredTool.from_function(
+        func=get_food_product,
+        name="get_food_product",
+        description="Get data about various grocery products and foods from Chomp",
+        args_schema=Tool_get_food_product
+    ),
+    StructuredTool.from_function(
+        func=get_brewery,
+        name="get_brewery",
+        description="Access breweries, cideries and craft beer bottle shop data from Open Brewery DB",
+        args_schema=Tool_get_brewery
+    ),
+    StructuredTool.from_function(
+        func=get_food_facts,
+        name="get_food_facts",
+        description="Access food products database from Open Food Facts",
+        args_schema=Tool_get_food_facts
+    ),
+    StructuredTool.from_function(
+        func=get_aoe2_resource,
+        name="get_aoe2_resource",
+        description="Get information about Age of Empires II resources",
+        args_schema=Tool_get_aoe2_resource
+    ),
+    StructuredTool.from_function(
+        func=get_amiibo,
+        name="get_amiibo",
+        description="Get Nintendo Amiibo information from AmiiboAPI",
+        args_schema=Tool_get_amiibo
+    ),
+    StructuredTool.from_function(
+        func=get_autochess_data,
+        name="get_autochess_data",
+        description="Access Autochess VNG REST API data",
+        args_schema=Tool_get_autochess_data
+    ),
+    StructuredTool.from_function(
+        func=get_barter_game,
+        name="get_barter_game",
+        description="Get information about games, DLC, bundles, giveaways, and trading from Barter.VG",
+        args_schema=Tool_get_barter_game
+    ),
+    StructuredTool.from_function(
+        func=geolocate_ip,
+        name="geolocate_ip",
+        description="Geolocate website visitors from their IP addresses",
+        args_schema=Tool_geolocate_ip
+    ),
+    StructuredTool.from_function(
+        func=process_grass_gis,
+        name="process_grass_gis",
+        description="Process geographical data using Actinia GRASS GIS REST API",
+        args_schema=Tool_process_grass_gis
+    ),
+    StructuredTool.from_function(
+        func=get_administrative_division,
+        name="get_administrative_division",
+        description="Get all administrative divisions of a country from administrative-divisions-db",
+        args_schema=Tool_get_administrative_division
+    ),
+    StructuredTool.from_function(
+        func=geocode_address_france,
+        name="geocode_address_france",
+        description="Geocode and reverse geocode French addresses using adresse.data.gouv.fr",
+        args_schema=Tool_geocode_address_france
+    ),
+    StructuredTool.from_function(
+        func=get_bc_law,
+        name="get_bc_law",
+        description="Access laws of British Columbia using BCLaws API",
+        args_schema=Tool_get_bc_law
+    ),
+    StructuredTool.from_function(
+        func=get_brazil_data,
+        name="get_brazil_data",
+        description="Community driven API for Brazil public data",
+        args_schema=Tool_get_brazil_data
+    ),
+    StructuredTool.from_function(
+        func=get_brazil_company,
+        name="get_brazil_company",
+        description="Consult Brazilian companies by CNPJ using Brazil Receita WS",
+        args_schema=Tool_get_brazil_company
+    ),
+    StructuredTool.from_function(
+        func=get_federal_code,
+        name="get_federal_code",
+        description="Primary platform for open source and code sharing for US Federal Government",
+        args_schema=Tool_get_federal_code
+    ),
+    StructuredTool.from_function(
+        func=get_cms_data,
+        name="get_cms_data",
+        description="Access CMS medicare.gov data",
+        args_schema=Tool_get_cms_data
+    ),
+    StructuredTool.from_function(
+        func=get_covid_data,
+        name="get_covid_data",
+        description="HTTP API for latest COVID-19 data",
+        args_schema=Tool_get_covid_data
+    ),
+    StructuredTool.from_function(
+        func=get_covid_datenhub,
+        name="get_covid_datenhub",
+        description="Access COVID-19 maps, datasets, and applications",
+        args_schema=Tool_get_covid_datenhub
+    ),
+    StructuredTool.from_function(
+        func=get_government_response,
+        name="get_government_response",
+        description="Track government measures to fight COVID-19 pandemic",
+        args_schema=Tool_get_government_response
+    ),
+    StructuredTool.from_function(
+        func=search_job_adzuna,
+        name="search_job_adzuna",
+        description="Search jobs from aggregated job boards using Adzuna",
+        args_schema=Tool_search_job_adzuna
+    ),
+    StructuredTool.from_function(
+        func=search_job_arbeitnow,
+        name="search_job_arbeitnow",
+        description="Job board aggregator for Europe and remote positions",
+        args_schema=Tool_search_job_arbeitnow
+    ),
+    StructuredTool.from_function(
+        func=search_job_arbeitsamt,
+        name="search_job_arbeitsamt",
+        description="Search German job board aggregator Arbeitsamt",
+        args_schema=Tool_search_job_arbeitsamt
+    ),
+    StructuredTool.from_function(
+        func=search_job_careerjet,
+        name="search_job_careerjet",
+        description="Search jobs using Careerjet job search engine",
+        args_schema=Tool_search_job_careerjet
+    ),
+    StructuredTool.from_function(
+        func=process_thai_ai,
+        name="process_thai_ai",
+        description="Access various free Thai AI APIs",
+        args_schema=Tool_process_thai_ai
+    ),
+    StructuredTool.from_function(
+        func=analyze_image_cloudmersive,
+        name="analyze_image_cloudmersive",
+        description="Image captioning, face recognition, and NSFW classification with Cloudmersive",
+        args_schema=Tool_analyze_image_cloudmersive
+    ),
+    StructuredTool.from_function(
+        func=process_dialogflow,
+        name="process_dialogflow",
+        description="Natural language processing using Google Dialogflow",
+        args_schema=Tool_process_dialogflow
+    ),
+    StructuredTool.from_function(
+        func=filter_text_exude,
+        name="filter_text_exude",
+        description="Filter stopping and stemming words from text data using EXUDE-API",
+        args_schema=Tool_filter_text_exude
+    ),
+    StructuredTool.from_function(
+        func=get_7digital_track,
+        name="get_7digital_track",
+        description="Access 7digital music store API",
+        args_schema=Tool_get_7digital_track
+    ),
+    StructuredTool.from_function(
+        func=master_audio,
+        name="master_audio",
+        description="Automated music mastering using AI Mastering",
+        args_schema=Tool_master_audio
+    ),
+    StructuredTool.from_function(
+        func=get_audiomack_track,
+        name="get_audiomack_track",
+        description="Access Audiomack streaming music hub API",
+        args_schema=Tool_get_audiomack_track
+    ),
+    StructuredTool.from_function(
+        func=search_bandcamp,
+        name="search_bandcamp",
+        description="Search Bandcamp music store API",
+        args_schema=Tool_search_bandcamp
+    ),
+    StructuredTool.from_function(
+        func=get_news_mediastack,
+        name="get_news_mediastack",
+        description="Free REST API for live news and blog articles using apilayer mediastack",
+        args_schema=Tool_get_news_mediastack
+    ),
+    StructuredTool.from_function(
+        func=search_news_ap,
+        name="search_news_ap",
+        description="Search news and metadata from Associated Press",
+        args_schema=Tool_search_news_ap
+    ),
+    StructuredTool.from_function(
+        func=search_historical_newspapers,
+        name="search_historical_newspapers",
+        description="Access millions of historic US newspaper pages from Library of Congress",
+        args_schema=Tool_search_historical_newspapers
+    ),
+    StructuredTool.from_function(
+        func=get_currents_news,
+        name="get_currents_news",
+        description="Latest news from various sources, blogs and forums using Currents",
+        args_schema=Tool_get_currents_news
+    ),
+    StructuredTool.from_function(
+        func=get_api_setu_service,
+        name="get_api_setu_service",
+        description="Indian Government platform APIs for KYC, business, education and employment",
+        args_schema=Tool_get_api_setu_service
+    ),
+    StructuredTool.from_function(
+        func=get_black_history_fact,
+        name="get_black_history_fact",
+        description="Search one of the largest black history fact databases",
+        args_schema=Tool_get_black_history_fact
+    ),
+    StructuredTool.from_function(
+        func=get_telegram_bot,
+        name="get_telegram_bot",
+        description="Get JSON formatted details about Telegram Bots from BotsArchive",
+        args_schema=Tool_get_telegram_bot
+    ),
+    StructuredTool.from_function(
+        func=get_carto_prediction,
+        name="get_carto_prediction",
+        description="Location information prediction using CARTO",
+        args_schema=Tool_get_carto_prediction
+    ),
+    StructuredTool.from_function(
+        func=get_countly_analytics,
+        name="get_countly_analytics",
+        description="Access Countly web analytics data",
+        args_schema=Tool_get_countly_analytics
+    ),
+    StructuredTool.from_function(
+        func=search_creative_commons,
+        name="search_creative_commons",
+        description="Search openly licensed and public domain works in Creative Commons Catalog",
+        args_schema=Tool_search_creative_commons
+    ),
+    StructuredTool.from_function(
+        func=search_datamuse,
+        name="search_datamuse",
+        description="Word-finding query engine for rhymes, synonyms, and related words",
+        args_schema=Tool_search_datamuse
+    ),
+    StructuredTool.from_function(
+        func=query_metabase,
+        name="query_metabase",
+        description="Share data and analytics using Metabase open source Business Intelligence",
+        args_schema=Tool_query_metabase
+    ),
+    StructuredTool.from_function(
+        func=search_epo_patent,
+        name="search_epo_patent",
+        description="Search European patent system using EPO API",
+        args_schema=Tool_search_epo_patent
+    ),
+    StructuredTool.from_function(
+        func=search_patentsview,
+        name="search_patentsview",
+        description="Explore and visualize trends across US innovation landscape with PatentsView",
+        args_schema=Tool_search_patentsview
+    ),
+    StructuredTool.from_function(
+        func=search_tipo_patent,
+        name="search_tipo_patent",
+        description="Search Taiwan patent system using TIPO API",
+        args_schema=Tool_search_tipo_patent
+    ),
+    StructuredTool.from_function(
+        func=search_uspto_patent,
+        name="search_uspto_patent",
+        description="Search USA patents using USPTO API services",
+        args_schema=Tool_search_uspto_patent
+    ),
+    StructuredTool.from_function(
+        func=get_advice,
+        name="get_advice",
+        description="Generate random advice slips from Advice Slip API",
+        args_schema=Tool_get_advice
+    ),
+    StructuredTool.from_function(
+        func=get_biriyani_image,
+        name="get_biriyani_image",
+        description="Get biriyani images placeholder from Biriyani As A Service",
+        args_schema=Tool_get_biriyani_image
+    ),
+    StructuredTool.from_function(
+        func=get_dev_article,
+        name="get_dev_article",
+        description="Access Forem articles, users and resources via Dev.to API",
+        args_schema=Tool_get_dev_article
+    ),
+    StructuredTool.from_function(
+        func=get_dictum_quote,
+        name="get_dictum_quote",
+        description="Access collection of inspiring expressions from Dictum API",
+        args_schema=Tool_get_dictum_quote
+    ),
+    StructuredTool.from_function(
+        func=validate_phone_number,
+        name="validate_phone_number",
+        description="Validate phone numbers globally using Phone Validation API",
+        args_schema=Tool_validate_phone_number
+    ),
+    StructuredTool.from_function(
+        func=validate_numverify,
+        name="validate_numverify",
+        description="Validate phone numbers using apilayer numverify",
+        args_schema=Tool_validate_numverify
+    ),
+    StructuredTool.from_function(
+        func=validate_phone_cloudmersive,
+        name="validate_phone_cloudmersive",
+        description="Validate international phone numbers with Cloudmersive",
+        args_schema=Tool_validate_phone_cloudmersive
+    ),
+    StructuredTool.from_function(
+        func=get_phone_specs,
+        name="get_phone_specs",
+        description="Get phone specifications using REST API",
+        args_schema=Tool_get_phone_specs
+    ),
+    StructuredTool.from_function(
+        func=generate_image_bruzu,
+        name="generate_image_bruzu",
+        description="Generate images with query string using Bruzu",
+        args_schema=Tool_generate_image_bruzu
+    ),
+    StructuredTool.from_function(
+        func=optimize_image_cheetaho,
+        name="optimize_image_cheetaho",
+        description="Optimize and resize photos using CheetahO",
+        args_schema=Tool_optimize_image_cheetaho
+    ),
+    StructuredTool.from_function(
+        func=manipulate_image_dagpi,
+        name="manipulate_image_dagpi",
+        description="Image manipulation and processing using Dagpi",
+        args_schema=Tool_manipulate_image_dagpi
+    ),
+    StructuredTool.from_function(
+        func=generate_image_duply,
+        name="generate_image_duply",
+        description="Generate, edit, scale and manage images and videos with Duply",
+        args_schema=Tool_generate_image_duply
+    ),
+    StructuredTool.from_function(
+        func=get_codeforces_user,
+        name="get_codeforces_user",
+        description="Get access to Codeforces competitive programming data",
+        args_schema=Tool_get_codeforces_user
+    ),
+    StructuredTool.from_function(
+        func=compile_code_hackerearth,
+        name="compile_code_hackerearth",
+        description="Compile and run code in several languages using Hackerearth",
+        args_schema=Tool_compile_code_hackerearth
+    ),
+    StructuredTool.from_function(
+        func=get_coding_contests,
+        name="get_coding_contests",
+        description="Get upcoming and ongoing competitive coding contests from KONTESTS",
+        args_schema=Tool_get_coding_contests
+    ),
+    StructuredTool.from_function(
+        func=generate_docs_mintlify,
+        name="generate_docs_mintlify",
+        description="Programmatically generate documentation for code using Mintlify",
+        args_schema=Tool_generate_docs_mintlify
+    ),
+    StructuredTool.from_function(
+        func=get_astronomy_data,
+        name="get_astronomy_data",
+        description="Access multiple astronomy data sources from arcsecond.io",
+        args_schema=Tool_get_astronomy_data
+    ),
+    StructuredTool.from_function(
+        func=search_arxiv,
+        name="search_arxiv",
+        description="Search curated research in physics, mathematics, quantitative finance from arXiv",
+        args_schema=Tool_search_arxiv
+    ),
+    StructuredTool.from_function(
+        func=search_core,
+        name="search_core",
+        description="Access world's open access research papers from CORE",
+        args_schema=Tool_search_core
+    ),
+    StructuredTool.from_function(
+        func=get_gbif_species,
+        name="get_gbif_species",
+        description="Access Global Biodiversity Information Facility data",
+        args_schema=Tool_get_gbif_species
+    ),
+    StructuredTool.from_function(
+        func=scan_binaryedge,
+        name="scan_binaryedge",
+        description="Access BinaryEdge 40fy scanning platform",
+        args_schema=Tool_scan_binaryedge
+    ),
+    StructuredTool.from_function(
+        func=get_bitwarden_vault,
+        name="get_bitwarden_vault",
+        description="Access best open-source password manager BitWarden",
+        args_schema=Tool_get_bitwarden_vault
+    ),
+    StructuredTool.from_function(
+        func=detect_bot,
+        name="detect_bot",
+        description="Detect JavaScript bots using Botd browser library",
+        args_schema=Tool_detect_bot
+    ),
+    StructuredTool.from_function(
+        func=get_bugcrowd_submission,
+        name="get_bugcrowd_submission",
+        description="Interact and track reported issues programmatically with Bugcrowd API",
+        args_schema=Tool_get_bugcrowd_submission
+    ),
+    StructuredTool.from_function(
+        func=search_bestbuy_product,
+        name="search_bestbuy_product",
+        description="Search Best Buy products, buying options, categories, recommendations, and stores",
+        args_schema=Tool_search_bestbuy_product
+    ),
+    StructuredTool.from_function(
+        func=search_digikey_part,
+        name="search_digikey_part",
+        description="Retrieve electronic component price, inventory and place orders with Digi-Key",
+        args_schema=Tool_search_digikey_part
+    ),
+    StructuredTool.from_function(
+        func=get_dummy_product,
+        name="get_dummy_product",
+        description="Fetch dummy e-commerce products JSON data with placeholder images",
+        args_schema=Tool_get_dummy_product
+    ),
+    StructuredTool.from_function(
+        func=search_ebay,
+        name="search_ebay",
+        description="Sell and buy products on eBay using their API",
+        args_schema=Tool_search_ebay
+    ),
+    StructuredTool.from_function(
+        func=get_4chan_board,
+        name="get_4chan_board",
+        description="Access 4chan image-based bulletin board API",
+        args_schema=Tool_get_4chan_board
+    ),
+    StructuredTool.from_function(
+        func=post_to_social_ayrshare,
+        name="post_to_social_ayrshare",
+        description="Post to social media, get analytics, and manage multiple user accounts with Ayrshare",
+        args_schema=Tool_post_to_social_ayrshare
+    ),
+    StructuredTool.from_function(
+        func=get_horoscope_aztro,
+        name="get_horoscope_aztro",
+        description="Get daily horoscope info for yesterday, today, and tomorrow from aztro",
+        args_schema=Tool_get_horoscope_aztro
+    ),
+    StructuredTool.from_function(
+        func=get_blogger_posts,
+        name="get_blogger_posts",
+        description="View and update Blogger content using Blogger API",
+        args_schema=Tool_get_blogger_posts
+    ),
+    StructuredTool.from_function(
+        func=get_football_info,
+        name="get_football_info",
+        description="Get information about football leagues and cups from API-FOOTBALL",
+        args_schema=Tool_get_football_info
+    ),
+    StructuredTool.from_function(
+        func=check_symptoms,
+        name="check_symptoms",
+        description="Medical symptom checker API primarily for patients using ApiMedic",
+        args_schema=Tool_check_symptoms
+    ),
+    StructuredTool.from_function(
+        func=get_nba_stats,
+        name="get_nba_stats",
+        description="Access NBA stats data from balldontlie",
+        args_schema=Tool_get_nba_stats
+    ),
+    StructuredTool.from_function(
+        func=get_city_bikes,
+        name="get_city_bikes",
+        description="Get city bikes information from around the world",
+        args_schema=Tool_get_city_bikes
+    ),
+    StructuredTool.from_function(
+        func=generate_bacon_ipsum,
+        name="generate_bacon_ipsum",
+        description="Generate meatier Lorem Ipsum text using Bacon Ipsum",
+        args_schema=Tool_generate_bacon_ipsum
+    ),
+    StructuredTool.from_function(
+        func=generate_avatar_dicebear,
+        name="generate_avatar_dicebear",
+        description="Generate random pixel-art avatars using Dicebear Avatars",
+        args_schema=Tool_generate_avatar_dicebear
+    ),
+    StructuredTool.from_function(
+        func=get_random_word,
+        name="get_random_word",
+        description="Generate English random words with pronunciation",
+        args_schema=Tool_get_random_word
+    ),
+    StructuredTool.from_function(
+        func=generate_fake_data,
+        name="generate_fake_data",
+        description="Generate test and fake data using FakeJSON service",
+        args_schema=Tool_generate_fake_data
+    ),
+    StructuredTool.from_function(
+        func=detect_code_language,
+        name="detect_code_language",
+        description="Detect, label, format and enrich code in apps or data pipelines",
+        args_schema=Tool_detect_code_language
+    ),
+    StructuredTool.from_function(
+        func=detect_language_apilayer,
+        name="detect_language_apilayer",
+        description="Detect language from text supporting 173 languages using apilayer languagelayer",
+        args_schema=Tool_detect_language_apilayer
+    ),
+    StructuredTool.from_function(
+        func=analyze_text_aylien,
+        name="analyze_text_aylien",
+        description="Information retrieval and natural language analysis using Aylien Text Analysis",
+        args_schema=Tool_analyze_text_aylien
+    ),
+    StructuredTool.from_function(
+        func=detect_language_api,
+        name="detect_language_api",
+        description="Detect text language using Detect Language API",
+        args_schema=Tool_detect_language_api
+    ),
+    StructuredTool.from_function(
+        func=track_shipment_aftership,
+        name="track_shipment_aftership",
+        description="Update, manage and track shipments efficiently with Aftership",
+        args_schema=Tool_track_shipment_aftership
+    ),
+    StructuredTool.from_function(
+        func=track_correios,
+        name="track_correios",
+        description="Integration to track shipments using Correios services in Brazil",
+        args_schema=Tool_track_correios
+    ),
+    StructuredTool.from_function(
+        func=track_habit_pixela,
+        name="track_habit_pixela",
+        description="Record and track habits, effort, and routines using Pixela API",
+        args_schema=Tool_track_habit_pixela
+    ),
+    StructuredTool.from_function(
+        func=get_pincode_info,
+        name="get_pincode_info",
+        description="Get Indian pincode details using PostalPinCode API",
+        args_schema=Tool_get_pincode_info
+    ),
+    StructuredTool.from_function(
+        func=get_adsb_flight,
+        name="get_adsb_flight",
+        description="Access real-time and historical data of airborne aircraft from ADS-B Exchange",
+        args_schema=Tool_get_adsb_flight
+    ),
+    StructuredTool.from_function(
+        func=get_airport_info,
+        name="get_airport_info",
+        description="Get airport name and website URL by ICAO code from airportsapi",
+        args_schema=Tool_get_airport_info
+    ),
+    StructuredTool.from_function(
+        func=get_ais_vessel,
+        name="get_ais_vessel",
+        description="Real-time data of marine vessels equipped with AIS tracking from AIS Hub",
+        args_schema=Tool_get_ais_vessel
+    ),
+    StructuredTool.from_function(
+        func=search_flights_amadeus,
+        name="search_flights_amadeus",
+        description="Search travel with limited usage using Amadeus for Developers",
+        args_schema=Tool_search_flights_amadeus
+    ),
+    StructuredTool.from_function(
+        func=shorten_url_cleanuri,
+        name="shorten_url_cleanuri",
+        description="Shorten URLs using CleanURI service",
+        args_schema=Tool_shorten_url_cleanuri
+    ),
+    StructuredTool.from_function(
+        func=track_link_clickmeter,
+        name="track_link_clickmeter",
+        description="Monitor, compare and optimize marketing links with ClickMeter",
+        args_schema=Tool_track_link_clickmeter
+    ),
+    StructuredTool.from_function(
+        func=shorten_url_drivet,
+        name="shorten_url_drivet",
+        description="Shorten long URLs easily and fast using Drivet URL Shortener",
+        args_schema=Tool_shorten_url_drivet
+    ),
+    StructuredTool.from_function(
+        func=shorten_url_free,
+        name="shorten_url_free",
+        description="Interact with Free URL Shortener powerful API",
+        args_schema=Tool_shorten_url_free
+    ),
+    StructuredTool.from_function(
+        func=get_helipad,
+        name="get_helipad",
+        description="Access helicopter and drone landing site directory from Helipaddy",
+        args_schema=Tool_get_helipad
+    ),
+    StructuredTool.from_function(
+        func=get_kbb_vehicle,
+        name="get_kbb_vehicle",
+        description="Get vehicle info, pricing, and configuration from Kelley Blue Book",
+        args_schema=Tool_get_kbb_vehicle
+    ),
+    StructuredTool.from_function(
+        func=get_mercedes_vehicle,
+        name="get_mercedes_vehicle",
+        description="Access Mercedes-Benz telematics data and remote vehicle functions",
+        args_schema=Tool_get_mercedes_vehicle
+    ),
+    StructuredTool.from_function(
+        func=get_nhtsa_vehicle,
+        name="get_nhtsa_vehicle",
+        description="NHTSA product information catalog and vehicle listing",
+        args_schema=Tool_get_nhtsa_vehicle
+    ),
+    StructuredTool.from_function(
+        func=get_doctor_who_info,
+        name="get_doctor_who_info",
+        description="Access Doctor Who API from Catalogopolis",
+        args_schema=Tool_get_doctor_who_info
+    ),
+    StructuredTool.from_function(
+        func=get_next_episode,
+        name="get_next_episode",
+        description="REST API for next-episode.net TV show schedule",
+        args_schema=Tool_get_next_episode
+    ),
+    StructuredTool.from_function(
+        func=get_czech_tv_schedule,
+        name="get_czech_tv_schedule",
+        description="Get Czech Television TV programme schedule",
+        args_schema=Tool_get_czech_tv_schedule
+    ),
+    StructuredTool.from_function(
+        func=get_dailymotion_video,
+        name="get_dailymotion_video",
+        description="Access Dailymotion Developer API for video content",
+        args_schema=Tool_get_dailymotion_video
+    ),
+    StructuredTool.from_function(
+        func=get_weather_micro,
+        name="get_weather_micro",
+        description="Get real-time weather forecasts and historic data from Micro Weather",
+        args_schema=Tool_get_weather_micro
+    ),
+    StructuredTool.from_function(
+        func=get_odweather_forecast,
+        name="get_odweather_forecast",
+        description="Get weather forecasts and weather webcams from ODWeather",
+        args_schema=Tool_get_odweather_forecast
+    ),
+    StructuredTool.from_function(
+        func=get_oikolab_weather,
+        name="get_oikolab_weather",
+        description="Access 70+ years of global hourly weather data from NOAA and ECMWF via Oikolab",
+        args_schema=Tool_get_oikolab_weather
+    ),
+    StructuredTool.from_function(
+        func=get_open_meteo_forecast,
+        name="get_open_meteo_forecast",
+        description="Global weather forecast API for non-commercial use from Open-Meteo",
+        args_schema=Tool_get_open_meteo_forecast
+    )
+]
+```
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件

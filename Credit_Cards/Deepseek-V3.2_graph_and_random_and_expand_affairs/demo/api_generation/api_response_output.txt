@@ -1,0 +1,1268 @@
+<sop_breakdown>
+
+## 1. Independent Tasks/Operations within Main Procedure
+
+Based on Section 5 (Main Procedure) and the API dependency graph, the independent tasks are:
+
+### Task 1: Application Intake and Pre-Processing Validation (Section 5.1)
+- Generate application_id
+- Record application_timestamp
+- Perform data quality validation (null checks, format validation, range validation, cross-field consistency)
+- Route to data quality remediation queue if validation fails
+
+### Task 2: Identity Verification and KYC Compliance Execution (Section 5.2)
+- Execute government database cross-reference validation
+- Perform Knowledge-Based Authentication (KBA) challenges if needed
+- Execute document upload and biometric matching for high-risk applications
+- Conduct OFAC sanctions screening
+
+### Task 3: Credit Bureau Data Retrieval and Analysis (Section 5.3)
+- Verify FCRA permissible purpose
+- Execute credit bureau API calls (consumer or commercial)
+- Parse and populate credit report data fields
+- Handle thin-file and no-hit scenarios
+
+### Task 4: Financial Analysis and DTI Calculation (Section 5.4)
+- Aggregate monthly debt obligations from credit report
+- Calculate monthly income
+- Compute debt-to-income ratio
+- Apply business-specific DTI logic for commercial applications
+
+### Task 5: Automated Credit Scorecard Evaluation (Section 5.5)
+- Route to appropriate scorecard based on credit_score and business_type
+- Execute scorecard point assignment logic
+- Calculate internal_risk_score
+- Generate scorecard reason codes
+
+### Task 6: Credit Decision Determination (Section 5.6)
+- Execute knockout rules (sanctions, bankruptcy, fraud, prohibited industry)
+- Apply score-based decisioning thresholds
+- Determine final_decision (approved/declined/pending_manual_review)
+- Assign decline_reason_code for rejected applications
+
+### Task 7: Credit Limit Assignment and APR Determination (Section 5.7)
+- Apply risk-tiered matrix for credit limit ranges
+- Calculate income-based affordability constraints
+- Determine assigned_apr based on risk bands
+- Calculate LTV ratio for secured cards
+- Calculate cardholder_limit_distribution for business cards
+
+### Task 8: Account Activation Eligibility Determination (Section 5.8)
+- Validate all prerequisites for account opening
+- Calculate estimated_card_delivery_date
+- Set account_activation_eligible flag
+
+### Task 9: Adverse Action Notice Generation (Section 5.9)
+- Determine if adverse action notice is required
+- Generate letter with statutory content
+- Deliver via postal mail and/or email
+- Log delivery tracking information
+
+### Task 10: Output Finalization
+- Calculate turnaround_time_seconds
+- Set auto_decision_flag
+- Consolidate all output fields
+- Persist complete dataset
+
+## 2. External Dependencies for Each Task
+
+### Task 1 (Validation):
+- LOS database for existing customer lookup
+- Validation rule configuration tables
+- Data quality remediation queue system
+
+### Task 2 (Identity Verification):
+- LexisNexis Instant Verify / Experian Precise ID API
+- USPS National Change of Address database
+- State DMV records
+- KBA service provider (Equifax/LexisNexis)
+- OCR engine for document scanning
+- Facial biometric matching service
+- OFAC sanctions screening platform (Fircosoft/Accuity/Dow Jones)
+
+### Task 3 (Credit Bureau):
+- Experian Connect API
+- TransUnion TrueVision API
+- Equifax OACIS API
+- Dun & Bradstreet D&B Direct API (for business applications)
+- FCRA permissible purpose validation
+
+### Task 4 (DTI Calculation):
+- Bureau of Labor Statistics Occupational Employment Statistics (for income validation)
+- Equifax Income Insight scores (optional)
+
+### Task 5 (Scorecard):
+- Business Rule Engine (BRE)
+- Scorecard model parameters database
+- Model Risk Management validation logs
+
+### Task 6 (Decision):
+- Business Rule Engine decision trees
+- Credit policy threshold configuration
+- Prohibited industry NAICS code lists
+- Underwriter Work Queue system
+
+### Task 7 (Credit Terms):
+- Risk-based pricing matrices
+- Product catalog configuration
+- State usury law ceiling database
+- Customer master file (for aggregate exposure limits)
+
+### Task 8 (Activation):
+- Card production system integration
+- Card personalization bureau API
+- Business day calendar (for delivery date calculation)
+
+### Task 9 (Adverse Action):
+- Letter template repository
+- Mail services vendor API
+- Email delivery service
+- Document Management System
+
+### Task 10 (Finalization):
+- Core banking system / card management platform
+- Business intelligence platform
+- Compliance audit database
+
+## 3. Edge Cases for Each Task
+
+### Task 1 (Validation):
+- Missing mandatory fields for specific business_type (e.g., secured cards without deposit info)
+- Outlier income values (too low or suspiciously high)
+- Years employed exceeding possible working tenure
+- International applicants with non-US SSN/ITIN
+- Duplicate application submissions within short timeframe
+
+### Task 2 (Identity Verification):
+- Government database returns no match (new immigrant, thin identity file)
+- KBA service generates insufficient questions (thin credit file)
+- Document upload quality too poor for OCR
+- Biometric match score in ambiguous range (75-85)
+- OFAC potential_match requiring manual analyst review
+- Multiple sanctions list hits requiring prioritization
+
+### Task 3 (Credit Bureau):
+- Bureau API timeout or system unavailable
+- No credit file found (credit invisible applicant)
+- Insufficient file (fewer than 2 trade lines)
+- Conflicting data across multiple bureaus
+- Security freeze on credit file preventing inquiry
+- Fraud alert on credit file requiring additional verification
+
+### Task 4 (DTI Calculation):
+- Missing monthly payment data on credit report trade lines
+- Self-employed income requiring estimation/verification
+- Negative DTI (income less than housing cost alone)
+- Business with negative cash flow
+- Guarantor income insufficient for business DTI fallback
+
+### Task 5 (Scorecard):
+- Credit score exactly on boundary between scorecard segments
+- Missing scorecard variables (null months_since_last_delinquency)
+- Thin file triggering alternative scorecard with limited variables
+- Scorecard model version mismatch during deployment window
+
+### Task 6 (Decision):
+- Internal_risk_score in manual review zone (indeterminate)
+- Multiple knockout rules triggered simultaneously
+- Prohibited industry for business applications
+- Maximum customer exposure exceeded requiring aggregate limit check
+- Income verification discrepancy flagging manual review
+
+### Task 7 (Credit Terms):
+- Approved credit limit would exceed state-specific lending limits
+- APR calculation exceeds state usury ceiling
+- Security deposit amount insufficient for minimum product limit
+- Business revenue too low to support minimum business card limit
+- Existing customer exposure preventing new limit approval
+
+### Task 8 (Activation):
+- Deposit verification pending for secured card (status not "verified")
+- Missing required document uploads for manual review approvals
+- Fraud hold unresolved blocking activation
+- Card delivery address undeliverable per USPS validation
+
+### Task 9 (Adverse Action):
+- Applicant contact information incomplete (missing email/address)
+- Multiple decline reasons requiring prioritization (top 4 selection)
+- Less favorable terms requiring comparative APR calculation
+- 30-day notice deadline at risk due to processing delays
+
+### Task 10 (Finalization):
+- Processing spans multiple days due to manual review (turnaround time calculation)
+- Missing prerequisite data preventing activation eligibility determination
+- System integration failure preventing downstream transmission
+
+## 4. Key API Parameters from SOP and Dependency Graph
+
+### API 1: ValidateApplicationData
+**Input Parameters:**
+- application_id (from system_state)
+- application_timestamp (from system_state)
+- application_channel (from user_input)
+- business_type (from user_input)
+- product_type (from user_input)
+- applicant_id (from user_input)
+- applicant_age (from user_input)
+- applicant_employment_status (from user_input)
+- applicant_annual_income (from user_input)
+- applicant_housing_status (from user_input)
+- applicant_monthly_housing_cost (from user_input)
+- applicant_years_at_address (from user_input)
+- applicant_years_employed (from user_input)
+- business_entity_name (conditional on business_type)
+- business_tin_ein (conditional on business_type)
+- business_incorporation_date (conditional on business_type)
+- business_annual_revenue (conditional on business_type)
+- business_industry_code (conditional on business_type)
+- guarantor_personal_income (conditional on business_type)
+- security_deposit_amount (conditional on business_type = secured)
+- deposit_verification_status (conditional on business_type = secured)
+- deposit_account_id (conditional on business_type = secured)
+
+**Output Parameters:**
+- validation_status
+- validation_errors
+- processing_start_timestamp
+
+### API 2: VerifyIdentity
+**Input Parameters:**
+- application_id (from ValidateApplicationData)
+- applicant_id (from ValidateApplicationData)
+- applicant_age (from ValidateApplicationData)
+- device_fingerprint_id (from system_state)
+- ip_address_location (from system_state)
+- fraud_alert_flags (from system_state)
+
+**Output Parameters:**
+- identity_verification_method
+- identity_verification_timestamp
+- identity_confidence_score
+
+### API 3: ScreenSanctionsWatchlist
+**Input Parameters:**
+- application_id (from VerifyIdentity)
+- applicant_id (from VerifyIdentity)
+- business_entity_name (from ValidateApplicationData, conditional)
+- identity_verification_method (from VerifyIdentity)
+
+**Output Parameters:**
+- watchlist_check_result
+- watchlist_match_details
+
+### API 4: DetectFraudIndicators
+**Input Parameters:**
+- application_id (from ScreenSanctionsWatchlist)
+- watchlist_check_result (from ScreenSanctionsWatchlist)
+- device_fingerprint_id (from system_state)
+- ip_address_location (from system_state)
+- fraud_alert_flags (from system_state)
+
+**Output Parameters:**
+- fraud_risk_level
+- fraud_alert_flags (updated)
+- fraud_investigation_required
+
+### API 5: RetrieveCreditBureauData
+**Input Parameters:**
+- application_id (from DetectFraudIndicators)
+- applicant_id (from ValidateApplicationData)
+- business_type (from ValidateApplicationData)
+- business_tin_ein (from ValidateApplicationData, conditional)
+- fraud_risk_level (from DetectFraudIndicators)
+
+**Output Parameters:**
+- credit_bureau_inquiry_timestamp
+- credit_bureau_source
+- credit_score
+- credit_utilization_ratio
+- number_of_open_accounts
+- number_of_delinquent_accounts
+- total_outstanding_debt
+- bankruptcy_flag
+- foreclosure_flag
+- months_since_last_delinquency
+
+### API 6: CalculateDebtToIncomeRatio
+**Input Parameters:**
+- application_id (from RetrieveCreditBureauData)
+- business_type (from ValidateApplicationData)
+- applicant_annual_income (from ValidateApplicationData)
+- applicant_monthly_housing_cost (from ValidateApplicationData)
+- total_outstanding_debt (from RetrieveCreditBureauData)
+- business_annual_revenue (from ValidateApplicationData, conditional)
+- guarantor_personal_income (from ValidateApplicationData, conditional)
+
+**Output Parameters:**
+- debt_to_income_ratio
+- monthly_debt_obligations
+- monthly_income
+
+### API 7: EvaluateCreditScorecard
+**Input Parameters:**
+- application_id (from CalculateDebtToIncomeRatio)
+- business_type (from ValidateApplicationData)
+- credit_score (from RetrieveCreditBureauData)
+- credit_utilization_ratio (from RetrieveCreditBureauData)
+- debt_to_income_ratio (from CalculateDebtToIncomeRatio)
+- number_of_open_accounts (from RetrieveCreditBureauData)
+- number_of_delinquent_accounts (from RetrieveCreditBureauData)
+- months_since_last_delinquency (from RetrieveCreditBureauData)
+- bankruptcy_flag (from RetrieveCreditBureauData)
+- applicant_years_employed (from ValidateApplicationData)
+- applicant_years_at_address (from ValidateApplicationData)
+
+**Output Parameters:**
+- internal_risk_score
+- scorecard_reason_codes
+- scorecard_version
+
+### API 8: DetermineCreditDecision
+**Input Parameters:**
+- application_id (from EvaluateCreditScorecard)
+- business_type (from ValidateApplicationData)
+- product_type (from ValidateApplicationData)
+- internal_risk_score (from EvaluateCreditScorecard)
+- scorecard_reason_codes (from EvaluateCreditScorecard)
+- watchlist_check_result (from ScreenSanctionsWatchlist)
+- identity_verification_method (from VerifyIdentity)
+- bankruptcy_flag (from RetrieveCreditBureauData)
+- fraud_alert_flags (from DetectFraudIndicators)
+- applicant_annual_income (from ValidateApplicationData)
+- business_industry_code (from ValidateApplicationData, conditional)
+
+**Output Parameters:**
+- final_decision
+- decline_reason_code
+- manual_review_required
+- manual_review_reason
+- underwriter_id
+
+### API 9: AssignCreditTerms
+**Input Parameters:**
+- application_id (from DetermineCreditDecision)
+- final_decision (from DetermineCreditDecision)
+- business_type (from ValidateApplicationData)
+- product_type (from ValidateApplicationData)
+- internal_risk_score (from EvaluateCreditScorecard)
+- applicant_annual_income (from ValidateApplicationData)
+- business_annual_revenue (from ValidateApplicationData, conditional)
+- security_deposit_amount (from ValidateApplicationData, conditional)
+- deposit_verification_status (from ValidateApplicationData, conditional)
+
+**Output Parameters:**
+- approved_credit_limit
+- assigned_apr
+- credit_limit_to_deposit_ratio
+- cardholder_limit_distribution
+
+### API 10: GenerateAdverseActionNotice
+**Input Parameters:**
+- application_id (from DetermineCreditDecision)
+- final_decision (from DetermineCreditDecision)
+- decline_reason_code (from DetermineCreditDecision)
+- applicant_id (from ValidateApplicationData)
+- credit_bureau_source (from RetrieveCreditBureauData)
+- application_timestamp (from ValidateApplicationData)
+
+**Output Parameters:**
+- adverse_action_letter_generated
+- adverse_action_letter_id
+- adverse_action_delivery_timestamp
+
+### API 11: FinalizeApplicationOutputs
+**Input Parameters:**
+- application_id (from DetermineCreditDecision)
+- processing_start_timestamp (from ValidateApplicationData)
+- final_decision (from DetermineCreditDecision)
+- approved_credit_limit (from AssignCreditTerms, conditional)
+- assigned_apr (from AssignCreditTerms, conditional)
+- adverse_action_letter_generated (from GenerateAdverseActionNotice, conditional)
+- manual_review_required (from DetermineCreditDecision)
+- underwriter_id (from DetermineCreditDecision)
+- deposit_verification_status (from ValidateApplicationData, conditional)
+- fraud_alert_flags (from DetectFraudIndicators)
+- uploaded_documents (from ValidateApplicationData)
+
+**Output Parameters:**
+- processing_end_timestamp
+- turnaround_time_seconds
+- auto_decision_flag
+- account_activation_eligible
+- estimated_card_delivery_date
+
+## 5. API Generation Approach
+
+### Sequential API Execution Plan:
+
+**Phase 1: Intake & Validation (Linear)**
+1. ValidateApplicationData - Entry point, validates all input data
+
+**Phase 2: Identity & Risk Screening (Linear)**
+2. VerifyIdentity - Depends on validated data
+3. ScreenSanctionsWatchlist - Depends on verified identity
+4. DetectFraudIndicators - Depends on sanctions screening result
+
+**Phase 3: Credit Assessment (Linear)**
+5. RetrieveCreditBureauData - Depends on fraud screening clearance
+6. CalculateDebtToIncomeRatio - Depends on credit bureau data
+7. EvaluateCreditScorecard - Depends on DTI and credit data
+
+**Phase 4: Decision & Terms (Conditional Branching)**
+8. DetermineCreditDecision - Depends on scorecard output
+9A. AssignCreditTerms - Executes only if final_decision = "approved"
+9B. GenerateAdverseActionNotice - Executes only if final_decision = "declined"
+
+**Phase 5: Finalization (Convergence)**
+10. FinalizeApplicationOutputs - Depends on decision and conditional outputs (terms OR adverse action)
+
+### Design Principles:
+- **Atomicity**: Each API performs one clear business function
+- **Data Flow**: Each API outputs parameters consumed by downstream APIs
+- **Conditional Execution**: Decision API acts as router for approved vs declined paths
+- **Error Propagation**: Failures at any stage prevent downstream execution
+- **Idempotency**: All APIs can be safely retried with same inputs
+
+## 6. Parameter Source Specification
+
+### ValidateApplicationData Sources:
+- All parameters from SOP sample_data (user_input and system_state)
+- No dependencies on other APIs
+
+### VerifyIdentity Sources:
+- application_id: ValidateApplicationData.output
+- applicant_id: ValidateApplicationData.output
+- applicant_age: ValidateApplicationData.output
+- device_fingerprint_id: sample_data
+- ip_address_location: sample_data
+- fraud_alert_flags: sample_data
+
+### ScreenSanctionsWatchlist Sources:
+- application_id: VerifyIdentity.output
+- applicant_id: VerifyIdentity.output
+- business_entity_name: ValidateApplicationData.output
+- identity_verification_method: VerifyIdentity.output
+
+### DetectFraudIndicators Sources:
+- application_id: ScreenSanctionsWatchlist.output
+- watchlist_check_result: ScreenSanctionsWatchlist.output
+- device_fingerprint_id: sample_data
+- ip_address_location: sample_data
+- fraud_alert_flags: sample_data
+
+### RetrieveCreditBureauData Sources:
+- application_id: DetectFraudIndicators.output
+- applicant_id: ValidateApplicationData.output
+- business_type: ValidateApplicationData.output
+- business_tin_ein: ValidateApplicationData.output
+- fraud_risk_level: DetectFraudIndicators.output
+
+### CalculateDebtToIncomeRatio Sources:
+- application_id: RetrieveCreditBureauData.output
+- business_type: ValidateApplicationData.output
+- applicant_annual_income: ValidateApplicationData.output
+- applicant_monthly_housing_cost: ValidateApplicationData.output
+- total_outstanding_debt: RetrieveCreditBureauData.output
+- business_annual_revenue: ValidateApplicationData.output
+- guarantor_personal_income: ValidateApplicationData.output
+
+### EvaluateCreditScorecard Sources:
+- application_id: CalculateDebtToIncomeRatio.output
+- business_type: ValidateApplicationData.output
+- credit_score: RetrieveCreditBureauData.output
+- credit_utilization_ratio: RetrieveCreditBureauData.output
+- debt_to_income_ratio: CalculateDebtToIncomeRatio.output
+- number_of_open_accounts: RetrieveCreditBureauData.output
+- number_of_delinquent_accounts: RetrieveCreditBureauData.output
+- months_since_last_delinquency: RetrieveCreditBureauData.output
+- bankruptcy_flag: RetrieveCreditBureauData.output
+- applicant_years_employed: ValidateApplicationData.output
+- applicant_years_at_address: ValidateApplicationData.output
+
+### DetermineCreditDecision Sources:
+- application_id: EvaluateCreditScorecard.output
+- business_type: ValidateApplicationData.output
+- product_type: ValidateApplicationData.output
+- internal_risk_score: EvaluateCreditScorecard.output
+- scorecard_reason_codes: EvaluateCreditScorecard.output
+- watchlist_check_result: ScreenSanctionsWatchlist.output
+- identity_verification_method: VerifyIdentity.output
+- bankruptcy_flag: RetrieveCreditBureauData.output
+- fraud_alert_flags: DetectFraudIndicators.output
+- applicant_annual_income: ValidateApplicationData.output
+- business_industry_code: ValidateApplicationData.output
+
+### AssignCreditTerms Sources:
+- application_id: DetermineCreditDecision.output
+- final_decision: DetermineCreditDecision.output
+- business_type: ValidateApplicationData.output
+- product_type: ValidateApplicationData.output
+- internal_risk_score: EvaluateCreditScorecard.output
+- applicant_annual_income: ValidateApplicationData.output
+- business_annual_revenue: ValidateApplicationData.output
+- security_deposit_amount: ValidateApplicationData.output
+- deposit_verification_status: ValidateApplicationData.output
+
+### GenerateAdverseActionNotice Sources:
+- application_id: DetermineCreditDecision.output
+- final_decision: DetermineCreditDecision.output
+- decline_reason_code: DetermineCreditDecision.output
+- applicant_id: ValidateApplicationData.output
+- credit_bureau_source: RetrieveCreditBureauData.output
+- application_timestamp: ValidateApplicationData.output
+
+### FinalizeApplicationOutputs Sources:
+- application_id: DetermineCreditDecision.output
+- processing_start_timestamp: ValidateApplicationData.output
+- final_decision: DetermineCreditDecision.output
+- approved_credit_limit: AssignCreditTerms.output
+- assigned_apr: AssignCreditTerms.output
+- adverse_action_letter_generated: GenerateAdverseActionNotice.output
+- manual_review_required: DetermineCreditDecision.output
+- underwriter_id: DetermineCreditDecision.output
+- deposit_verification_status: ValidateApplicationData.output
+- fraud_alert_flags: DetectFraudIndicators.output
+- uploaded_documents: sample_data
+
+## 7. API Execution Sequence
+
+1. **ValidateApplicationData** - No dependencies, processes raw application input
+2. **VerifyIdentity** - Depends on ValidateApplicationData output
+3. **ScreenSanctionsWatchlist** - Depends on VerifyIdentity output
+4. **DetectFraudIndicators** - Depends on ScreenSanctionsWatchlist output
+5. **RetrieveCreditBureauData** - Depends on DetectFraudIndicators output
+6. **CalculateDebtToIncomeRatio** - Depends on RetrieveCreditBureauData output
+7. **EvaluateCreditScorecard** - Depends on CalculateDebtToIncomeRatio and RetrieveCreditBureauData outputs
+8. **DetermineCreditDecision** - Depends on EvaluateCreditScorecard, ScreenSanctionsWatchlist, VerifyIdentity, RetrieveCreditBureauData, DetectFraudIndicators, and ValidateApplicationData outputs
+9. **Conditional Branching:**
+   - **AssignCreditTerms** - Executes if final_decision = "approved"
+   - **GenerateAdverseActionNotice** - Executes if final_decision = "declined"
+10. **FinalizeApplicationOutputs** - Depends on DetermineCreditDecision and conditional outputs (AssignCreditTerms OR GenerateAdverseActionNotice)
+
+## 8. Error Scenarios and Handling
+
+### ValidateApplicationData Errors:
+- **Scenario**: Missing mandatory fields for business_type
+  - **Handling**: Return validation_status = "failed" with specific validation_errors array, route to data quality remediation queue
+- **Scenario**: Out-of-range values (age < 18, income < 10000)
+  - **Handling**: Return validation errors, request corrected data from applicant
+- **Scenario**: Cross-field inconsistency (years_employed > age - 16)
+  - **Handling**: Flag logical inconsistency, route to manual data review
+
+### VerifyIdentity Errors:
+- **Scenario**: Government database returns no match
+  - **Handling**: Step-up to KBA challenge, if KBA fails, step-up to document upload
+- **Scenario**: KBA service generates insufficient questions (thin file)
+  - **Handling**: Skip KBA, proceed directly to document upload requirement
+- **Scenario**: Document OCR quality insufficient
+  - **Handling**: Request re-upload with guidance on lighting/positioning
+- **Scenario**: All verification methods fail
+  - **Handling**: Set identity_verification_method = "failed", trigger automatic decline in DetermineCreditDecision
+
+### ScreenSanctionsWatchlist Errors:
+- **Scenario**: OFAC API timeout
+  - **Handling**: Retry with exponential backoff (3 attempts), if all fail, route to technical exception queue
+- **Scenario**: Potential match requires manual review
+  - **Handling**: Set watchlist_check_result = "potential_match", route to Sanctions Review Queue for analyst adjudication
+- **Scenario**: Confirmed match
+  - **Handling**: Set watchlist_check_result = "confirmed_match", trigger immediate decline without credit assessment
+
+### DetectFraudIndicators Errors:
+- **Scenario**: High-severity fraud flag ("confirmed_synthetic_identity")
+  - **Handling**: Set fraud_risk_level = "high", trigger automatic decline in DetermineCreditDecision
+- **Scenario**: Moderate fraud signals requiring investigation
+  - **Handling**: Set fraud_investigation_required = true, route to Fraud Analyst queue for manual review
+
+### RetrieveCreditBureauData Errors:
+- **Scenario**: Bureau API timeout after all retries exhausted
+  - **Handling**: Route to technical exception queue, notify applicant of processing delay
+- **Scenario**: No credit file found (no hit)
+  - **Handling**: Set credit_score = 0 or null, route to thin-file alternative decisioning logic
+- **Scenario**: Insufficient credit file (fewer than 2 trade lines)
+  - **Handling**: Flag as thin file, use alternative scorecard or decline based on business_type (secured cards may still approve)
+- **Scenario**: Security freeze on credit file
+  - **Handling**: Return error, instruct applicant to lift freeze and reapply
+
+### CalculateDebtToIncomeRatio Errors:
+- **Scenario**: Missing monthly payment data on trade lines
+  - **Handling**: Estimate payments using standard formulas (2% of balance for revolving, standard amortization for installment)
+- **Scenario**: Self-employed income flagged as requiring verification
+  - **Handling**: Set manual_review_required = true with reason "Income verification required"
+- **Scenario**: Negative DTI (income < housing cost)
+  - **Handling**: Flag data quality issue, route to manual underwriter review for income validation
+
+### EvaluateCreditScorecard Errors:
+- **Scenario**: Missing scorecard variables (null months_since_last_delinquency)
+  - **Handling**: Apply default point assignment for missing variables as defined in scorecard model
+- **Scenario**: Thin file triggering alternative scorecard
+  - **Handling**: Route to thin-file scorecard with limited variables, assign conservative risk score
+- **Scenario**: Credit score on exact boundary between scorecard segments
+  - **Handling**: Apply tie-breaking rule (assign to higher-risk segment for conservative decisioning)
+
+### DetermineCreditDecision Errors:
+- **Scenario**: Multiple knockout rules triggered simultaneously
+  - **Handling**: Prioritize decline reasons (sanctions > identity failure > recent bankruptcy > prohibited industry)
+- **Scenario**: Internal_risk_score in manual review zone
+  - **Handling**: Set final_decision = "pending_manual_review", route to Underwriter Work Queue
+- **Scenario**: Maximum customer exposure exceeded
+  - **Handling**: Set decline_reason_code = "MAXIMUM_CREDIT_EXPOSURE_EXCEEDED", decline application
+
+### AssignCreditTerms Errors:
+- **Scenario**: Calculated credit limit exceeds state lending limit
+  - **Handling**: Cap approved_credit_limit at state maximum
+- **Scenario**: Calculated APR exceeds state usury ceiling
+  - **Handling**: Set assigned_apr to state maximum, if below profitability threshold, decline application
+- **Scenario**: Security deposit insufficient for minimum product limit (secured cards)
+  - **Handling**: Set approved_credit_limit equal to security_deposit_amount regardless of product minimum
+
+### GenerateAdverseActionNotice Errors:
+- **Scenario**: Applicant email address invalid
+  - **Handling**: Send postal mail only, log email delivery failure
+- **Scenario**: Mail services vendor API unavailable
+  - **Handling**: Queue letter for later delivery, ensure 30-day deadline not violated
+- **Scenario**: 30-day notice deadline at risk
+  - **Handling**: Escalate to compliance team for expedited delivery
+
+### FinalizeApplicationOutputs Errors:
+- **Scenario**: Deposit verification still pending for secured card
+  - **Handling**: Set account_activation_eligible = false, await deposit verification completion
+- **Scenario**: Missing required document uploads for manual review approval
+  - **Handling**: Set account_activation_eligible = false, request missing documents
+- **Scenario**: Downstream system integration failure
+  - **Handling**: Retry integration, if fails, queue for manual transmission to card production system
+
+## 9. Sample Data Processing Validation
+
+### Verifying all sample data records can be processed:
+
+**Record 1 (APP_CC_2025041801234)**: Retail, Rewards Platinum, credit_score 720
+- ✓ Validates successfully (all mandatory fields present)
+- ✓ Identity verification: government_database method
+- ✓ Sanctions: clear
+- ✓ Fraud: no alerts
+- ✓ Credit score 720 → prime scorecard
+- ✓ Expected outcome: Approved with moderate-high credit limit
+
+**Record 2 (APP_CC_2025041801235)**: Retail, Cashback Gold, credit_score 685, 1 delinquent account
+- ✓ Validates with fraud alert "address_mismatch"
+- ✓ Identity verification: KBA (stepped-up due to fraud alert)
+- ✓ Credit score 685 → near-prime scorecard
+- ✓ Recent delinquency (8 months ago)
+- ✓ Expected outcome: Approved with moderate limit or manual review
+
+**Record 3 (APP_CC_2025041801236)**: Small_business, commercial credit_score 78
+- ✓ Validates with business entity fields
+- ✓ Commercial bureau inquiry + guarantor personal inquiry
+- ✓ Business DTI calculation with revenue consideration
+- ✓ Expected outcome: Approved with business credit line
+
+**Record 4 (APP_CC_2025041801237)**: Secured, $500 deposit verified, credit_score 610
+- ✓ Validates with security_deposit_amount and deposit_verification_status
+- ✓ LTV calculation: approved_credit_limit = $500
+- ✓ Expected outcome: Approved with limit = deposit amount
+
+**Record 5 (APP_CC_2025041801238)**: Retail, Low Interest Silver, credit_score 805
+- ✓ Validates successfully
+- ✓ Exceptional credit profile
+- ✓ Expected outcome: Approved with maximum credit limit, lowest APR
+
+**Record 6 (APP_CC_2025041801239)**: Retail, Rewards Platinum, credit_score 595, 2 delinquent accounts
+- ✓ Validates successfully
+- ✓ High utilization (0.78), multiple recent delinquencies
+- ✓ Expected outcome: Likely declined due to low score + high risk factors
+
+**Record 7 (APP_CC_2025041801240)**: Corporate, credit_score 85, $2.5M revenue
+- ✓ Validates with business entity fields
+- ✓ Strong commercial credit profile
+- ✓ Expected outcome: Approved with high business credit line
+
+**Record 8 (APP_CC_2025041801241)**: Retail, manual_review_required due to fraud alert "velocity_anomaly"
+- ✓ Validates successfully
+- ✓ Fraud investigation flag set
+- ✓ Expected outcome: Route to manual review, decision pending underwriter
+
+**Record 9 (APP_CC_2025041801242)**: Secured, $300 deposit, credit_score 0 (thin file)
+- ✓ Validates with deposit fields
+- ✓ No credit score (credit invisible)
+- ✓ Expected outcome: Approved based on collateral, limit = deposit
+
+**Record 10 (APP_CC_2025041801243)**: Retail, retired, credit_score 760
+- ✓ Validates with employment_status = retired
+- ✓ Strong credit profile despite retirement
+- ✓ Expected outcome: Approved with moderate-high limit
+
+**Record 11 (APP_CC_2025041801244)**: Retail, self_employed, manual_review_required for income verification
+- ✓ Validates successfully
+- ✓ Tax return document uploaded
+- ✓ Expected outcome: Manual review for income verification, then likely approved
+
+**Record 12 (APP_CC_2025041801245)**: Retail, Cashback Gold, credit_score 705
+- ✓ Validates successfully
+- ✓ Good credit profile
+- ✓ Expected outcome: Approved with moderate credit limit
+
+**Record 13 (APP_CC_2025041801246)**: Small_business, commercial score 68, newer business (2020)
+- ✓ Validates with business fields
+- ✓ Moderate commercial credit, young business
+- ✓ Expected outcome: Approved with conservative business limit or declined
+
+**Record 14 (APP_CC_2025041801247)**: Retail, credit_score 572, 3 delinquent accounts, high utilization
+- ✓ Validates successfully
+- ✓ Subprime profile with multiple risk factors
+- ✓ Expected outcome: Likely declined
+
+**Record 15 (APP_CC_2025041801250)**: Retail, unemployed, bankruptcy_flag True, 4 delinquent accounts
+- ✓ Validates successfully
+- ✓ Fraud alert "device_fingerprint_suspicious"
+- ✓ Recent bankruptcy (within 24 months)
+- ✓ Expected outcome: Declined via knockout rule (bankruptcy + fraud)
+
+**Record 16 (APP_CC_2025041801251)**: Corporate, credit_score 92, $5.5M revenue
+- ✓ Validates with business fields
+- ✓ Exceptional commercial credit profile
+- ✓ Expected outcome: Approved with high business credit line
+
+**Record 17 (APP_CC_2025041801252)**: Retail, Low Interest Silver, credit_score 692
+- ✓ Validates successfully
+- ✓ Good credit profile
+- ✓ Expected outcome: Approved with moderate limit
+
+**Record 18 (APP_CC_2025041801253)**: Secured, $750 deposit, deposit_verification_status = pending
+- ✓ Validates successfully
+- ✓ Deposit not yet verified
+- ✓ Expected outcome: Approved pending deposit verification, account_activation_eligible = false until verified
+
+**Record 19 (APP_CC_2025041801254)**: Retail, watchlist_check_result = potential_match
+- ✓ Validates successfully
+- ✓ OFAC potential match requiring manual review
+- ✓ Expected outcome: Pending manual sanctions review by AML analyst
+
+All 19 sample records can be successfully processed through the API sequence with appropriate routing for manual review cases, conditional logic for business types, and proper handling of edge cases (thin files, pending deposits, sanctions matches, fraud alerts).
+
+</sop_breakdown>
+
+<TOOLS>
+
+<API>
+Name: ValidateApplicationData
+Description: Performs comprehensive data quality validation on submitted credit card application including null checks, format validation (SSN, email, phone, ZIP), range validation (age 18-110, income 10000-15000000), and cross-field logical consistency checks (years_employed ≤ age-16, housing_cost ≤ 50% monthly income) to ensure all mandatory fields are populated with valid values before proceeding to identity verification. Routes applications with validation failures to data quality remediation queue.
+Endpoint: /api/v1/applications/validate
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "application_timestamp": "2025-04-18T10:23:45Z",
+  "application_channel": "mobile_app",
+  "business_type": "retail",
+  "product_type": "Rewards Platinum",
+  "applicant_id": "CUST_789456",
+  "applicant_age": 34,
+  "applicant_employment_status": "employed_full_time",
+  "applicant_annual_income": 75000.00,
+  "applicant_housing_status": "mortgage",
+  "applicant_monthly_housing_cost": 1800.00,
+  "applicant_years_at_address": 3,
+  "applicant_years_employed": 5,
+  "business_entity_name": "",
+  "business_tin_ein": "",
+  "business_incorporation_date": "",
+  "business_annual_revenue": "",
+  "business_industry_code": "",
+  "guarantor_personal_income": "",
+  "security_deposit_amount": "",
+  "deposit_verification_status": "",
+  "deposit_account_id": ""
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "validation_status": "passed",
+  "validation_errors": [],
+  "processing_start_timestamp": "2025-04-18T10:24:35Z",
+  "validated_application_data": {
+    "application_id": "APP_CC_2025041801234",
+    "application_timestamp": "2025-04-18T10:23:45Z",
+    "application_channel": "mobile_app",
+    "business_type": "retail",
+    "product_type": "Rewards Platinum",
+    "applicant_id": "CUST_789456",
+    "applicant_age": 34,
+    "applicant_employment_status": "employed_full_time",
+    "applicant_annual_income": 75000.00,
+    "applicant_housing_status": "mortgage",
+    "applicant_monthly_housing_cost": 1800.00,
+    "applicant_years_at_address": 3,
+    "applicant_years_employed": 5,
+    "business_entity_name": null,
+    "business_tin_ein": null,
+    "business_incorporation_date": null,
+    "business_annual_revenue": null,
+    "business_industry_code": null,
+    "guarantor_personal_income": null,
+    "security_deposit_amount": null,
+    "deposit_verification_status": null,
+    "deposit_account_id": null
+  }
+}
+Dependencies: None (entry point API)
+Error Scenarios:
+- Missing mandatory fields for business_type: Return validation_status = "failed" with specific validation_errors array ["Missing business_entity_name for business application"], route to data quality remediation queue
+- Out-of-range age (age < 18 or > 110): Return validation_status = "failed" with validation_errors ["applicant_age must be between 18 and 110"], request corrected data
+- Out-of-range income (income < 10000 or > 15000000): Return validation_status = "failed" with validation_errors ["applicant_annual_income must be between 10000 and 15000000"], request corrected data
+- Cross-field inconsistency (years_employed > age - 16): Return validation_status = "failed" with validation_errors ["applicant_years_employed cannot exceed working tenure based on age"], route to manual data review
+- Invalid SSN format: Return validation_status = "failed" with validation_errors ["SSN format invalid, must be XXX-XX-XXXX"], request corrected data
+- Housing cost exceeds 50% of monthly income: Return validation_status = "warning" with validation_errors ["applicant_monthly_housing_cost exceeds 50% of monthly income, flagging for verification"], allow progression but flag for manual review
+</API>
+
+<API>
+Name: VerifyIdentity
+Description: Executes multi-layered identity verification procedures including government database cross-reference validation (LexisNexis Instant Verify/Experian Precise ID), Knowledge-Based Authentication challenges for elevated-risk applications, document upload with OCR and biometric facial matching for high-risk cases, and device fingerprinting analysis to satisfy Customer Identification Program requirements under USA PATRIOT Act Section 326 and detect synthetic identity fraud. Returns confidence score 0-100 and verification method used.
+Endpoint: /api/v1/identity/verify
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "applicant_id": "CUST_789456",
+  "applicant_age": 34,
+  "device_fingerprint_id": "DEV_FP_998877",
+  "ip_address_location": "New York, NY, US",
+  "fraud_alert_flags": []
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "identity_verification_method": "government_database",
+  "identity_verification_timestamp": "2025-04-18T10:24:12Z",
+  "identity_confidence_score": 95.5,
+  "verification_details": {
+    "ssn_match": true,
+    "name_match": true,
+    "dob_match": true,
+    "address_match": true,
+    "dmv_record_found": true
+  }
+}
+Dependencies: ValidateApplicationData (requires validated application data including applicant identity attributes)
+Error Scenarios:
+- Government database returns no match (confidence_score < 60): Step-up to KBA challenge, return identity_verification_method = "kba_required", prompt applicant for KBA questions
+- KBA service generates insufficient questions (thin credit file): Skip KBA, return identity_verification_method = "document_scan_required", request document upload
+- Document OCR quality insufficient: Return error with message "Document image quality too low for processing", request re-upload with guidance on lighting/positioning
+- Biometric match score in ambiguous range (75-85): Return identity_verification_method = "manual_review_required", route to fraud analyst for human verification
+- All verification methods fail (confidence_score < 60 after all attempts): Return identity_verification_method = "failed", set flag to trigger automatic decline in DetermineCreditDecision API
+- Identity verification service API timeout: Retry with exponential backoff (3 attempts), if all fail return error "Identity verification service unavailable", route to technical exception queue
+</API>
+
+<API>
+Name: ScreenSanctionsWatchlist
+Description: Screens applicant name and business entity name (if applicable) against OFAC Specially Designated Nationals list and consolidated sanctions lists using fuzzy name-matching algorithms (Levenshtein edit distance, Soundex phonetic similarity) to ensure no prohibited persons receive financial services. Returns match result (clear/potential_match/confirmed_match) with match confidence score and requires potential matches to route to manual AML analyst review for false positive adjudication.
+Endpoint: /api/v1/sanctions/screen
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "applicant_id": "CUST_789456",
+  "business_entity_name": null,
+  "identity_verification_method": "government_database"
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "watchlist_check_result": "clear",
+  "watchlist_match_details": {
+    "match_confidence_score": 12.5,
+    "matched_list": null,
+    "matched_entity_name": null,
+    "screening_timestamp": "2025-04-18T10:24:15Z",
+    "requires_manual_review": false
+  }
+}
+Dependencies: VerifyIdentity (sanctions screening must execute only after identity has been successfully verified)
+Error Scenarios:
+- OFAC API timeout: Retry with exponential backoff (max 3 attempts with 5s, 15s, 45s delays), if all fail route to technical exception queue with error "Sanctions screening service unavailable"
+- Potential match requiring manual review (confidence_score 75-95): Return watchlist_check_result = "potential_match", set requires_manual_review = true, route to Sanctions Review Queue for AML analyst adjudication
+- Confirmed match (confidence_score > 95): Return watchlist_check_result = "confirmed_match", trigger immediate decline without further processing, block adverse action notice per OFAC regulations
+- Multiple sanctions list hits: Prioritize SDN list over sectoral sanctions, return highest confidence match in response
+- Business entity name matching but personal name clear: Flag for manual review to determine if applicant is associated with sanctioned business entity
+</API>
+
+<API>
+Name: DetectFraudIndicators
+Description: Analyzes application for fraud indicators by evaluating fraud_alert_flags array (address_mismatch, device_fingerprint_suspicious, velocity_anomaly, synthetic_identity_indicators), comparing device fingerprint against historical fraud patterns database, validating IP address geolocation consistency with stated address, and calculating velocity metrics (multiple applications from same device/IP within short timeframe). Returns fraud_risk_level (low/medium/high) and updated fraud_alert_flags with investigation requirement flag.
+Endpoint: /api/v1/fraud/detect
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "watchlist_check_result": "clear",
+  "device_fingerprint_id": "DEV_FP_998877",
+  "ip_address_location": "New York, NY, US",
+  "fraud_alert_flags": []
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "fraud_risk_level": "low",
+  "fraud_alert_flags": [],
+  "fraud_investigation_required": false,
+  "fraud_analysis_details": {
+    "device_fingerprint_match_count": 1,
+    "velocity_check": {
+      "applications_last_24h": 1,
+      "applications_last_7d": 1
+    },
+    "ip_geolocation_match": true,
+    "synthetic_identity_score": 5.2
+  }
+}
+Dependencies: ScreenSanctionsWatchlist (fraud detection proceeds only after sanctions screening clears)
+Error Scenarios:
+- High-severity fraud flag detected (confirmed_synthetic_identity): Return fraud_risk_level = "high", set fraud_investigation_required = true, add "CONFIRMED_FRAUD" to fraud_alert_flags, trigger automatic decline in DetermineCreditDecision
+- Moderate fraud signals (address_mismatch + velocity_anomaly): Return fraud_risk_level = "medium", set fraud_investigation_required = true, route to Fraud Analyst queue for manual investigation before proceeding
+- Device fingerprint linked to prior fraud (device in fraud database): Return fraud_risk_level = "high", add "device_linked_to_prior_fraud" to fraud_alert_flags, trigger automatic decline
+- IP address from high-risk geography (non-US or known fraud hotspot): Return fraud_risk_level = "medium", add "high_risk_ip_location" to fraud_alert_flags, route to manual review
+- Velocity anomaly (5+ applications from same device in 24h): Return fraud_risk_level = "high", add "excessive_velocity" to fraud_alert_flags, trigger automatic decline
+</API>
+
+<API>
+Name: RetrieveCreditBureauData
+Description: Executes hard inquiry API calls to consumer credit bureaus (Experian Connect API, TransUnion TrueVision API, Equifax OACIS API) for retail applications or blended commercial credit inquiry (Dun & Bradstreet D&B Direct API) plus personal guarantor inquiry for business applications. Retrieves comprehensive credit reports including FICO Score 8 or VantageScore 3.0, trade line details with 24-month payment history, utilization ratios, public records (bankruptcies, liens, foreclosures), and inquiry history. Implements retry logic with exponential backoff for API failures and handles thin-file/no-hit scenarios.
+Endpoint: /api/v1/credit-bureau/retrieve
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "applicant_id": "CUST_789456",
+  "business_type": "retail",
+  "business_tin_ein": null,
+  "fraud_risk_level": "low"
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "credit_bureau_inquiry_timestamp": "2025-04-18T10:24:30Z",
+  "credit_bureau_source": "experian",
+  "credit_score": 720,
+  "credit_utilization_ratio": 0.32,
+  "number_of_open_accounts": 8,
+  "number_of_delinquent_accounts": 0,
+  "total_outstanding_debt": 25000.00,
+  "bankruptcy_flag": false,
+  "foreclosure_flag": false,
+  "months_since_last_delinquency": null,
+  "credit_report_details": {
+    "score_model": "FICO_8",
+    "score_factors": [
+      "Proportion of balances to credit limits is too high on revolving accounts",
+      "Number of accounts with delinquency",
+      "Length of time accounts have been established",
+      "Too few accounts currently paid as agreed"
+    ],
+    "inquiry_count_6m": 2,
+    "inquiry_count_12m": 4,
+    "oldest_account_age_months": 96,
+    "average_account_age_months": 48
+  }
+}
+Dependencies: DetectFraudIndicators (credit bureau inquiry executes only for applications that pass fraud screening)
+Error Scenarios:
+- Bureau API timeout after all retries exhausted (4 attempts): Return error "Credit bureau service unavailable after retries", route to technical exception queue, notify applicant of processing delay via email/SMS
+- No credit file found (no hit): Return credit_score = 0, set thin_file_indicator = true, route to thin-file alternative decisioning logic (may approve secured cards, decline unsecured)
+- Insufficient credit file (fewer than 2 trade lines): Return credit_score = null, set insufficient_file_indicator = true, route to alternative scorecard or decline for unsecured products
+- Security freeze on credit file: Return error "Credit file frozen by consumer", instruct applicant to lift freeze with bureau and reapply, provide bureau contact information
+- Credit file locked due to fraud alert: Return error "Credit file under fraud alert", request additional identity verification from applicant per FCRA requirements
+- Bureau returns malformed response: Retry query, if persists route to technical exception queue for manual bureau inquiry by operations team
+</API>
+
+<API>
+Name: CalculateDebtToIncomeRatio
+Description: Computes debt-to-income ratio by aggregating total monthly debt obligations from credit bureau trade lines (summing minimum payments on installment loans calculated from balance and term, revolving account minimums using greater of $25 or 2% of balance formula) plus applicant_monthly_housing_cost, divided by monthly gross income (applicant_annual_income / 12). For business applications, calculates business debt service coverage ratio (business debt payments / business monthly cash flow) and guarantor personal DTI. Flags income verification requirements for self-employed applicants.
+Endpoint: /api/v1/financial/calculate-dti
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "business_type": "retail",
+  "applicant_annual_income": 75000.00,
+  "applicant_monthly_housing_cost": 1800.00,
+  "total_outstanding_debt": 25000.00,
+  "business_annual_revenue": null,
+  "guarantor_personal_income": null
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "debt_to_income_ratio": 0.42,
+  "monthly_debt_obligations": 2633.33,
+  "monthly_income": 6250.00,
+  "dti_calculation_details": {
+    "housing_payment": 1800.00,
+    "estimated_debt_payments": 833.33,
+    "total_monthly_obligations": 2633.33,
+    "dti_percentage": 42.13
+  }
+}
+Dependencies: RetrieveCreditBureauData (requires total_outstanding_debt from credit bureau report to aggregate existing debt obligations)
+Error Scenarios:
+- Missing monthly payment data on trade lines: Estimate payments using standard formulas (2% of balance for revolving, calculate installment payment from balance assuming 48-month term), log estimation in dti_calculation_details
+- Self-employed income flagged as requiring verification (applicant_employment_status = "self_employed" and income > occupation median): Set income_verification_required = true, set manual_review_reason = "Income verification required", route to underwriter for document review
+- Negative DTI (monthly_income < applicant_monthly_housing_cost): Flag data quality issue with error "Income insufficient to cover housing cost", route to manual underwriter review for income validation
+- Business with negative cash flow (business_annual_revenue < business debt obligations): Calculate guarantor personal DTI as fallback, if guarantor DTI also excessive, flag for decline
+- DTI exceeds 100% (total debt > total income): Flag as high-risk with warning "DTI exceeds 100%, applicant over-leveraged", likely trigger decline unless compensating factors present
+</API>
+
+<API>
+Name: EvaluateCreditScorecard
+Description: Executes proprietary credit scorecard model using logistic regression-derived point assignments across multiple applicant and bureau attributes. Routes to appropriate scorecard segment (prime for credit_score ≥ 720, near-prime 660-719, subprime 600-659, thin-file for score = 0). Applies binning rules mapping continuous variables to point ranges: credit_score bands (800+ = 300pts, 780-799 = 285pts, etc.), credit_utilization_ratio brackets (<0.10 = 150pts, 0.10-0.29 = 135pts, etc.), debt_to_income_ratio tiers (<0.20 = 150pts, 0.20-0.35 = 125pts, etc.). Sums points to generate internal_risk_score (0-1000) and identifies top 4 variables with lowest point contributions as scorecard_reason_codes for adverse action disclosure.
+Endpoint: /api/v1/scorecard/evaluate
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "business_type": "retail",
+  "credit_score": 720,
+  "credit_utilization_ratio": 0.32,
+  "debt_to_income_ratio": 0.42,
+  "number_of_open_accounts": 8,
+  "number_of_delinquent_accounts": 0,
+  "months_since_last_delinquency": null,
+  "bankruptcy_flag": false,
+  "applicant_years_employed": 5,
+  "applicant_years_at_address": 3
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "internal_risk_score": 685,
+  "scorecard_reason_codes": [
+    "Debt-to-income ratio too high",
+    "Proportion of balances to credit limits is too high on revolving accounts",
+    "Length of residence too short",
+    "Number of open accounts moderate"
+  ],
+  "scorecard_version": "RETAIL_PRIME_V3.2",
+  "scorecard_details": {
+    "segment": "prime",
+    "credit_score_points": 240,
+    "utilization_points": 110,
+    "dti_points": 90,
+    "delinquency_points": 100,
+    "bankruptcy_points": 100,
+    "employment_tenure_points": 35,
+    "address_tenure_points": 20,
+    "total_points": 685
+  }
+}
+Dependencies: 
+- CalculateDebtToIncomeRatio (requires debt_to_income_ratio as heavily weighted scorecard variable)
+- RetrieveCreditBureauData (requires credit_score, credit_utilization_ratio, number_of_delinquent_accounts, bankruptcy_flag, months_since_last_delinquency)
+Error Scenarios:
+- Missing scorecard variables (null months_since_last_delinquency): Apply default point assignment for missing variables as defined in scorecard model (e.g., assign 50 points for null delinquency indicating no recent issues), log default application
+- Thin file triggering alternative scorecard (credit_score = 0): Route to thin-file scorecard with limited variables (employment tenure, address stability, income level only), assign conservative risk score (typically 450-550 range)
+- Credit score on exact boundary between scorecard segments (credit_score = 720): Apply tie-breaking rule by assigning to higher-risk segment (near-prime instead of prime) for conservative decisioning
+- Scorecard model version mismatch during deployment: Use previous version scorecard with warning flag, queue for re-scoring after new version fully deployed
+- Extreme outlier values causing point overflow: Cap individual variable points at defined maximums, log outlier detection for model validation review
+</API>
+
+<API>
+Name: DetermineCreditDecision
+Description: Applies hierarchical decision rule logic by first executing preliminary knockout rules for disqualifying characteristics (sanctions confirmed_match, identity verification failed, recent bankruptcy within 24 months, high-severity fraud, prohibited NAICS industry code, income below $10k minimum), then evaluating internal_risk_score against product-specific cutoff thresholds. For retail Rewards Platinum: score ≥ 650 = approve, 500-649 = manual review, <500 = decline. For standard retail products: score ≥ 550 = approve. For secured products: score ≥ 400 = approve. Assigns specific decline_reason_code from scorecard_reason_codes for regulatory adverse action notice requirements and routes borderline cases to manual_review_required queue.
+Endpoint: /api/v1/decision/determine
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "business_type": "retail",
+  "product_type": "Rewards Platinum",
+  "internal_risk_score": 685,
+  "scorecard_reason_codes": [
+    "Debt-to-income ratio too high",
+    "Proportion of balances to credit limits is too high on revolving accounts",
+    "Length of residence too short",
+    "Number of open accounts moderate"
+  ],
+  "watchlist_check_result": "clear",
+  "identity_verification_method": "government_database",
+  "bankruptcy_flag": false,
+  "fraud_alert_flags": [],
+  "applicant_annual_income": 75000.00,
+  "business_industry_code": null
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "final_decision": "approved",
+  "decline_reason_code": null,
+  "manual_review_required": false,
+  "manual_review_reason": null,
+  "underwriter_id": null,
+  "decision_details": {
+    "decision_path": "automated_approval",
+    "score_threshold_met": true,
+    "knockout_rules_triggered": [],
+    "decision_timestamp": "2025-04-18T10:24:55Z"
+  }
+}
+Dependencies:
+- EvaluateCreditScorecard (requires internal_risk_score and scorecard_reason_codes)
+- ScreenSanctionsWatchlist (requires watchlist_check_result for knockout rule evaluation)
+- VerifyIdentity (requires identity_verification_method to ensure identity was confirmed)
+- RetrieveCreditBureauData (requires bankruptcy_flag for knockout rule evaluation)
+- DetectFraudIndicators (requires fraud_alert_flags for knockout rule evaluation)
+- ValidateApplicationData (requires applicant_annual_income and business_industry_code for knockout rules)
+Error Scenarios:
+- Multiple knockout rules triggered simultaneously: Prioritize decline reasons in order: sanctions > identity failure > recent bankruptcy > prohibited industry > excessive fraud > insufficient income, set decline_reason_code to highest priority trigger
+- Internal_risk_score in manual review zone (500-649 for premium products): Set final_decision = "pending_manual_review", manual_review_required = true, manual_review_reason = "Credit score in indeterminate zone requiring underwriter evaluation", route to Underwriter Work Queue
+- Maximum customer exposure exceeded (aggregate credit limit check): Set final_decision = "declined", decline_reason_code = "MAXIMUM_CREDIT_EXPOSURE_EXCEEDED", log customer_id and existing exposure amount
+- Prohibited industry for business applications (cannabis, cryptocurrency, ammunition per NAICS code): Set final_decision = "declined", decline_reason_code = "PROHIBITED_INDUSTRY", reference specific NAICS code in decision_details
+- Income verification discrepancy flagged: Set final_decision = "pending_manual_review", manual_review_required = true, manual_review_reason = "Income verification required - stated income exceeds occupation median", route to underwriter
+</API>
+
+<API>
+Name: AssignCreditTerms
+Description: Calculates approved_credit_limit using risk-tiered matrix mapping internal_risk_score bands to limit ranges: 800+ = $15k-$25k, 750-799 = $10k-$15k, 700-749 = $7k-$10k, 650-699 = $5k-$7k, 600-649 = $3k-$5k, 550-599 = $1k-$3k, constrained by income-based affordability (applicant_annual_income × 0.20) and product minimums/maximums. Determines assigned_apr through risk-based pricing: 800+ = 13.99%, 750-799 = 15.99%, 700-749 = 17.99%, 650-699 = 19.99%, 600-649 = 22.99%, 550-599 = 25.99%, enforcing state usury law ceilings. For secured cards, calculates LTV ratio (approved_credit_limit = security_deposit_amount × LTV policy, typically 1.00). For business cards, calculates cardholder_limit_distribution (total_line, per_card_limit = total_line / 10, max_cards = 20).
+Endpoint: /api/v1/credit-terms/assign
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "final_decision": "approved",
+  "business_type": "retail",
+  "product_type": "Rewards Platinum",
+  "internal_risk_score": 685,
+  "applicant_annual_income": 75000.00,
+  "business_annual_revenue": null,
+  "security_deposit_amount": null,
+  "deposit_verification_status": null
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "approved_credit_limit": 7000.00,
+  "assigned_apr": 0.1799,
+  "credit_limit_to_deposit_ratio": null,
+  "cardholder_limit_distribution": null,
+  "credit_terms_details": {
+    "score_based_limit_range": "7000-10000",
+    "income_affordability_limit": 15000.00,
+    "final_limit_constraint": "score_based_minimum",
+    "risk_tier": "good",
+    "apr_percentage": "17.99%",
+    "state_usury_ceiling": 0.36,
+    "product_minimum_limit": 5000.00,
+    "product_maximum_limit": 25000.00
+  }
+}
+Dependencies:
+- DetermineCreditDecision (executes only for final_decision = "approved")
+- EvaluateCreditScorecard (requires internal_risk_score for risk tier classification)
+Error Scenarios:
+- Calculated credit limit exceeds state lending limit (e.g., state max $10k but score qualifies for $15k): Cap approved_credit_limit at state maximum, log state_constraint_applied = true
+- Calculated APR exceeds state usury ceiling (e.g., calculated 25.99% but state max 24%): Set assigned_apr to state maximum, if below profitability threshold (e.g., state ceiling < 18%), decline application with decline_reason_code = "UNABLE_TO_OFFER_COMPLIANT_TERMS"
+- Security deposit insufficient for minimum product limit (secured card requires $500 min but deposit only $300): Set approved_credit_limit = security_deposit_amount regardless of product minimum, prioritize full collateralization over product minimum
+- Business revenue too low to support minimum business card limit (revenue $50k but minimum business limit $10k): Calculate approved_credit_limit = business_annual_revenue × 0.10 = $5k, apply reduced limit or decline if below product minimum
+- Existing customer exposure prevents new limit approval (current exposure $45k, proposed $10k, max per customer $50k): Reduce approved_credit_limit to $5k to stay within aggregate limit, or decline if minimum product limit cannot be met
+</API>
+
+<API>
+Name: GenerateAdverseActionNotice
+Description: Produces FCRA Section 615(a) and ECOA Regulation B compliant adverse action letters for declined applications (final_decision = "declined") or less-favorable-terms approvals (approved_credit_limit < requested amount or assigned_apr > 3 percentage points above best rate). Retrieves letter template, populates statutory elements: credit bureau contact information (name, address, toll-free number from credit_bureau_source lookup table), statement that bureau did not make decision, consumer rights to free credit report within 60 days, right to dispute inaccurate information, and principal decline reasons from decline_reason_code (up to 4 reasons in descending importance). Transmits via postal mail through mail services vendor API and/or email delivery service within 30-day regulatory deadline (calculated from application_timestamp). Logs delivery tracking and sets adverse_action_letter_generated flag.
+Endpoint: /api/v1/adverse-action/generate
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801239",
+  "final_decision": "declined",
+  "decline_reason_code": "INSUFFICIENT_CREDIT_SCORE",
+  "applicant_id": "CUST_223344",
+  "credit_bureau_source": "transunion",
+  "application_timestamp": "2025-04-18T13:10:05Z"
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801239",
+  "adverse_action_letter_generated": true,
+  "adverse_action_letter_id": "AAL_2025041813001",
+  "adverse_action_delivery_timestamp": "2025-04-18T13:12:35Z",
+  "adverse_action_details": {
+    "letter_type": "decline",
+    "bureau_disclosed": "TransUnion",
+    "bureau_contact": "1-800-888-4213",
+    "principal_reasons": [
+      "Credit score did not meet minimum requirements for approval",
+      "Proportion of balances to credit limits is too high on revolving accounts",
+      "Too many recent credit inquiries",
+      "Recent delinquencies on credit obligations"
+    ],
+    "delivery_method": "email_and_postal",
+    "email_delivery_status": "sent",
+    "postal_tracking_number": "USPS_9205590164917262583421",
+    "regulatory_deadline": "2025-05-18"
+  }
+}
+Dependencies:
+- DetermineCreditDecision (executes only for final_decision = "declined" or certain approved cases with less favorable terms)
+- RetrieveCreditBureauData (requires credit_bureau_source to identify bureau in adverse action notice)
+Error Scenarios:
+- Applicant email address invalid or bounced: Deliver postal mail only, log email_delivery_status = "failed", ensure postal delivery within 30-day deadline
+- Mail services vendor API unavailable: Queue letter for later delivery in retry queue, escalate if approaching 30-day deadline (application_timestamp + 30 days), send urgent notification to compliance team
+- 30-day notice deadline at risk (processing delay pushed to day 28): Escalate to compliance team for expedited delivery via certified mail with tracking, log regulatory_deadline_risk = true
+- Multiple decline reasons requiring prioritization (6 scorecard factors): Select top 4 reasons by point deficiency magnitude from scorecard_reason_codes, list in descending order of impact
+- Less favorable terms requiring comparative disclosure: Calculate APR difference from best rate (e.g., approved at 22.99% vs best rate 13.99% = 9 percentage point difference), include comparative disclosure in letter
+- Applicant contact information incomplete (missing both email and address): Set adverse_action_letter_generated = false, route to exception queue for manual applicant contact to obtain delivery address
+</API>
+
+<API>
+Name: FinalizeApplicationOutputs
+Description: Consolidates all required output fields to complete application processing lifecycle. Calculates turnaround_time_seconds (difference in seconds between processing_end_timestamp and processing_start_timestamp from ValidateApplicationData). Sets auto_decision_flag (true if manual_review_required = false and underwriter_id = null, false otherwise). Determines account_activation_eligible status through comprehensive prerequisite validation: final_decision = "approved", approved_credit_limit is non-null, assigned_apr is non-null, for secured cards deposit_verification_status = "verified", no unresolved fraud holds (high-severity fraud_alert_flags), all mandatory documents received. Computes estimated_card_delivery_date (current_date + 7 business days for standard processing, adjusting for weekends/holidays). Persists complete output dataset to LOS database and transmits to downstream systems (card management platform for approved applications, analytics/BI platforms).
+Endpoint: /api/v1/application/finalize
+Method: POST
+Request Body:
+{
+  "application_id": "APP_CC_2025041801234",
+  "processing_start_timestamp": "2025-04-18T10:24:35Z",
+  "final_decision": "approved",
+  "approved_credit_limit": 7000.00,
+  "assigned_apr": 0.1799,
+  "adverse_action_letter_generated": false,
+  "manual_review_required": false,
+  "underwriter_id": null,
+  "deposit_verification_status": null,
+  "fraud_alert_flags": [],
+  "uploaded_documents": [
+    {
+      "doc_type": "pay_stub",
+      "doc_id": "DOC_112233",
+      "upload_timestamp": "2025-04-18T10:22:00Z"
+    }
+  ]
+}
+Response:
+{
+  "application_id": "APP_CC_2025041801234",
+  "processing_end_timestamp": "2025-04-18T10:25:02Z",
+  "turnaround_time_seconds": 27,
+  "auto_decision_flag": true,
+  "account_activation_eligible": true,
+  "estimated_card_delivery_date": "2025-04-29",
+  "finalization_details": {
+    "all_prerequisites_met": true,
+    "activation_blockers": [],
+    "downstream_transmission_status": "success",
+    "card_production_queue_status": "submitted",
+    "business_days_to_delivery": 7
+  }
+}
+Dependencies:
+- AssignCreditTerms (for approved applications, requires approved_credit_limit and assigned_apr)
+- GenerateAdverseActionNotice (for declined applications, requires adverse_action_letter_generated status)
+- DetermineCreditDecision (requires final_decision to determine which conditional outputs apply)
+Error Scenarios:
+- Deposit verification still pending for secured card (deposit_verification_status = "pending"): Set account_activation_eligible = false, add "DEPOSIT_VERIFICATION_PENDING" to activation_blockers array, await deposit verification completion before activation
+- Missing required document uploads for manual review approval (underwriter stipulated income docs but uploaded_documents empty): Set account_activation_eligible = false, add "MISSING_REQUIRED_DOCUMENTS" to activation_blockers, request missing documents via email/SMS
+- Unresolved fraud hold blocking activation (high-severity fraud_alert_flags present): Set account_activation_eligible = false, add "FRAUD_HOLD" to activation_blockers, require fraud investigation clearance
+- Downstream card production system integration failure: Retry integration with exponential backoff (3 attempts), if all fail set downstream_transmission_status = "failed", queue for manual transmission to card production system, notify operations team
+- Processing spans multiple days due to manual review (turnaround_time_seconds > 86400): Calculate accurate turnaround time spanning multiple days, log extended_processing_time = true for SLA reporting
+- Business day calendar unavailable for delivery date calculation: Use default 7 calendar days as estimated_card_delivery_date, log calendar_service_unavailable warning
+</API>
+
+</TOOLS>

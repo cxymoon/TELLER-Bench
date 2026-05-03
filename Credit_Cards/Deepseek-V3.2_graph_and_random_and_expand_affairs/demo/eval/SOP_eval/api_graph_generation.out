@@ -1,0 +1,475 @@
+<dependency_analysis>
+
+### 1. Business Process Deconstruction
+**Sub-business A (Retail) API Mapping:**
+1. Application Intake → `ValidateApplicationData`
+2. Identity Verification → `VerifyIdentity` → `ScreenSanctionsWatchlist` → `DetectFraudIndicators`
+3. Credit Bureau Inquiry → `RetrieveCreditBureauData`
+4. DTI Calculation → `CalculateDebtToIncomeRatio`
+5. Scorecard Evaluation → `EvaluateCreditScorecard`
+6. Final Output → `DetermineCreditDecision` → `AssignCreditTerms` → `FinalizeApplicationOutputs`
+
+**Sub-business B (Business) Additions:**
+- Business verification → `ScreenSanctionsWatchlist` (KYB)
+- Blended credit → `RetrieveCreditBureauData` (commercial report)
+- Cash flow analysis → Embedded in `CalculateDebtToIncomeRatio`
+
+**Sub-business C (Secured) Additions:**
+- Deposit verification → `AssignCreditTerms` (uses security_deposit_amount)
+- Risk hygiene → `DetectFraudIndicators` (bankruptcy_flag)
+
+### 2. Data Flow Analysis
+**Key Entity Associations:**
+- `application_id` → Central connector across all APIs
+- `fraud_risk_level` → Output of DetectFraudIndicators → Input to RetrieveCreditBureauData
+- `internal_risk_score` → Output of EvaluateCreditScorecard → Input to DetermineCreditDecision
+- `final_decision` → Output of DetermineCreditDecision → Input to AssignCreditTerms
+
+**Parameter Sources:**
+- User Input: application_id, applicant_annual_income
+- API Outputs: watchlist_check_result (ScreenSanctions → DetectFraud)
+- System State: business_type (determines execution path)
+
+### 3. Dependency Relationship Deduction
+**Direct Dependencies:**
+- Data: RetrieveCreditBureauData requires fraud_risk_level (from DetectFraudIndicators)
+- State: AssignCreditTerms requires final_decision state from DetermineCreditDecision
+- Temporal: GenerateAdverseActionNotice must follow DetermineCreditDecision
+
+**Indirect Dependencies:**
+- ValidateApplicationData must precede VerifyIdentity (data quality gate)
+- CalculateDebtToIncomeRatio requires credit bureau data (state synchronization)
+
+### 4. Complexity Assessment
+**High Complexity APIs:**
+- EvaluateCreditScorecard (ML model execution)
+- DetectFraudIndicators (multi-source pattern analysis)
+- DetermineCreditDecision (hierarchical rule engine)
+
+**Cyclic Risk:** No cycles detected (linear workflow)
+**Critical Path:** Validate → Verify → DetectFraud → CreditBureau → Scorecard → Decision → Terms
+
+### 5. Verification & Optimization
+**Parallelization Opportunities:**
+- ScreenSanctionsWatchlist and VerifyIdentity (independent checks)
+- Document validation APIs (unused in core flow)
+
+**Optimization Suggestions:**
+- Remove DocumentImageResolutionValidation (not referenced in SOP)
+- Merge GenerateAdverseActionNotice into FinalizeApplicationOutputs
+- Add cache mechanism for frequent credit bureau queries
+
+**Validation:**
+- All dependencies match SOP sequencing
+- 100% parameter coverage in data schema
+- Security: Sensitive fields (SSN, income) encrypted via RBAC controls
+
+</dependency_analysis>
+
+<api_dependency_graph>
+apis:
+  - api_name: "ValidateApplicationData"
+    description: "Performs comprehensive data quality validation on credit card applications"
+    purpose: "Initial data integrity check for all application types"
+    input_parameters:
+      - name: "application_id"
+        data_type: "str"
+        source: "user_input"
+        required: true
+      - name: "business_type"
+        data_type: "str"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "validation_status"
+        data_type: "bool"
+        destination: "system_state"
+    direct_dependencies: []
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "VerifyIdentity"
+    description: "Executes multi-layered identity verification per USA PATRIOT Act Section 326"
+    purpose: "KYC compliance and fraud prevention"
+    input_parameters:
+      - name: "application_id"
+        data_type: "str"
+        source: "system_state"
+        required: true
+      - name: "applicant_id"
+        data_type: "str"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "identity_verification_method"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ValidateApplicationData"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires validated application data"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "ScreenSanctionsWatchlist"
+    description: "Screens applicant against OFAC SDN list and consolidated sanctions lists"
+    purpose: "AML compliance check"
+    input_parameters:
+      - name: "application_id"
+        data_type: "str"
+        source: "system_state"
+        required: true
+      - name: "identity_verification_method"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "watchlist_check_result"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "VerifyIdentity"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses identity_verification_method output"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "DetectFraudIndicators"
+    description: "Analyzes application for fraud risk patterns using multi-factor detection logic"
+    purpose: "Fraud risk assessment"
+    input_parameters:
+      - name: "watchlist_check_result"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "fraud_risk_level"
+        data_type: "str"
+        destination: "other_api"
+      - name: "bankruptcy_flag"
+        data_type: "bool"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "ScreenSanctionsWatchlist"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires watchlist_check_result"
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "RetrieveCreditBureauData"
+    description: "Executes hard inquiry to credit bureaus based on business type"
+    purpose: "Credit report retrieval"
+    input_parameters:
+      - name: "fraud_risk_level"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "credit_score"
+        data_type: "int"
+        destination: "other_api"
+      - name: "credit_utilization_ratio"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "DetectFraudIndicators"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires fraud_risk_level"
+    complexity_level: "high"
+    business_criticality: "critical"
+
+  - api_name: "CalculateDebtToIncomeRatio"
+    description: "Computes debt-to-income ratio as primary measure of ability to service credit"
+    purpose: "Affordability analysis"
+    input_parameters:
+      - name: "total_outstanding_debt"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "RetrieveCreditBureauData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires total_outstanding_debt"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "EvaluateCreditScorecard"
+    description: "Executes proprietary credit scorecard model to predict default probability"
+    purpose: "Risk scoring"
+    input_parameters:
+      - name: "credit_score"
+        data_type: "int"
+        source: "other_api"
+        required: true
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "internal_risk_score"
+        data_type: "int"
+        destination: "other_api"
+      - name: "scorecard_reason_codes"
+        data_type: "List[str]"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "RetrieveCreditBureauData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires credit_score"
+      - dependent_api: "CalculateDebtToIncomeRatio"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires debt_to_income_ratio"
+    complexity_level: "high"
+    business_criticality: "critical"
+
+  - api_name: "DetermineCreditDecision"
+    description: "Applies hierarchical decision rule logic to render final credit decision"
+    purpose: "Approval/decline determination"
+    input_parameters:
+      - name: "internal_risk_score"
+        data_type: "int"
+        source: "other_api"
+        required: true
+      - name: "watchlist_check_result"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "final_decision"
+        data_type: "str"
+        destination: "other_api"
+      - name: "decline_reason_code"
+        data_type: "str"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "EvaluateCreditScorecard"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires internal_risk_score"
+      - dependent_api: "ScreenSanctionsWatchlist"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses watchlist_check_result"
+    complexity_level: "high"
+    business_criticality: "critical"
+
+  - api_name: "AssignCreditTerms"
+    description: "Calculates approved credit limit and APR for approved applications"
+    purpose: "Terms generation"
+    input_parameters:
+      - name: "final_decision"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "internal_risk_score"
+        data_type: "int"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "approved_credit_limit"
+        data_type: "float"
+        destination: "other_api"
+      - name: "assigned_apr"
+        data_type: "float"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "DetermineCreditDecision"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires final_decision"
+      - dependent_api: "EvaluateCreditScorecard"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires internal_risk_score"
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "GenerateAdverseActionNotice"
+    description: "Produces FCRA and ECOA compliant adverse action notices"
+    purpose: "Regulatory compliance"
+    input_parameters:
+      - name: "final_decision"
+        data_type: "str"
+        source: "other_api"
+        required: true
+      - name: "credit_bureau_source"
+        data_type: "str"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "adverse_action_letter"
+        data_type: "str"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "DetermineCreditDecision"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires final_decision"
+      - dependent_api: "RetrieveCreditBureauData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires credit_bureau_source"
+    complexity_level: "low"
+    business_criticality: "medium"
+
+  - api_name: "FinalizeApplicationOutputs"
+    description: "Consolidates all output fields to complete application processing lifecycle"
+    purpose: "Workflow completion"
+    input_parameters:
+      - name: "approved_credit_limit"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "adverse_action_letter_generated"
+        data_type: "bool"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "application_status"
+        data_type: "str"
+        destination: "system_state"
+    direct_dependencies:
+      - dependent_api: "AssignCreditTerms"
+        dependency_type: "data_dependency"
+        dependency_reason: "Uses approved_credit_limit when present"
+      - dependent_api: "GenerateAdverseActionNotice"
+        dependency_type: "state_dependency"
+        dependency_reason: "Requires adverse_action_letter status"
+    complexity_level: "low"
+    business_criticality: "medium"
+
+  - api_name: "get_application_by_id"
+    description: "Retrieve application data by application_id"
+    purpose: "Data access layer"
+    input_parameters:
+      - name: "application_id"
+        data_type: "str"
+        source: "user_input"
+        required: true
+    output_parameters:
+      - name: "application_data"
+        data_type: "dict"
+        destination: "other_api"
+    direct_dependencies: []
+    complexity_level: "low"
+    business_criticality: "medium"
+
+  - api_name: "update_application_data"
+    description: "Update application data with new fields"
+    purpose: "State persistence"
+    input_parameters:
+      - name: "application_id"
+        data_type: "str"
+        source: "system_state"
+        required: true
+    output_parameters:
+      - name: "update_status"
+        data_type: "bool"
+        destination: "system_state"
+    direct_dependencies:
+      - dependent_api: "get_application_by_id"
+        dependency_type: "temporal_dependency"
+        dependency_reason: "Requires pre-existing application state"
+    complexity_level: "low"
+    business_criticality: "medium"
+</api_dependency_graph>
+
+<class>
+class Tool_ValidateApplicationData(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    business_type: str = Field(..., description="Retail/Business/Secured classification")
+
+class Tool_VerifyIdentity(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    applicant_id: str = Field(..., description="Customer identity number")
+
+class Tool_ScreenSanctionsWatchlist(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    identity_verification_method: str = Field(..., description="Output from VerifyIdentity")
+
+class Tool_DetectFraudIndicators(BaseModel):
+    watchlist_check_result: str = Field(..., description="Output from ScreenSanctionsWatchlist")
+
+class Tool_RetrieveCreditBureauData(BaseModel):
+    fraud_risk_level: str = Field(..., description="Output from DetectFraudIndicators")
+
+class Tool_CalculateDebtToIncomeRatio(BaseModel):
+    total_outstanding_debt: float = Field(..., description="Output from RetrieveCreditBureauData")
+
+class Tool_EvaluateCreditScorecard(BaseModel):
+    credit_score: int = Field(..., description="Output from RetrieveCreditBureauData")
+    debt_to_income_ratio: float = Field(..., description="Output from CalculateDebtToIncomeRatio")
+
+class Tool_DetermineCreditDecision(BaseModel):
+    internal_risk_score: int = Field(..., description="Output from EvaluateCreditScorecard")
+    watchlist_check_result: str = Field(..., description="Output from ScreenSanctionsWatchlist")
+
+class Tool_AssignCreditTerms(BaseModel):
+    final_decision: str = Field(..., description="Output from DetermineCreditDecision")
+    internal_risk_score: int = Field(..., description="Output from EvaluateCreditScorecard")
+
+class Tool_GenerateAdverseActionNotice(BaseModel):
+    final_decision: str = Field(..., description="Output from DetermineCreditDecision")
+    credit_bureau_source: str = Field(..., description="Output from RetrieveCreditBureauData")
+
+class Tool_FinalizeApplicationOutputs(BaseModel):
+    approved_credit_limit: float = Field(None, description="Output from AssignCreditTerms")
+    adverse_action_letter_generated: bool = Field(..., description="System state flag")
+
+class Tool_get_application_by_id(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+
+class Tool_update_application_data(BaseModel):
+    application_id: str = Field(..., description="Unique application identifier")
+    updates: Dict[str, Any] = Field(..., description="Key-value pairs to update")
+</class>
+
+<tools>
+StructuredTool.from_function(
+    func=ValidateApplicationData,
+    name="ValidateApplicationData",
+    description="Performs data quality validation for credit applications",
+    args_schema=Tool_ValidateApplicationData
+),
+StructuredTool.from_function(
+    func=VerifyIdentity,
+    name="VerifyIdentity",
+    description="Executes KYC identity verification checks",
+    args_schema=Tool_VerifyIdentity
+),
+StructuredTool.from_function(
+    func=ScreenSanctionsWatchlist,
+    name="ScreenSanctionsWatchlist",
+    description="Screens against OFAC/AML watchlists",
+    args_schema=Tool_ScreenSanctionsWatchlist
+),
+StructuredTool.from_function(
+    func=DetectFraudIndicators,
+    name="DetectFraudIndicators",
+    description="Identifies fraud patterns using multi-factor analysis",
+    args_schema=Tool_DetectFraudIndicators
+),
+StructuredTool.from_function(
+    func=RetrieveCreditBureauData,
+    name="RetrieveCreditBureauData",
+    description="Pulls credit reports from bureaus",
+    args_schema=Tool_RetrieveCreditBureauData
+),
+StructuredTool.from_function(
+    func=CalculateDebtToIncomeRatio,
+    name="CalculateDebtToIncomeRatio",
+    description="Computes DTI ratio for affordability assessment",
+    args_schema=Tool_CalculateDebtToIncomeRatio
+),
+StructuredTool.from_function(
+    func=EvaluateCreditScorecard,
+    name="EvaluateCreditScorecard",
+    description="Runs proprietary risk scoring model",
+    args_schema=Tool_EvaluateCreditScorecard
+),
+StructuredTool.from_function(
+    func=DetermineCreditDecision,
+    name="DetermineCreditDecision",
+    description="Renders final approve/decline decision",
+    args_schema=Tool_DetermineCreditDecision
+),
+StructuredTool.from_function(
+   

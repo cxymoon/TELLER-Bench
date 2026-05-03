@@ -1,0 +1,208 @@
+# prompts:
+#   name: llm_coder
+#   parameters: [api, sample_data, api_example, coding_example, data_example]
+#   text: |
+#     您是一个精通使用流行库编写 Python 代码的 AI 编程专家。
+#     您将获得一个 API 的元数据和一个示例数据集。
+#     您的任务是严格按照给定的API模板编写一个 Python 函数，模拟这些 API，然后在你生成的代码中把<sample_data></sample_data>中的数据保持原格式地维护为可读写的数据，数据中已有值的字段是用户原有数据，空值字段是需要经过API处理后获取的数据，通过API得到后写入你维护的对应数据，完成修改。最后，在结尾写出API函数的class定义和tools列表封装。
+#     如果没有样例数据和代码，你要按照给定的需求生成逻辑严谨的代码，代码逻辑必须完全符合模板，不能有任何创新。另外代码中任何数值计算等逻辑必须是确定的，应该每次都得到同一确定结果，严禁使用随机数等方式。
+
+
+#     <requirements>
+#       要求 1：在仔细研究 <example> 标签中提供的示例后，生成相关的 Python 代码，并将其放在 <code></code> 标签中。
+#       要求 2：您必须编写测试用例，如示例中所示。
+#       要求 3：导入所有必需的 Python 库。使用描述性和有意义的变量名。
+#       要求 4：函数名称必须与 API 规范中指定的名称完全一致。
+#       要求 5：严格遵循 API 定义——请求中的字段必须映射到函数参数，响应中的字段必须返回。
+#       要求 6：仅使用数据集中存在的列。
+#       要求 7：在访问所需字段之前，将数据集加载到内存中。
+#       要求 8：按照 <example> 标签中演示的方式，准确实现 process_tool_call() 函数。
+#       要求 9：一次性生成代码，不要暂停、请求确认或互动。不要询问是否继续。
+#     </requirements>
+
+#     根据上述示例，为以下 API 和数据集编写代码，以成功完成任务：
+#     <api>
+#     API 元数据：
+#     {{api}}
+#     </api>
+
+#     <sample_data>
+#     以下是你要维护的数据：
+#     {{sample_data}}
+#     </sample_data>
+
+#     API 代码生成完毕后，模仿以下格式输出每个API的class 定义和tools 列表封装。
+#     样例：例如API 代码中有ApplicationLogicValidation:
+#     <sample_code>
+#     def ApplicationLogicValidation(application_id: str, material_completeness_score: float,
+#                                           requested_loan_amount: float, requested_loan_term: int,
+#                                           loan_purpose: str, customer_age: int, 
+#                                           customer_employment_type: str, customer_monthly_income: float,
+#                                           purpose_invoice_amount: Optional[float] = None) -> Dict[str, Any]:
+#         """申请信息逻辑一致性校验API"""
+        
+#         validation_passed = True
+#         validation_issues = []
+        
+#         # 材料完整性检查
+#         if material_completeness_score < 0.85:
+#             validation_passed = False
+#             validation_issues.append("Material completeness score below threshold")
+        
+#         # 金额用途匹配度检查
+#         if purpose_invoice_amount:
+#             amount_deviation = abs(requested_loan_amount - purpose_invoice_amount) / purpose_invoice_amount
+#             if amount_deviation > 0.10:
+#                 validation_issues.append(f"Loan amount deviates {amount_deviation*100:.1f}% from purpose invoice")
+        
+#         # 年龄与期限合理性检查
+#         retirement_age = 60
+#         loan_end_age = customer_age + requested_loan_term // 12
+#         if loan_end_age > retirement_age:
+#             validation_passed = False
+#             validation_issues.append(f"Loan repayment completes at age {loan_end_age}, exceeds retirement age")
+        
+#         # 收入与职业合理性检查
+#         if customer_employment_type == "retired" and customer_monthly_income > 15000:
+#             validation_issues.append("Income seems high for retired customer")
+        
+#         result = {
+#             "application_id": application_id,
+#             "validation_passed": validation_passed,
+#             "validation_issues": validation_issues,
+#             "logic_consistency_score": round(1.0 - len(validation_issues) * 0.2, 2)
+#         }
+        
+#         return result
+#         ...
+#     </sample_code>
+#     则对应的class 定义：
+#     <class>
+#     class Tool_ApplicationLogicValidation(BaseModel):
+#         application_id: str = Field(..., description="")
+#         material_completeness_score: float = Field(..., description="")
+#         requested_loan_amount: float = Field(..., description="")
+#         requested_loan_term: int = Field(..., description="")
+#         loan_purpose: str = Field(..., description="")
+#         customer_age: int = Field(..., description="")
+#         customer_employment_type: str = Field(..., description="")
+#         customer_monthly_income: float = Field(..., description="")
+#         purpose_invoice_amount: Optional[float] = Field(None, description="")
+#       ...
+#     </class>
+#     对应的tools封装：
+#     <tools>
+#     tools = [
+#         StructuredTool.from_function(
+#             func=ApplicationLogicValidation,
+#             name="ApplicationLogicValidation",
+#             description="",
+#             args_schema=Tool_ApplicationLogicValidation
+#         ),
+#         ...
+#     ]
+#     </tools>
+
+prompts:
+  name: llm_coder
+  parameters: [api, sample_data, api_example, coding_example, data_example]
+  text: |
+    You are an AI programming expert proficient in writing Python code using popular libraries.
+    You will receive metadata for an API and a sample dataset.
+    Your task is to write a Python function that simulates this API by strictly adhering to the given API template. In the code you generate, maintain the data within <sample_data></sample_data> in its original format as readable and writable data. Fields that already have values in the data are user's original data; empty fields are data that need to be obtained through API processing. Once obtained via the API, write the data back to the corresponding entry you maintain, completing the update. Finally, write the class definition and tools list encapsulation for the API functions at the end.
+    If there is no sample data or code, you must generate logically rigorous code according to the given requirements. The code logic must fully comply with the template without any innovation. Furthermore, any numerical calculations or logic in the code must be deterministic, producing the same result every time. The use of random numbers or similar methods is strictly prohibited.
+
+    <requirements>
+      Requirement 1: After carefully studying the example provided within the <example> tags, generate the relevant Python code and place it within <code></code> tags.
+      Requirement 2: You must write test cases as demonstrated in the example.
+      Requirement 3: Import all necessary Python libraries. Use descriptive and meaningful variable names.
+      Requirement 4: Function names must exactly match the names specified in the API specification.
+      Requirement 5: Strictly follow the API definition—fields in the request must map to function parameters, and fields in the response must be returned.
+      Requirement 6: Use only columns that exist in the dataset.
+      Requirement 7: Load the dataset into memory before accessing the required fields.
+      Requirement 8: Implement the process_tool_call() function accurately, following the method demonstrated in the <example> tags.
+      Requirement 9: Generate the code in one go, without pausing, requesting confirmation, or interacting. Do not ask to continue.
+    </requirements>
+
+    Based on the example above, write code for the following API and dataset to successfully complete the task:
+    <api>
+    API Metadata:
+    {{api}}
+    </api>
+
+    <sample_data>
+    Here is the data you need to maintain:
+    {{sample_data}}
+    </sample_data>
+
+    After the API code is generated, output the class definition and tools list encapsulation for each API, mimicking the following format.
+    Example: For instance, if the API code includes ApplicationLogicValidation:
+    <sample_code>
+    def ApplicationLogicValidation(application_id: str, material_completeness_score: float,
+                                          requested_loan_amount: float, requested_loan_term: int,
+                                          loan_purpose: str, customer_age: int,
+                                          customer_employment_type: str, customer_monthly_income: float,
+                                          purpose_invoice_amount: Optional[float] = None) -> Dict[str, Any]:
+        """API for validating logical consistency of application information"""
+        
+        validation_passed = True
+        validation_issues = []
+        
+        # Material completeness check
+        if material_completeness_score < 0.85:
+            validation_passed = False
+            validation_issues.append("Material completeness score below threshold")
+        
+        # Amount-purpose matching check
+        if purpose_invoice_amount:
+            amount_deviation = abs(requested_loan_amount - purpose_invoice_amount) / purpose_invoice_amount
+            if amount_deviation > 0.10:
+                validation_issues.append(f"Loan amount deviates {amount_deviation*100:.1f}% from purpose invoice")
+        
+        # Age and term reasonableness check
+        retirement_age = 60
+        loan_end_age = customer_age + requested_loan_term // 12
+        if loan_end_age > retirement_age:
+            validation_passed = False
+            validation_issues.append(f"Loan repayment completes at age {loan_end_age}, exceeds retirement age")
+        
+        # Income and occupation reasonableness check
+        if customer_employment_type == "retired" and customer_monthly_income > 15000:
+            validation_issues.append("Income seems high for retired customer")
+        
+        result = {
+            "application_id": application_id,
+            "validation_passed": validation_passed,
+            "validation_issues": validation_issues,
+            "logic_consistency_score": round(1.0 - len(validation_issues) * 0.2, 2)
+        }
+        
+        return result
+        ...
+    </sample_code>
+    Then the corresponding class definition:
+    <class>
+    class Tool_ApplicationLogicValidation(BaseModel):
+        application_id: str = Field(..., description="")
+        material_completeness_score: float = Field(..., description="")
+        requested_loan_amount: float = Field(..., description="")
+        requested_loan_term: int = Field(..., description="")
+        loan_purpose: str = Field(..., description="")
+        customer_age: int = Field(..., description="")
+        customer_employment_type: str = Field(..., description="")
+        customer_monthly_income: float = Field(..., description="")
+        purpose_invoice_amount: Optional[float] = Field(None, description="")
+      ...
+    </class>
+    The corresponding tools encapsulation:
+    <tools>
+    tools = [
+        StructuredTool.from_function(
+            func=ApplicationLogicValidation,
+            name="ApplicationLogicValidation",
+            description="",
+            args_schema=Tool_ApplicationLogicValidation
+        ),
+        ...
+    ]
+    </tools>`

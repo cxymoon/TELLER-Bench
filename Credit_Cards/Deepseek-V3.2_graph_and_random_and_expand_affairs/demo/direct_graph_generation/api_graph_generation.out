@@ -1,0 +1,950 @@
+<dependency_analysis>
+
+## 1. Business Process Deconstruction
+
+### Step-to-API Mapping
+
+Based on the SOP, the credit card issuance process can be decomposed into the following API operations:
+
+**Phase 1: Application Intake & Validation**
+- API1: ValidateApplicationData - Performs data quality checks on submitted application
+- API2: VerifyIdentity - Executes KYC/CIP compliance and identity verification
+
+**Phase 2: Risk Screening**
+- API3: ScreenSanctionsWatchlist - Performs OFAC/AML screening
+- API4: DetectFraudIndicators - Analyzes fraud alert flags and device fingerprints
+
+**Phase 3: Credit Assessment**
+- API5: RetrieveCreditBureauData - Pulls credit reports from bureaus (Experian/TransUnion/Equifax/D&B)
+- API6: CalculateDebtToIncomeRatio - Computes DTI based on income and debt obligations
+- API7: EvaluateCreditScorecard - Runs proprietary scorecard model to generate internal_risk_score
+
+**Phase 4: Credit Decision**
+- API8: DetermineCreditDecision - Applies decision rules to approve/decline/route to manual review
+- API9: AssignCreditTerms - Calculates approved_credit_limit and assigned_apr for approved applications
+
+**Phase 5: Output Generation**
+- API10: GenerateAdverseActionNotice - Creates regulatory-compliant adverse action letters for declines
+- API11: FinalizeApplicationOutputs - Consolidates all output fields and determines account_activation_eligible
+
+### Data Transfer Relationships
+
+- ValidateApplicationData → VerifyIdentity (validated application data)
+- VerifyIdentity → ScreenSanctionsWatchlist (verified identity attributes)
+- ScreenSanctionsWatchlist → DetectFraudIndicators (cleared watchlist status)
+- DetectFraudIndicators → RetrieveCreditBureauData (fraud-cleared applications)
+- RetrieveCreditBureauData → CalculateDebtToIncomeRatio (credit bureau debt data)
+- CalculateDebtToIncomeRatio → EvaluateCreditScorecard (DTI ratio + credit data)
+- EvaluateCreditScorecard → DetermineCreditDecision (internal_risk_score)
+- DetermineCreditDecision → AssignCreditTerms (approved applications only)
+- DetermineCreditDecision → GenerateAdverseActionNotice (declined applications)
+- AssignCreditTerms → FinalizeApplicationOutputs (credit terms for approved apps)
+- GenerateAdverseActionNotice → FinalizeApplicationOutputs (adverse action status)
+
+## 2. Data Flow Analysis
+
+### Entity Associations from Schema
+
+**Core Entities:**
+- Application (application_id, business_type, product_type)
+- Applicant (applicant_id, demographics, employment, financial data)
+- Business Entity (for business_type = small_business/corporate)
+- Security Deposit (for business_type = secured)
+- Credit Bureau Data (credit_score, utilization, payment history)
+- Decision Outputs (final_decision, approved_credit_limit, assigned_apr)
+
+### Input Parameter Sources
+
+**User Input (Application Submission):**
+- application_channel, business_type, product_type
+- applicant_id, applicant_age, applicant_employment_status, applicant_annual_income
+- applicant_housing_status, applicant_monthly_housing_cost, applicant_years_at_address
+- applicant_years_employed
+- business_entity_name, business_tin_ein, business_incorporation_date (for business apps)
+- security_deposit_amount, deposit_account_id (for secured apps)
+
+**System State:**
+- application_timestamp (system-generated)
+- processing_start_timestamp, processing_end_timestamp
+- device_fingerprint_id, ip_address_location (captured by frontend)
+
+**API-Generated Outputs (Chained):**
+- identity_verification_method, identity_verification_timestamp (from VerifyIdentity)
+- watchlist_check_result (from ScreenSanctionsWatchlist)
+- fraud_alert_flags (from DetectFraudIndicators)
+- credit_score, credit_utilization_ratio, total_outstanding_debt (from RetrieveCreditBureauData)
+- debt_to_income_ratio (from CalculateDebtToIncomeRatio)
+- internal_risk_score (from EvaluateCreditScorecard)
+- final_decision, decline_reason_code (from DetermineCreditDecision)
+- approved_credit_limit, assigned_apr (from AssignCreditTerms)
+
+### Output Data Consumers
+
+**Downstream Systems:**
+- Card Management Platform (approved applications with credit terms)
+- Document Management System (adverse action letters)
+- Compliance Reporting (audit trails, decision logs)
+- Account Activation System (account_activation_eligible status)
+
+**Analytics/BI:**
+- Application volume, approval rates by segment
+- Average credit limits and APRs
+- Turnaround time metrics
+- Decline reason distributions
+
+## 3. Dependency Relationship Deduction
+
+### Direct Dependencies (Data Flow)
+
+1. **ValidateApplicationData → VerifyIdentity**
+   - Type: Data Dependency
+   - Reason: Identity verification requires validated application data (SSN, name, DOB, address)
+   - Strength: Strong - identity verification cannot proceed with invalid data
+
+2. **VerifyIdentity → ScreenSanctionsWatchlist**
+   - Type: Data Dependency
+   - Reason: Sanctions screening uses verified identity attributes
+   - Strength: Strong - must have confirmed identity before sanctions check
+
+3. **ScreenSanctionsWatchlist → DetectFraudIndicators**
+   - Type: State Dependency
+   - Reason: Fraud detection proceeds only if sanctions screening passes
+   - Strength: Strong - confirmed_match on sanctions triggers immediate decline
+
+4. **DetectFraudIndicators → RetrieveCreditBureauData**
+   - Type: State Dependency
+   - Reason: Credit bureau inquiry executes only for fraud-cleared applications
+   - Strength: Strong - high-severity fraud flags block bureau inquiry
+
+5. **RetrieveCreditBureauData → CalculateDebtToIncomeRatio**
+   - Type: Data Dependency
+   - Reason: DTI calculation requires total_outstanding_debt from credit report
+   - Strength: Strong - DTI cannot be calculated without debt data
+
+6. **CalculateDebtToIncomeRatio → EvaluateCreditScorecard**
+   - Type: Data Dependency
+   - Reason: Scorecard model requires debt_to_income_ratio as key input variable
+   - Strength: Strong - DTI is a heavily weighted scorecard attribute
+
+7. **EvaluateCreditScorecard → DetermineCreditDecision**
+   - Type: Data Dependency
+   - Reason: Decision rules evaluate internal_risk_score against thresholds
+   - Strength: Strong - score is primary decision driver
+
+8. **DetermineCreditDecision → AssignCreditTerms**
+   - Type: State Dependency
+   - Reason: Credit terms assigned only for approved applications
+   - Strength: Strong - conditional execution based on final_decision = "approved"
+
+9. **DetermineCreditDecision → GenerateAdverseActionNotice**
+   - Type: State Dependency
+   - Reason: Adverse action notice generated for declined applications
+   - Strength: Strong - conditional execution based on final_decision = "declined"
+
+10. **AssignCreditTerms → FinalizeApplicationOutputs**
+    - Type: Data Dependency
+    - Reason: Finalization requires approved_credit_limit and assigned_apr
+    - Strength: Medium - only applies to approved applications
+
+11. **GenerateAdverseActionNotice → FinalizeApplicationOutputs**
+    - Type: Data Dependency
+    - Reason: Finalization requires adverse_action_letter_generated status
+    - Strength: Medium - only applies to declined applications
+
+### Indirect Dependencies
+
+1. **ValidateApplicationData → RetrieveCreditBureauData**
+   - Type: Temporal Dependency (via identity/sanctions/fraud chain)
+   - Reason: Bureau inquiry requires completion of all upstream validation steps
+   - Strength: Medium - enforced through sequential workflow
+
+2. **RetrieveCreditBureauData → DetermineCreditDecision**
+   - Type: Data Dependency (via DTI and scorecard chain)
+   - Reason: Decision logic depends on credit data processed through intermediate steps
+   - Strength: Strong - credit data is foundational to decision
+
+## 4. Complexity Assessment
+
+### API Complexity Levels
+
+**High Complexity:**
+- RetrieveCreditBureauData (external API integration, multiple bureau sources, error handling)
+- EvaluateCreditScorecard (complex statistical model, multiple variables, segmentation logic)
+- AssignCreditTerms (multi-dimensional risk-based pricing, LTV calculations, business logic)
+
+**Medium Complexity:**
+- VerifyIdentity (multi-method verification, KBA challenges, biometric matching)
+- CalculateDebtToIncomeRatio (data aggregation, business-specific logic variations)
+- DetermineCreditDecision (rule engine execution, knockout logic, routing decisions)
+- GenerateAdverseActionNotice (regulatory compliance, template generation, multi-channel delivery)
+
+**Low Complexity:**
+- ValidateApplicationData (format validation, range checks, null checks)
+- ScreenSanctionsWatchlist (name-matching API call, result interpretation)
+- DetectFraudIndicators (flag evaluation, threshold comparison)
+- FinalizeApplicationOutputs (data consolidation, timestamp calculation)
+
+### Cyclic Dependency Risks
+
+**No cyclic dependencies identified.** The process follows a strict directed acyclic graph (DAG) structure:
+- Linear progression from application intake → validation → screening → credit assessment → decision → output
+- Conditional branching (approve vs. decline) but no loops back to earlier stages
+- Manual review routing is an external human process, not an API cycle
+
+### Dependency Chain Analysis
+
+**Critical Path (Auto-Decisioned Approved Application):**
+1. ValidateApplicationData
+2. VerifyIdentity
+3. ScreenSanctionsWatchlist
+4. DetectFraudIndicators
+5. RetrieveCreditBureauData
+6. CalculateDebtToIncomeRatio
+7. EvaluateCreditScorecard
+8. DetermineCreditDecision
+9. AssignCreditTerms
+10. FinalizeApplicationOutputs
+
+**Chain Length:** 10 APIs (longest path)
+**Chain Complexity:** High - involves external dependencies (bureau API), complex calculations (DTI, scorecard), and multi-conditional logic
+
+**Alternative Path (Declined Application):**
+Same 1-8, then:
+9. GenerateAdverseActionNotice
+10. FinalizeApplicationOutputs
+
+### Exception Handling Considerations
+
+**Early Termination Points:**
+- Validation failures → reject before identity verification
+- Identity verification failure → decline without bureau inquiry
+- Sanctions match → immediate decline without credit assessment
+- High-severity fraud → decline without bureau inquiry
+- Bureau API timeout → retry logic or route to technical exception queue
+- Knockout rules in decision logic → decline without scorecard evaluation
+
+**Data Quality Issues:**
+- Missing bureau data (thin file) → route to alternative decisioning logic
+- Income verification discrepancies → route to manual_review_required
+- Deposit verification failure (secured cards) → prevent activation
+
+## 5. Verification and Optimization
+
+### Rationality Verification
+
+**All dependencies are justified:**
+- Each API builds on outputs from predecessors
+- No unnecessary dependencies identified
+- Conditional branching (approve/decline) properly handled through parallel paths that converge at finalization
+- Business logic sequence aligns with SOP procedural steps
+
+### Parallel Execution Opportunities
+
+**Limited parallelization possible:**
+1. **ScreenSanctionsWatchlist + DetectFraudIndicators** could execute in parallel after VerifyIdentity completes, as they both consume identity data but don't depend on each other. However, SOP suggests sequential execution for fraud screening before bureau inquiry.
+
+2. **For business applications:** Personal guarantor credit pull and commercial entity credit pull could execute in parallel within RetrieveCreditBureauData.
+
+**Recommendation:** Keep sequential execution for clarity and to support early termination (if sanctions screening fails, no need to run fraud detection).
+
+### Optimization Suggestions
+
+1. **Caching:** Store credit bureau data with TTL to avoid duplicate pulls if customer reapplies within short window
+
+2. **Async Processing:** For manual review cases, execute preliminary scoring asynchronously to provide underwriters with pre-calculated metrics
+
+3. **Batch Optimization:** For high-volume periods, batch sanctionswatchlist screening API calls
+
+4. **Early Exit Optimization:** Implement knockout rules as early as possible in the chain to reduce unnecessary API calls for applications that will be declined
+
+5. **Response Time Optimization:** Cache scorecard model parameters and decision thresholds in memory to avoid database lookups during high-frequency decisioning
+
+### API Consolidation Considerations
+
+**Potential Mergers:**
+- ScreenSanctionsWatchlist + DetectFraudIndicators could be consolidated into a single "RiskScreening" API for efficiency, but kept separate for:
+  - Regulatory clarity (OFAC screening is distinct compliance requirement)
+  - Different data sources (external sanctions lists vs. internal fraud databases)
+  - Different expertise requirements (AML analysts vs. fraud analysts)
+
+**Keep Separated:** All APIs serve distinct business functions with clear ownership and should remain as separate microservices for maintainability.
+
+</dependency_analysis>
+
+<api_dependency_graph>
+```yaml
+apis:
+  - api_name: "ValidateApplicationData"
+    description: "Performs comprehensive data quality validation on submitted credit card application including null checks, format validation, range validation, and cross-field logical consistency checks to ensure all mandatory fields are populated with valid values before proceeding to identity verification."
+    purpose: "Enforce data quality standards and prevent invalid applications from entering the decisioning workflow, reducing downstream processing errors and improving operational efficiency."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "application_timestamp"
+        data_type: "datetime"
+        source: "system_state"
+        required: true
+      - name: "application_channel"
+        data_type: "enum[string]"
+        source: "user_input"
+        required: true
+      - name: "business_type"
+        data_type: "enum[string]"
+        source: "user_input"
+        required: true
+      - name: "product_type"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_id"
+        data_type: "string"
+        source: "user_input"
+        required: true
+      - name: "applicant_age"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+      - name: "applicant_employment_status"
+        data_type: "enum[string]"
+        source: "user_input"
+        required: true
+      - name: "applicant_annual_income"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "applicant_housing_status"
+        data_type: "enum[string]"
+        source: "user_input"
+        required: true
+      - name: "applicant_monthly_housing_cost"
+        data_type: "float"
+        source: "user_input"
+        required: true
+      - name: "applicant_years_at_address"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+      - name: "applicant_years_employed"
+        data_type: "integer"
+        source: "user_input"
+        required: true
+      - name: "business_entity_name"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "business_tin_ein"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "business_incorporation_date"
+        data_type: "date"
+        source: "user_input"
+        required: false
+      - name: "business_annual_revenue"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "business_industry_code"
+        data_type: "string"
+        source: "user_input"
+        required: false
+      - name: "guarantor_personal_income"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "security_deposit_amount"
+        data_type: "float"
+        source: "user_input"
+        required: false
+      - name: "deposit_verification_status"
+        data_type: "enum[string]"
+        source: "user_input"
+        required: false
+      - name: "deposit_account_id"
+        data_type: "string"
+        source: "user_input"
+        required: false
+    output_parameters:
+      - name: "validation_status"
+        data_type: "string"
+        destination: "other_api"
+      - name: "validation_errors"
+        data_type: "list[string]"
+        destination: "storage"
+      - name: "processing_start_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies: []
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "VerifyIdentity"
+    description: "Executes multi-layered identity verification procedures including government database cross-reference validation, Knowledge-Based Authentication challenges, document upload with biometric matching, and device fingerprinting analysis to satisfy Customer Identification Program requirements and detect synthetic identity fraud."
+    purpose: "Confirm applicant identity to prevent identity theft, synthetic identity fraud, and ensure compliance with KYC/CIP regulations under USA PATRIOT Act Section 326."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_age"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "device_fingerprint_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "ip_address_location"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "fraud_alert_flags"
+        data_type: "list[string]"
+        source: "system_state"
+        required: false
+    output_parameters:
+      - name: "identity_verification_method"
+        data_type: "enum[string]"
+        destination: "other_api"
+      - name: "identity_verification_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "identity_confidence_score"
+        data_type: "float"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ValidateApplicationData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Requires validated application data including applicant identity attributes (SSN, name, DOB, address) to perform government database cross-reference and KBA challenge generation."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "ScreenSanctionsWatchlist"
+    description: "Screens applicant name and business entity name against OFAC Specially Designated Nationals list and consolidated sanctions lists using fuzzy name-matching algorithms to ensure no prohibited persons receive financial services, with results requiring potential manual analyst review for ambiguous matches."
+    purpose: "Ensure AML compliance and prevent the institution from providing credit facilities to sanctioned individuals or entities, satisfying Bank Secrecy Act and OFAC regulatory requirements."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "business_entity_name"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "identity_verification_method"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "watchlist_check_result"
+        data_type: "enum[string]"
+        destination: "other_api"
+      - name: "watchlist_match_details"
+        data_type: "object"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "VerifyIdentity"
+        dependency_type: "state_dependency"
+        dependency_reason: "Sanctions screening must execute only after identity has been successfully verified, as screening requires confirmed identity attributes and cannot proceed if identity verification failed."
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "DetectFraudIndicators"
+    description: "Analyzes application for fraud indicators including device fingerprint patterns, velocity anomalies, address mismatches, and synthetic identity characteristics by evaluating fraud_alert_flags and comparing device/IP data against historical fraud patterns to identify high-risk applications requiring investigation or immediate decline."
+    purpose: "Detect and prevent fraudulent account origination including identity theft, synthetic identities, and bust-out fraud schemes to protect the institution from fraud losses and operational costs."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "watchlist_check_result"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "device_fingerprint_id"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "ip_address_location"
+        data_type: "string"
+        source: "system_state"
+        required: true
+      - name: "fraud_alert_flags"
+        data_type: "list[string]"
+        source: "system_state"
+        required: false
+    output_parameters:
+      - name: "fraud_risk_level"
+        data_type: "string"
+        destination: "other_api"
+      - name: "fraud_alert_flags"
+        data_type: "list[string]"
+        destination: "storage"
+      - name: "fraud_investigation_required"
+        data_type: "boolean"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "ScreenSanctionsWatchlist"
+        dependency_type: "state_dependency"
+        dependency_reason: "Fraud detection proceeds only after sanctions screening clears, as confirmed_match on sanctions triggers immediate decline without fraud analysis, and fraud detection logic considers watchlist_check_result in overall risk assessment."
+    complexity_level: "low"
+    business_criticality: "high"
+
+  - api_name: "RetrieveCreditBureauData"
+    description: "Executes hard inquiry API calls to consumer credit bureaus (Experian, TransUnion, Equifax) for retail applications or blended commercial and personal credit inquiries for business applications, retrieving comprehensive credit reports including credit scores, trade line details, payment history, utilization ratios, public records, and inquiry history with retry logic for API failures."
+    purpose: "Obtain authoritative third-party credit data required for creditworthiness assessment, debt obligation calculation, and scorecard evaluation while ensuring FCRA permissible purpose compliance."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "business_type"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "business_tin_ein"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "fraud_risk_level"
+        data_type: "string"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "credit_bureau_inquiry_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "credit_bureau_source"
+        data_type: "enum[string]"
+        destination: "storage"
+      - name: "credit_score"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "credit_utilization_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "number_of_open_accounts"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "number_of_delinquent_accounts"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "total_outstanding_debt"
+        data_type: "float"
+        destination: "other_api"
+      - name: "bankruptcy_flag"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "foreclosure_flag"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "months_since_last_delinquency"
+        data_type: "integer"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "DetectFraudIndicators"
+        dependency_type: "state_dependency"
+        dependency_reason: "Credit bureau inquiry executes only for applications that pass fraud screening, as high-severity fraud alerts block bureau inquiry to avoid wasting hard inquiry quota on fraudulent applications, and fraud_risk_level informs whether to proceed with bureau pull."
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "CalculateDebtToIncomeRatio"
+    description: "Computes debt-to-income ratio by aggregating total monthly debt obligations from credit bureau trade lines (minimum payments on installment and revolving accounts) plus housing costs, divided by monthly gross income, with business-specific logic for calculating business debt service coverage and guarantor DTI for commercial applications."
+    purpose: "Quantify applicant's ability to service new credit obligations by measuring existing debt burden relative to income, serving as a primary credit capacity indicator for decisioning and limit assignment."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "business_type"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "applicant_annual_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "applicant_monthly_housing_cost"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "total_outstanding_debt"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "business_annual_revenue"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "guarantor_personal_income"
+        data_type: "float"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "monthly_debt_obligations"
+        data_type: "float"
+        destination: "storage"
+      - name: "monthly_income"
+        data_type: "float"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "RetrieveCreditBureauData"
+        dependency_type: "data_dependency"
+        dependency_reason: "DTI calculation requires total_outstanding_debt from credit bureau report to aggregate existing debt obligations, as credit report trade lines provide the source data for minimum payment calculations across installment and revolving accounts."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "EvaluateCreditScorecard"
+    description: "Executes proprietary credit scorecard model using logistic regression-derived point assignments across multiple applicant and bureau attributes (credit_score, debt_to_income_ratio, utilization, delinquencies, employment tenure) to generate internal_risk_score ranging 0-1000 with higher scores indicating lower default probability, with segmented scorecards for prime/near-prime/subprime/thin-file populations."
+    purpose: "Quantify credit risk through statistically validated predictive model that translates multiple risk factors into single numerical score driving approve/decline decisions and risk-based pricing for credit limits and APRs."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "business_type"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "credit_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "credit_utilization_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "debt_to_income_ratio"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "number_of_open_accounts"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "number_of_delinquent_accounts"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "months_since_last_delinquency"
+        data_type: "integer"
+        source: "other_api"
+        required: false
+      - name: "bankruptcy_flag"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "applicant_years_employed"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "applicant_years_at_address"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "internal_risk_score"
+        data_type: "integer"
+        destination: "other_api"
+      - name: "scorecard_reason_codes"
+        data_type: "list[string]"
+        destination: "other_api"
+      - name: "scorecard_version"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "CalculateDebtToIncomeRatio"
+        dependency_type: "data_dependency"
+        dependency_reason: "Scorecard model requires debt_to_income_ratio as a heavily weighted input variable, and also requires all credit bureau attributes (credit_score, utilization, delinquencies) to compute comprehensive risk assessment through multi-variate scoring algorithm."
+      - dependent_api: "RetrieveCreditBureauData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Scorecard evaluation depends on multiple credit bureau data elements including credit_score, credit_utilization_ratio, number_of_delinquent_accounts, bankruptcy_flag, and months_since_last_delinquency which serve as key predictive variables in the scoring model."
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "DetermineCreditDecision"
+    description: "Applies hierarchical decision rule logic evaluating internal_risk_score against product-specific cutoff thresholds while executing preliminary knockout rules for disqualifying characteristics (recent bankruptcy, sanctions match, identity failure) to render final binary approve/decline/manual-review decision with specific decline_reason_code assignment for regulatory adverse action notice requirements."
+    purpose: "Render final credit decision by mapping quantitative risk assessment to institutional credit policy thresholds, ensuring consistent automated decisioning while supporting manual underwriter routing for borderline cases and regulatory compliance for decline reason disclosure."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "business_type"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "product_type"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "internal_risk_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "scorecard_reason_codes"
+        data_type: "list[string]"
+        source: "other_api"
+        required: true
+      - name: "watchlist_check_result"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "identity_verification_method"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "bankruptcy_flag"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "fraud_alert_flags"
+        data_type: "list[string]"
+        source: "other_api"
+        required: true
+      - name: "applicant_annual_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "business_industry_code"
+        data_type: "string"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "final_decision"
+        data_type: "enum[string]"
+        destination: "other_api"
+      - name: "decline_reason_code"
+        data_type: "string"
+        destination: "other_api"
+      - name: "manual_review_required"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "manual_review_reason"
+        data_type: "string"
+        destination: "storage"
+      - name: "underwriter_id"
+        data_type: "string"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "EvaluateCreditScorecard"
+        dependency_type: "data_dependency"
+        dependency_reason: "Decision determination requires internal_risk_score as the primary decision input evaluated against product-specific cutoff thresholds, and requires scorecard_reason_codes to generate decline_reason_code when applications are rejected due to insufficient score."
+      - dependent_api: "ScreenSanctionsWatchlist"
+        dependency_type: "data_dependency"
+        dependency_reason: "Decision logic evaluates watchlist_check_result as a knockout rule criterion, with confirmed_match triggering immediate decline regardless of credit score, requiring sanctions screening output for comprehensive decision rule execution."
+      - dependent_api: "VerifyIdentity"
+        dependency_type: "data_dependency"
+        dependency_reason: "Decision rules check identity_verification_method to ensure identity was successfully confirmed, as identity verification failure serves as a knockout criterion triggering automatic decline before credit assessment."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "AssignCreditTerms"
+    description: "Calculates approved_credit_limit using risk-tiered matrix mapping internal_risk_score bands to limit ranges constrained by income-based affordability formulas and product minimums/maximums, and determines assigned_apr through risk-based pricing matrices, with special logic for secured card LTV ratios and business card employee limit distributions."
+    purpose: "Establish specific credit facility parameters (credit limit and APR) for approved applications through quantitative risk-based pricing that balances portfolio profitability with ability-to-pay considerations and regulatory compliance requirements."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "final_decision"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "business_type"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "product_type"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "internal_risk_score"
+        data_type: "integer"
+        source: "other_api"
+        required: true
+      - name: "applicant_annual_income"
+        data_type: "float"
+        source: "other_api"
+        required: true
+      - name: "business_annual_revenue"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "security_deposit_amount"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "deposit_verification_status"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "approved_credit_limit"
+        data_type: "float"
+        destination: "other_api"
+      - name: "assigned_apr"
+        data_type: "float"
+        destination: "other_api"
+      - name: "credit_limit_to_deposit_ratio"
+        data_type: "float"
+        destination: "other_api"
+      - name: "cardholder_limit_distribution"
+        data_type: "object"
+        destination: "other_api"
+    direct_dependencies:
+      - dependent_api: "DetermineCreditDecision"
+        dependency_type: "state_dependency"
+        dependency_reason: "Credit terms assignment executes only for applications with final_decision of 'approved', as declined applications do not receive credit limits or APRs, representing conditional execution based on decision outcome."
+      - dependent_api: "EvaluateCreditScorecard"
+        dependency_type: "data_dependency"
+        dependency_reason: "Limit and APR assignment algorithms use internal_risk_score to determine risk tier classifications that map to specific limit ranges and APR pricing bands through risk-based pricing matrices."
+    complexity_level: "high"
+    business_criticality: "high"
+
+  - api_name: "GenerateAdverseActionNotice"
+    description: "Produces FCRA/ECOA-compliant adverse action letters for declined applications or less-favorable-terms approvals by retrieving letter templates, populating required statutory elements (bureau contact information, consumer rights notices, principal decline reasons from decline_reason_code), and transmitting via postal mail and/or email within regulatory 30-day timeframe with comprehensive audit logging."
+    purpose: "Satisfy regulatory adverse action notice requirements under FCRA Section 615(a) and ECOA Regulation B by providing timely written disclosure of credit decision rationale to applicants, protecting the institution from compliance violations and supporting consumer dispute resolution processes."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "final_decision"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "decline_reason_code"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "applicant_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "credit_bureau_source"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "application_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: true
+    output_parameters:
+      - name: "adverse_action_letter_generated"
+        data_type: "boolean"
+        destination: "other_api"
+      - name: "adverse_action_letter_id"
+        data_type: "string"
+        destination: "storage"
+      - name: "adverse_action_delivery_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "DetermineCreditDecision"
+        dependency_type: "state_dependency"
+        dependency_reason: "Adverse action notice generation executes only for applications with final_decision of 'declined' or certain 'approved' cases with less favorable terms, requiring decline_reason_code to populate principal reasons disclosure in the notice, representing conditional execution based on decision outcome."
+      - dependent_api: "RetrieveCreditBureauData"
+        dependency_type: "data_dependency"
+        dependency_reason: "Adverse action notice must identify the credit_bureau_source whose report was used in the decision, as FCRA requires disclosure of the specific consumer reporting agency and their contact information in all adverse action notices."
+    complexity_level: "medium"
+    business_criticality: "high"
+
+  - api_name: "FinalizeApplicationOutputs"
+    description: "Consolidates all required output fields by calculating turnaround_time_seconds (difference between processing_end_timestamp and processing_start_timestamp), setting auto_decision_flag based on manual review involvement, determining account_activation_eligible status through comprehensive prerequisite validation, computing estimated_card_delivery_date, and persisting complete output dataset for approved and declined applications."
+    purpose: "Complete the application processing lifecycle by generating all schema-required output fields, calculating performance metrics, determining activation readiness, and ensuring data completeness for downstream systems, analytics, and regulatory reporting requirements."
+    input_parameters:
+      - name: "application_id"
+        data_type: "string"
+        source: "other_api"
+        required: true
+      - name: "processing_start_timestamp"
+        data_type: "datetime"
+        source: "other_api"
+        required: true
+      - name: "final_decision"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: true
+      - name: "approved_credit_limit"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "assigned_apr"
+        data_type: "float"
+        source: "other_api"
+        required: false
+      - name: "adverse_action_letter_generated"
+        data_type: "boolean"
+        source: "other_api"
+        required: false
+      - name: "manual_review_required"
+        data_type: "boolean"
+        source: "other_api"
+        required: true
+      - name: "underwriter_id"
+        data_type: "string"
+        source: "other_api"
+        required: false
+      - name: "deposit_verification_status"
+        data_type: "enum[string]"
+        source: "other_api"
+        required: false
+      - name: "fraud_alert_flags"
+        data_type: "list[string]"
+        source: "other_api"
+        required: false
+      - name: "uploaded_documents"
+        data_type: "list[object]"
+        source: "other_api"
+        required: false
+    output_parameters:
+      - name: "processing_end_timestamp"
+        data_type: "datetime"
+        destination: "storage"
+      - name: "turnaround_time_seconds"
+        data_type: "integer"
+        destination: "storage"
+      - name: "auto_decision_flag"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "account_activation_eligible"
+        data_type: "boolean"
+        destination: "storage"
+      - name: "estimated_card_delivery_date"
+        data_type: "date"
+        destination: "storage"
+    direct_dependencies:
+      - dependent_api: "AssignCreditTerms"
+        dependency_type: "data_dependency"
+        dependency_reason: "Finalization for approved applications requires approved_credit_limit and assigned_apr to determine account_activation_eligible status and calculate estimated_card_delivery_date, as activation eligibility validation checks for non-null credit terms."
+      - dependent_api: "GenerateAdverseActionNotice"
+        dependency_type: "data_dependency"
+        dependency_reason: "Finalization for declined applications requires adverse_action_letter_generated status to complete regulatory compliance validation and ensure all required notices were produced before marking application processing as complete."
+      - dependent_api: "DetermineCreditDecision"
+        dependency_type: "data_dependency"
+        dependency_reason: "Finalization requires final_decision to determine which conditional outputs apply (credit terms for approved vs adverse action status for declined) and to route data to appropriate downstream systems based on decision outcome."
+    complexity_level: "low"
+    business_criticality: "high"
+```
+</api_dependency_graph>
+
+【流式输出结束】
+完整回复已保存到 response_output.txt 文件
