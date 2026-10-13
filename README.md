@@ -1,4 +1,4 @@
-# SOP-Bench: A Benchmark for Evaluating LLM Agents on Banking Business Processes
+# TELLER-Bench: A Benchmark for Evaluating LLM Agents on Banking Business Processes
 
 ## Overview
 
