@@ -2,7 +2,7 @@
 
 ## Overview
 
-SOP-Bench evaluates the ability of LLM-based agents to execute complex, multi-step banking business workflows by making structured API tool calls in the correct order. Given a detailed Standard Operating Procedure (SOP) and a set of callable APIs, an agent must process each business case by invoking APIs in the exact sequence mandated by the SOP—without skipping, reordering, or prematurely terminating the call chain.
+TELLER-Bench evaluates the ability of LLM-based agents to execute complex, multi-step banking business workflows by making structured API tool calls in the correct order. Given a detailed Standard Operating Procedure (SOP) and a set of callable APIs, an agent must process each business case by invoking APIs in the exact sequence mandated by the SOP—without skipping, reordering, or prematurely terminating the call chain.
 
 The benchmark is built around real banking business domains. This document uses **Mortgage Loan Origination (LOAN)** as the running example. The LOAN process covers three interdependent phases:
 
